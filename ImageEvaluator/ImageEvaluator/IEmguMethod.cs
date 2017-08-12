@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ImageEvaluator
 {
-    public interface IEmguMethod : IInitalizable
+    public interface IEmguMethod
     {
     }
 }

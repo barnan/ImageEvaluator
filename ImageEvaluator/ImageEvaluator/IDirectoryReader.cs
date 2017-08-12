@@ -3,7 +3,7 @@ using Emgu.CV.Structure;
 
 namespace ImageEvaluator
 {
-    public interface IDirectoryReader : IInitalizable
+    public interface IDirectoryReader
     {
 
         Image<Gray, float> GetNextImage();

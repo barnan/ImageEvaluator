@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ImageEvaluator
 {
-    public interface IImageReader : IInitalizable
+    public interface IImageReader
     {
         Image<Gray, float> ReadDoubleLightImage();
 

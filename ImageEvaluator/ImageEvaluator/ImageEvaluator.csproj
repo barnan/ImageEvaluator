@@ -52,6 +52,9 @@
   <ItemGroup>
     <Compile Include="BorderSearch\BorderSearcher_CSharp1.cs" />
     <Compile Include="BorderSearch\BorderSearcher_Emgu1.cs" />
+    <Compile Include="BorderSearch\BorderSearcher_Base.cs" />
+    <Compile Include="CalculateStatisticalData\CalculateColumnData_Base.cs" />
+    <Compile Include="CalculateStatisticalData\CalculateColumnData_Base_Emgu.cs" />
     <Compile Include="CalculateStatisticalData\CalculateColumnData_CSharp2.cs" />
     <Compile Include="CalculateStatisticalData\CalculateColumnData_CSharp1.cs" />
     <Compile Include="CalculateStatisticalData\CalculateColumnData_Emgu2.cs" />

@@ -8,11 +8,8 @@ using System.Threading.Tasks;
 
 namespace ImageEvaluator.SearchContourPoints
 {
-    class BorderSearcher_CSharp1 : IBorderSearcher
+    class BorderSearcher_CSharp1 : BorderSearcher_Base
     {
-        int[,] _borderPoints;
-        int _borderSkipSize;
-
 
         public BorderSearcher_CSharp1(int border)
         {
@@ -20,75 +17,42 @@ namespace ImageEvaluator.SearchContourPoints
         }
 
 
-        public int[,] GetBorderPoints(Image<Gray, byte> maskImage, ref string outMessage)
+        protected override void CalculatePoints(Image<Gray, byte> maskImage)
         {
             try
             {
-                if (!CheckInputImage(maskImage))
-                {
-                    outMessage = "invalid input image.";
+                byte[,,] imgArray = maskImage.Data;
 
-                    return null;
+                for (int i = 0; i < maskImage.Height; i++)
+                {
+                    for (int j = 0; j < maskImage.Width / 4; j++)
+                    {
+                        if (imgArray[i, j, 0] > 0)
+                        {
+                            _borderPoints[i, 0] = j + _borderSkipSize;
+                            break;
+                        }
+                    }
                 }
 
-                Init(maskImage.Height);
-
-                CalculatePoints(maskImage);
+                for (int i = 0; i < maskImage.Height; i++)
+                {
+                    for (int j = maskImage.Width - 1; j > maskImage.Width * 3 / 4; j--)
+                    {
+                        if (imgArray[i, j, 0] > 0)
+                        {
+                            _borderPoints[i, 1] = j - _borderSkipSize;
+                            break;
+                        }
+                    }
+                }
 
             }
             catch (Exception ex)
             {
-                outMessage = $"Exception during border points calculation: {ex.Message}";
-                return null;
+                throw new Exception($"Exception caught in BorderSearcher_CSharp1-CalculatePoints: {ex.Message}.");
             }
 
-            return _borderPoints;
-        }
-
-        private void CalculatePoints(Image<Gray, byte> maskImage)
-        {
-            byte[,,] imgArray = maskImage.Data;
-
-            for (int i = 0; i < maskImage.Height; i++)
-            {
-                for (int j = 0; j < maskImage.Width / 4; j++)
-                {
-                    if (imgArray[i, j, 0] > 0)
-                    {
-                        _borderPoints[i, 0] = j + _borderSkipSize;
-                        break;
-                    }
-                }
-            }
-
-            for (int i = 0; i < maskImage.Height; i++)
-            {
-                for (int j = maskImage.Width - 1; j > maskImage.Width * 3 / 4; j--)
-                {
-                    if (imgArray[i, j, 0] > 0)
-                    {
-                        _borderPoints[i, 1] = j - _borderSkipSize;
-                        break;
-                    }
-                }
-            }
-
-        }
-
-        private bool Init(int height)
-        {
-            _borderPoints = new int[height, 2];
-
-            return true;
-        }
-
-        private bool CheckInputImage(Image<Gray, byte> maskImage)
-        {
-            if (maskImage == null || maskImage.Height < 0 || maskImage.Height > 10000 || maskImage.Width < 0 || maskImage.Width > 10000)
-            {
-                return false;
-            }
-            return true;
         }
 
 

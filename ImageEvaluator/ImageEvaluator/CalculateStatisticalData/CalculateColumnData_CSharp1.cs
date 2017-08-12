@@ -1,12 +1,13 @@
 ﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ImageEvaluator
+namespace ImageEvaluator.CalculateStatisticalData
 {
-    public interface IColumnDataCalculator : IInitalizable
+    class CalculateColumnData_CSharp1 : IColumnDataCalculator
     {
     }
 }

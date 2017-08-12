@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ImageEvaluator
+namespace ImageEvaluator.CalculateStatisticalData
 {
-    public interface IColumnDataCalculator : IInitalizable
+    class CalculateColumnData_Emgu1 : IColumnDataCalculator
     {
     }
 }

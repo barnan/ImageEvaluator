@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Emgu.CV;
+using Emgu.CV.Structure;
 
-namespace ConsoleApplication1
+namespace ImageEvaluator
 {
-    interface IBorderSearcher : IInitalizable
+    public interface IBorderSearcher
     {
+
+        int[,] GetBorderPoints(Image<Gray, byte> maskImage, ref string message);
+
     }
 }

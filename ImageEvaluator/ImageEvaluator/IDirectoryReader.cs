@@ -1,9 +1,9 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
 
-namespace ConsoleApplication1
+namespace ImageEvaluator
 {
-    interface IDirectoryReader : IInitalizable
+    public interface IDirectoryReader : IInitalizable
     {
 
         Image<Gray, float> GetNextImage();

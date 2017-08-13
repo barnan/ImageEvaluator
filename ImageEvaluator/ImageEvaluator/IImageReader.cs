@@ -8,10 +8,18 @@ using System.Threading.Tasks;
 
 namespace ImageEvaluator
 {
-    public interface IImageReader
+    public interface IDoubleLightImageReader
     {
-        Image<Gray, float> ReadDoubleLightImage();
-
-
+        bool GetImage(string fileName, Image<Gray, float> img1, Image<Gray, float> immg2, ref string outmessage);
     }
+
+
+
+    public interface IDoubleLightImageReader_Creator
+    {
+        IDoubleLightImageReader Factory(int width, int bitDepth);
+    }
+
+
+
 }

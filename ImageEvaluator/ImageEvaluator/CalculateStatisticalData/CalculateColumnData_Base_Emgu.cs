@@ -1,7 +1,7 @@
 ﻿
 namespace ImageEvaluator.CalculateStatisticalData
 {
-    class CalculateColumnData_Base_Emgu : CalculateColumnData_Base
+    abstract class CalculateColumnData_Base_Emgu : CalculateColumnData_Base
     {
 
         protected int _imageWidth;
@@ -9,12 +9,10 @@ namespace ImageEvaluator.CalculateStatisticalData
         protected float[,,] _resultVector2;
 
 
-        protected virtual void InitEmguImages(int width, int height)
-        { }
+        protected abstract void InitEmguImages(int width, int height);
 
-        protected virtual void ClearEmguImages()
-        { }
+        protected abstract void ClearEmguImages();
 
-
+        protected abstract bool Init(int width, int height);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
 using System.Drawing;
+using System;
 
 namespace ImageEvaluator.CalculateStatisticalData
 {
@@ -20,14 +21,15 @@ namespace ImageEvaluator.CalculateStatisticalData
             float[,,] resultVector1 = meanVector.Data;
             float[,,] resultVector2 = stdVector.Data;
 
-            MCvScalar mean = new MCvScalar();
-            MCvScalar std = new MCvScalar();
 
             for (int i = 0; i < pointArray.Length / 2; i++)
             {
                 if (pointArray[i, 0] > 0 && pointArray[i, 1] < imageWidth && (pointArray[i, 1] - pointArray[i, 0]) < imageWidth)
                 {
                     Rectangle r = new Rectangle(pointArray[i, 0], i, pointArray[i, 1] - pointArray[i, 0], 1);
+
+                    MCvScalar mean = new MCvScalar();
+                    MCvScalar std = new MCvScalar();
 
                     inputImage.ROI = r;
                     CvInvoke.MeanStdDev(inputImage, ref mean, ref std, null);
@@ -36,8 +38,6 @@ namespace ImageEvaluator.CalculateStatisticalData
                     resultVector2[i, 0, 0] = (float)std.V0;
                 }
             }
-
-
         }
 
         /// <summary>
@@ -59,5 +59,18 @@ namespace ImageEvaluator.CalculateStatisticalData
         }
 
 
+        protected override bool Init(int width, int height)
+        {
+            return true;
+        }
+
+
+        protected override void InitEmguImages(int width, int height)
+        {
+        }
+
+        protected override void ClearEmguImages()
+        {
+        }
     }
 }

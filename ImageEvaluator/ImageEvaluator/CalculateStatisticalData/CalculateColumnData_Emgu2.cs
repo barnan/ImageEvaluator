@@ -3,6 +3,7 @@ using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using System.Drawing;
+using System;
 
 namespace ImageEvaluator.CalculateStatisticalData
 {
@@ -122,5 +123,11 @@ namespace ImageEvaluator.CalculateStatisticalData
             _sqrt?.Dispose();
         }
 
+        protected override bool Init(int width, int height)
+        {
+            InitEmguImages(width, height);
+
+            return true;
+        }
     }
 }

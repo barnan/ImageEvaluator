@@ -10,6 +10,10 @@ namespace ImageEvaluator
     {
         static void Main(string[] args)
         {
+
+
+
+
         }
     }
 }

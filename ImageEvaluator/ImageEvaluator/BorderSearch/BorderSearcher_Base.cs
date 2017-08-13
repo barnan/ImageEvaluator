@@ -8,7 +8,7 @@ using Emgu.CV.Structure;
 
 namespace ImageEvaluator.SearchContourPoints
 {
-    class BorderSearcher_Base : IBorderSearcher
+    abstract class BorderSearcher_Base : IBorderSearcher
     {
         protected int[,] _borderPoints;
         protected int _borderSkipSize;
@@ -40,8 +40,7 @@ namespace ImageEvaluator.SearchContourPoints
             return _borderPoints;
         }
 
-        protected virtual void CalculatePoints(Image<Gray, byte> maskImage)
-        { }
+        protected abstract void CalculatePoints(Image<Gray, byte> maskImage);
 
         protected bool Init(int height)
         {

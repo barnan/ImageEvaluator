@@ -4,7 +4,7 @@ using Emgu.CV.Structure;
 
 namespace ImageEvaluator.CalculateStatisticalData
 {
-    class CalculateColumnData_Base : IColumnDataCalculator
+    abstract class CalculateColumnData_Base : IColumnDataCalculator
     {
 
         public void GetStatisticalData(Image<Gray, float> inputImage, Image<Gray, byte> maskimage,
@@ -21,12 +21,7 @@ namespace ImageEvaluator.CalculateStatisticalData
         { }
 
 
-        protected bool Init(int height)
-        {
-
-
-            return true;
-        }
+        //protected abstract bool Init(int width, int height);   // TODO: facade design patter
 
 
         /// <summary>

@@ -62,11 +62,14 @@
     <Compile Include="IBorderSearcher.cs" />
     <Compile Include="IColumnDataCalculator.cs" />
     <Compile Include="IDirectoryReader.cs" />
-    <Compile Include="IEmguMethod.cs" />
     <Compile Include="IImageReader.cs" />
     <Compile Include="IInitalizable.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReadDirectory\DirectoryReader.cs" />
+    <Compile Include="ReadImage\DoubleLight16bitImageReader.cs" />
+    <Compile Include="ReadImage\DoubleLight8bitImageReader.cs" />
+    <Compile Include="ReadImage\DoubleLightImageReader_Base.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -13,7 +13,7 @@ namespace ImageEvaluator.ReadImage
         /// <param name="bitdepth"></param>
         public DoubleLight8bitImageReader(int width, int bitdepth) : base(width)
         {
-            _bitDepth = bitdepth;
+            _bitNumber = bitdepth;
         }
 
         /// <summary>

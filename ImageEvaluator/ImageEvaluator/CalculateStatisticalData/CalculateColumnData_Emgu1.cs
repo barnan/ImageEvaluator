@@ -11,16 +11,30 @@ namespace ImageEvaluator.CalculateStatisticalData
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        public CalculateColumnData_Emgu1(int width, int height)
+            : base(width, height)
+        {
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="inputImage"></param>
         /// <param name="pointArray"></param>
         /// <param name="meanVector"></param>
         /// <param name="stdVector"></param>
-        protected override void CalculateStatistics(Image<Gray, float> inputImage, int[,] pointArray, Image<Gray, float> meanVector, Image<Gray, float> stdVector)
+        public override bool CalculateStatistics(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector)
         {
-            int imageWidth = inputImage.Width;
-            float[,,] resultVector1 = meanVector.Data;
-            float[,,] resultVector2 = stdVector.Data;
+            if (!CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector))
+                return false;
 
+            meanVector = _meanVector;
+            stdVector = _stdVector;
+
+            int imageWidth = inputImage.Width;
 
             for (int i = 0; i < pointArray.Length / 2; i++)
             {
@@ -34,10 +48,12 @@ namespace ImageEvaluator.CalculateStatisticalData
                     inputImage.ROI = r;
                     CvInvoke.MeanStdDev(inputImage, ref mean, ref std, null);
 
-                    resultVector1[i, 0, 0] = (float)mean.V0;
-                    resultVector2[i, 0, 0] = (float)std.V0;
+                    _resultVector1[i, 0, 0] = (float)mean.V0;
+                    _resultVector2[i, 0, 0] = (float)std.V0;
                 }
             }
+
+            return true;
         }
 
         /// <summary>
@@ -55,12 +71,6 @@ namespace ImageEvaluator.CalculateStatisticalData
                 return false;
 
 
-            return true;
-        }
-
-
-        protected override bool Init(int width, int height)
-        {
             return true;
         }
 

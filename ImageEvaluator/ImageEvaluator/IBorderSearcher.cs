@@ -6,7 +6,7 @@ namespace ImageEvaluator
     public interface IBorderSearcher
     {
 
-        int[,] GetBorderPoints(Image<Gray, byte> maskImage, ref string message);
+        bool GetBorderPoints(Image<Gray, byte> maskImage, ref int[,] pointList, ref string message);
 
     }
 }

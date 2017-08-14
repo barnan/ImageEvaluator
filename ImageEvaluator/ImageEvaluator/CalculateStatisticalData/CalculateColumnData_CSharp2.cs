@@ -7,6 +7,18 @@ namespace ImageEvaluator.CalculateStatisticalData
 {
     class CalculateColumnData_CSharp2 : CalculateColumnData_Base
     {
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        public CalculateColumnData_CSharp2(int width, int height)
+            : base(width, height)
+        {
+        }
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -14,38 +26,43 @@ namespace ImageEvaluator.CalculateStatisticalData
         /// <param name="pointArray"></param>
         /// <param name="meanVector"></param>
         /// <param name="stdVector"></param>
-        protected override void CalculateStatistics(Image<Gray, float> inputImage, int[,] pointArray, Image<Gray, float> meanVector, Image<Gray, float> stdVector)
+        public override bool CalculateStatistics(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector)
         {
+            if (!CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector))
+                return false;
+
             float[,,] imgData = inputImage.Data;
-            float[,,] resultVector1 = meanVector.Data;
-            float[,,] resultVector2 = stdVector.Data;
+
+            meanVector = _meanVector;
+            stdVector = _stdVector;
 
             for (int i = 0; i < pointArray.Length / 2; i++)
             {
                 try
                 {
-                    if (pointArray[i, 0] > 0 && pointArray[i, 1] < inputImage.Width)
+                    double sum = 0;
+                    double sum2 = 0;
+                    int counter = 0;
+
+                    for (int j = 0; j < (pointArray[i, 1] - pointArray[i, 0]); j++)
                     {
-                        double sum = 0;
-                        double sum2 = 0;
-                        int counter = 0;
-
-                        for (int j = 0; j < (pointArray[i, 1] - pointArray[i, 0]); j++)
-                        {
-                            sum += imgData[i, pointArray[i, 0] + j, 0];
-                            sum2 += (imgData[i, pointArray[i, 0] + j, 0] * imgData[i, pointArray[i, 0] + j, 0]);
-                            counter++;
-                        }
-
-                        resultVector1[i, 0, 0] = (float)(sum / counter);
-                        resultVector2[i, 0, 0] = (float)Math.Sqrt(sum2 / (counter - 1) - (sum * sum / Math.Pow(counter - 1, 2)));
+                        sum += imgData[i, pointArray[i, 0] + j, 0];
+                        sum2 += (imgData[i, pointArray[i, 0] + j, 0] * imgData[i, pointArray[i, 0] + j, 0]);
+                        counter++;
                     }
+
+                    _resultVector1[i, 0, 0] = (float)(sum / counter);
+                    _resultVector2[i, 0, 0] = (float)Math.Sqrt(sum2 / (counter - 1) - (sum * sum / Math.Pow(counter - 1, 2)));
+
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error during the CalculateColumnData_CSharp2-CalculateStatistics, i:{i}, message: {ex.Message}.");
+                    return false;
                 }
             }
+
+            return true;
         }
 
         /// <summary>

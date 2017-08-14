@@ -10,7 +10,7 @@ namespace ImageEvaluator.ReadImage
         protected string _fileName;
         protected int _width;
         protected int _height;
-        protected int _bitDepth;
+        protected int _bitNumber;
         private int width;
         protected Image<Gray, float> _img1;
         protected Image<Gray, float> _img2;
@@ -28,6 +28,8 @@ namespace ImageEvaluator.ReadImage
 
             this.width = width;
             this._height = width * 2;
+
+            InitEmguImages();
         }
 
 
@@ -37,7 +39,7 @@ namespace ImageEvaluator.ReadImage
         /// <param name="inputfileName"></param>
         /// <param name="img1"></param>
         /// <param name="immg2"></param>
-        public bool GetImage(string inputfileName, Image<Gray, float> img1, Image<Gray, float> img2, ref string outmessage)
+        public bool GetImage(string inputfileName, ref Image<Gray, float> img1, ref Image<Gray, float> img2, ref string outmessage)
         {
             if (!CheckFileName(inputfileName))
             {
@@ -48,6 +50,9 @@ namespace ImageEvaluator.ReadImage
             try
             {
                 InitEmguImages();
+
+                img1 = _img1;
+                img2 = _img2;
             }
             catch (Exception ex)
             {
@@ -57,7 +62,6 @@ namespace ImageEvaluator.ReadImage
 
             try
             {
-
                 ReadDoubleLightImage();
 
                 return true;
@@ -91,7 +95,7 @@ namespace ImageEvaluator.ReadImage
                 return false;
 
             FileInfo fi = new FileInfo(inputfileName);
-            if (fi.Length != (_width * _height * _bitDepth))
+            if (fi.Length != (_width * _height * _bitNumber))
                 return false;
 
             return true;
@@ -101,27 +105,36 @@ namespace ImageEvaluator.ReadImage
         /// <summary>
         /// 
         /// </summary>
-        private void InitEmguImages()
+        private bool InitEmguImages()
         {
-            if (!_initialized)
+            if (_initialized)
+                return true;
+
+            try
             {
                 _img1 = new Image<Gray, float>(_width, _height);
                 _img2 = new Image<Gray, float>(_width, _height);
 
-                _initialized = true;
+                return _initialized = true;
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"DoubleLightImageReader_Base - InitEmguImages. Error during emgu initialization. {ex.Message}");
+                return _initialized = false;
+            }
+
         }
 
 
         /// <summary>
         /// 
         /// </summary>
-        private void ClearEmguImages()
+        private bool ClearEmguImages()
         {
             _img1?.Dispose();
             _img2?.Dispose();
 
-            _initialized = false;
+            return !(_initialized = false);
         }
 
 

@@ -5,14 +5,25 @@ namespace ImageEvaluator.CalculateStatisticalData
     {
 
         protected int _imageWidth;
-        protected float[,,] _resultVector1;
-        protected float[,,] _resultVector2;
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        public CalculateColumnData_Base_Emgu(int width, int height)
+            : base(width, height)
+        {
+        }
+
 
 
         protected abstract void InitEmguImages(int width, int height);
 
+
+
         protected abstract void ClearEmguImages();
 
-        protected abstract bool Init(int width, int height);
     }
 }

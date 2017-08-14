@@ -59,8 +59,12 @@
     <Compile Include="CalculateStatisticalData\CalculateColumnData_CSharp1.cs" />
     <Compile Include="CalculateStatisticalData\CalculateColumnData_Emgu2.cs" />
     <Compile Include="CalculateStatisticalData\CalculateColumnData_Emgu1.cs" />
+    <Compile Include="IImagePreProcessor.cs" />
+    <Compile Include="PreProcessor\ImagePreProcessor.cs" />
+    <Compile Include="ProcessManager\ProcessManager.cs" />
     <Compile Include="IBorderSearcher.cs" />
     <Compile Include="IColumnDataCalculator.cs" />
+    <Compile Include="IProcessManager.cs" />
     <Compile Include="IDirectoryReader.cs" />
     <Compile Include="IImageReader.cs" />
     <Compile Include="IInitalizable.cs" />

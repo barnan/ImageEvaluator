@@ -21,6 +21,18 @@ namespace ImageEvaluator.CalculateStatisticalData
         Image<Gray, float> _sqrt;
 
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        public CalculateColumnData_Emgu2(int width, int height)
+            : base(width, height)
+        {
+        }
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -28,10 +40,13 @@ namespace ImageEvaluator.CalculateStatisticalData
         /// <param name="maskImage"></param>
         /// <param name="meanVector"></param>
         /// <param name="stdVector"></param>
-        protected override void CalculateStatistics(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, Image<Gray, float> meanVector, Image<Gray, float> stdVector)
+        public override bool CalculateStatistics(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector)
         {
-            float[,,] resultVector1 = meanVector.Data;
-            float[,,] resultVector2 = stdVector.Data;
+            if (!CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector))
+                return false;
+
+            meanVector = _meanVector;
+            stdVector = _stdVector;
 
             // mask the outer area to zero
             Gray zero = new Gray(0.0);
@@ -73,9 +88,11 @@ namespace ImageEvaluator.CalculateStatisticalData
 
             for (int i = 0; i < _mean.Height; i++)
             {
-                resultVector1[i, 0, 0] = meanData[i, 0, 0];
-                resultVector2[i, 0, 0] = resuData[i, 0, 0];
+                _resultVector1[i, 0, 0] = meanData[i, 0, 0];
+                _resultVector2[i, 0, 0] = resuData[i, 0, 0];
             }
+
+            return true;
         }
 
 
@@ -123,9 +140,9 @@ namespace ImageEvaluator.CalculateStatisticalData
             _sqrt?.Dispose();
         }
 
-        protected override bool Init(int width, int height)
+        protected override bool Init()
         {
-            InitEmguImages(width, height);
+            InitEmguImages(_width, _height);
 
             return true;
         }

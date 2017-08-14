@@ -13,20 +13,31 @@ namespace ImageEvaluator.SearchContourPoints
         protected int[,] _borderPoints;
         protected int _borderSkipSize;
         protected bool _showImages;
+        bool _initialized;
 
 
-        public int[,] GetBorderPoints(Image<Gray, byte> maskImage, ref string outMessage)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="maskImage"></param>
+        /// <param name="pointList"></param>
+        /// <param name="outMessage"></param>
+        /// <returns></returns>
+        public bool GetBorderPoints(Image<Gray, byte> maskImage, ref int[,] pointList, ref string outMessage)
         {
             try
             {
                 if (!CheckInputImage(maskImage))
                 {
-                    outMessage = "Invalid input image.";
-
-                    return null;
+                    outMessage = "GetBorderPoints - Invalid input image.";
+                    return false;
                 }
 
                 Init(maskImage.Height);
+
+                ResetPointList();
+
+                pointList = _borderPoints;
 
                 CalculatePoints(maskImage);
 
@@ -34,21 +45,49 @@ namespace ImageEvaluator.SearchContourPoints
             catch (Exception ex)
             {
                 outMessage = $"Exception during border points calculation: {ex.Message}";
-                return null;
+                return false;
             }
-
-            return _borderPoints;
-        }
-
-        protected abstract void CalculatePoints(Image<Gray, byte> maskImage);
-
-        protected bool Init(int height)
-        {
-            _borderPoints = new int[height, 2];
 
             return true;
         }
 
+        protected abstract void CalculatePoints(Image<Gray, byte> maskImage);
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="height"></param>
+        /// <returns></returns>
+        protected bool Init(int height)
+        {
+            if (_initialized)
+                return true;
+
+            _borderPoints = new int[height, 2];
+
+            return _initialized = true;
+        }
+
+
+
+        protected bool ResetPointList()
+        {
+            for (int i = 0; i < _borderPoints.Length / 2; i++)
+            {
+                _borderPoints[i, 0] = 0;
+                _borderPoints[i, 1] = 4096;
+            }
+
+            return true;
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="maskImage"></param>
+        /// <returns></returns>
         protected bool CheckInputImage(Image<Gray, byte> maskImage)
         {
             if (maskImage == null || maskImage.Height < 0 || maskImage.Height > 10000 || maskImage.Width < 0 || maskImage.Width > 10000)
@@ -57,7 +96,6 @@ namespace ImageEvaluator.SearchContourPoints
             }
             return true;
         }
-
 
     }
 }

@@ -10,7 +10,7 @@ namespace ImageEvaluator
 {
     public interface IDoubleLightImageReader
     {
-        bool GetImage(string fileName, Image<Gray, float> img1, Image<Gray, float> immg2, ref string outmessage);
+        bool GetImage(string fileName, ref Image<Gray, float> img1, ref Image<Gray, float> img2, ref string outmessage);
     }
 
 

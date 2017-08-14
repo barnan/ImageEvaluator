@@ -1,4 +1,4 @@
-﻿
+﻿using System;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using System.IO;
@@ -70,13 +70,32 @@ namespace ImageEvaluator.ReadDirectory
         /// 
         /// </summary>
         /// <returns></returns>
-        public Image<Gray, float> GetNextImage()
+        public bool GetNextImage(ref Image<Gray, float> img1, ref Image<Gray, float> img2, ref string message)
         {
             int maxLength = _fileList.Length;
 
+            if (_currentImageNumber >= maxLength - 1)
+                return false;
 
+            try
+            {
+                bool resu = _reader.GetImage(_fileList[_currentImageNumber], ref img1, ref img2, ref message);
+                _currentImageNumber++;
 
-
+                if (resu)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GetImage: {ex.Message}");
+                return false;
+            }
         }
 
 
@@ -89,10 +108,21 @@ namespace ImageEvaluator.ReadDirectory
             _currentImageNumber = 0;
             return true;
         }
+
     }
 
 
 
+    /// <summary>
+    /// 
+    /// </summary>
+    class Factory_DirectoryReader : IDirectoryReader_Creator
+    {
+        public IDirectoryReader Factory(string directoryName, string extension, IDoubleLightImageReader_Creator reader, int width, int bitDepth)
+        {
+            return new DirectoryReader(directoryName, extension, reader, width, bitDepth);
+        }
+    }
 
 
 

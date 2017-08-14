@@ -7,21 +7,39 @@ namespace ImageEvaluator.CalculateStatisticalData
     abstract class CalculateColumnData_Base : IColumnDataCalculator
     {
 
-        public void GetStatisticalData(Image<Gray, float> inputImage, Image<Gray, byte> maskimage,
-                                        int[,] pointArray, Image<Gray, float> meanVector, Image<Gray, float> stdVector)
-        {
+        protected bool _initialized;
+        protected int _width;
+        protected int _height;
+        protected Image<Gray, float> _meanVector;
+        protected Image<Gray, float> _stdVector;
+        protected float[,,] _resultVector1;
+        protected float[,,] _resultVector2;
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        public CalculateColumnData_Base(int width, int height)
+        {
+            _width = width;
+            _height = height;
+
+            Init();
         }
 
 
-        protected virtual void CalculateStatistics(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, Image<Gray, float> meanVector, Image<Gray, float> stdVector)
-        { }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="inputImage"></param>
+        /// <param name="maskImage"></param>
+        /// <param name="meanVector"></param>
+        /// <param name="stdVector"></param>
+        /// <returns></returns>
+        public abstract bool CalculateStatistics(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector);
 
-        protected virtual void CalculateStatistics(Image<Gray, float> inputImage, int[,] pointList, Image<Gray, float> meanVector, Image<Gray, float> stdVector)
-        { }
-
-
-        //protected abstract bool Init(int width, int height);   // TODO: facade design patter
 
 
         /// <summary>
@@ -43,7 +61,38 @@ namespace ImageEvaluator.CalculateStatisticalData
 
             return true;
         }
-    }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        protected virtual bool Init()
+        {
+            if (_initialized)
+                return true;
+
+            try
+            {
+                _meanVector = new Image<Gray, float>(_width, _height);
+                _stdVector = new Image<Gray, float>(_width, _height);
+
+                _resultVector1 = _meanVector.Data;
+                _resultVector2 = _stdVector.Data;
+
+                return _initialized = true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error during CalculcateColumnData - Init: {ex.Message}.");
+                return _initialized = false;
+            }
+
+        }
+
+
+
+
+    }
 
 }

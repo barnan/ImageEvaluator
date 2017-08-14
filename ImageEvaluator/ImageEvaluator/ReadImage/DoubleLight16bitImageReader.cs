@@ -11,10 +11,10 @@ namespace ImageEvaluator.ReadImage
         /// </summary>
         /// <param name="width"></param>
         /// <param name="bitdepth"></param>
-        public DoubleLight16bitImageReader(int width, int bitdepth)
+        public DoubleLight16bitImageReader(int width, int bitnumber)
             : base(width)
         {
-            _bitDepth = bitdepth;
+            _bitNumber = bitnumber;
         }
 
 

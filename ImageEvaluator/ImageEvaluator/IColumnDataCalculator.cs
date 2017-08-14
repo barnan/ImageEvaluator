@@ -5,7 +5,9 @@ namespace ImageEvaluator
 {
     public interface IColumnDataCalculator
     {
-        void GetStatisticalData(Image<Gray, float> inputImage, Image<Gray, byte> maskimage, int[,] pointArray, Image<Gray, float> meanVector, Image<Gray, float> stdVector);
+        //bool GetStatisticalData(Image<Gray, float> inputImage, Image<Gray, byte> maskimage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector);
+
+        bool CalculateStatistics(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector);
 
     }
 }

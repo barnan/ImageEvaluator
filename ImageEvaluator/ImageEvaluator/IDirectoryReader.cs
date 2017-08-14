@@ -6,7 +6,7 @@ namespace ImageEvaluator
     public interface IDirectoryReader : IInitalizable
 
     {
-        Image<Gray, float> GetNextImage();
+        bool GetNextImage(ref Image<Gray, float> img1, ref Image<Gray, float> img2, ref string message);
 
         bool Restart();
     }

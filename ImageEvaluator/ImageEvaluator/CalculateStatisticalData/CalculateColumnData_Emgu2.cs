@@ -27,7 +27,7 @@ namespace ImageEvaluator.CalculateStatisticalData
         /// </summary>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        public CalculateColumnData_Emgu2(int width, int height)
+        internal CalculateColumnData_Emgu2(int width, int height)
             : base(width, height)
         {
         }
@@ -113,21 +113,35 @@ namespace ImageEvaluator.CalculateStatisticalData
         }
 
 
-        protected override void InitEmguImages(int width, int height)
+        protected override bool InitEmguImages()
         {
-            _complementaryMask = new Image<Gray, byte>(width, height);
-            _squareImage = new Image<Gray, float>(width, height);
-            _squaremean = new Image<Gray, float>(width, height);
-            _mean = new Image<Gray, float>(width, height);
-            _counter = new Image<Gray, float>(width, height);
-            _convertedMask = new Image<Gray, float>(width, height);
-            _sq = new Image<Gray, float>(width, height);
-            _resu = new Image<Gray, float>(width, height);
-            _sqrt = new Image<Gray, float>(width, height);
+            if (_initialized)
+                return _initialized;
+
+            try
+            {
+                _complementaryMask = new Image<Gray, byte>(_width, _height);
+                _squareImage = new Image<Gray, float>(_width, _height);
+                _squaremean = new Image<Gray, float>(_width, _height);
+                _mean = new Image<Gray, float>(_width, _height);
+                _counter = new Image<Gray, float>(_width, _height);
+                _convertedMask = new Image<Gray, float>(_width, _height);
+                _sq = new Image<Gray, float>(_width, _height);
+                _resu = new Image<Gray, float>(_width, _height);
+                _sqrt = new Image<Gray, float>(_width, _height);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error during InitEmguImages: {ex.Message}");
+                return _initialized = false;
+            }
+
+            return _initialized = true;
         }
 
 
-        protected override void ClearEmguImages()
+        protected override bool ClearEmguImages()
         {
             _complementaryMask?.Dispose();
             _squareImage?.Dispose();
@@ -138,13 +152,23 @@ namespace ImageEvaluator.CalculateStatisticalData
             _sq?.Dispose();
             _resu?.Dispose();
             _sqrt?.Dispose();
+
+            return _initialized = false;
         }
 
-        protected override bool Init()
-        {
-            InitEmguImages(_width, _height);
+    }
 
-            return true;
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    class Factory_CalculateColumnData_Emgu2 : IColumnDataCalculator_Creator
+    {
+        public IColumnDataCalculator Factory(int width, int height)
+        {
+            return new CalculateColumnData_Emgu2(width, height);
         }
     }
+
 }

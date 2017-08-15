@@ -11,7 +11,7 @@ namespace ImageEvaluator.PreProcessor
     class ImagePreProcessor : IImagePreProcessor
     {
         DenseHistogram _hist;
-        int _bitDepth;
+        int _intensityRange;
         Image<Gray, byte> _maskImage;
         Image<Gray, float> _rotatedImage;
         bool _emguInitialized;
@@ -20,14 +20,14 @@ namespace ImageEvaluator.PreProcessor
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="bitdepth"></param>
+        /// <param name="intensityRange"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        public ImagePreProcessor(int bitDepth, int width, int height)
+        internal ImagePreProcessor(int intensityRange, int width, int height)
         {
-            _bitDepth = bitDepth;
+            _intensityRange = intensityRange;
 
-            InitEmguImages(bitDepth, width, height);
+            InitEmguImages(width, height);
         }
 
 
@@ -113,11 +113,11 @@ namespace ImageEvaluator.PreProcessor
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="bitDepth"></param>
+        /// <param name="intensityRange"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
         /// <returns></returns>
-        private bool InitEmguImages(int bitDepth, int width, int height)
+        private bool InitEmguImages(int width, int height)
         {
             if (_emguInitialized)
                 return true;
@@ -125,10 +125,8 @@ namespace ImageEvaluator.PreProcessor
             try
             {
                 _maskImage = new Image<Gray, byte>(width, height);
-
                 _rotatedImage = new Image<Gray, float>(width, height);
-
-                _hist = new DenseHistogram(bitDepth, new RangeF(0, bitDepth - 1));
+                _hist = new DenseHistogram(_intensityRange, new RangeF(0, _intensityRange - 1));
 
                 return _emguInitialized = true;
             }
@@ -146,14 +144,24 @@ namespace ImageEvaluator.PreProcessor
         /// <returns></returns>
         private bool ClearEmguImages()
         {
+            _maskImage?.Dispose();
+            _rotatedImage?.Dispose();
 
-
+            _emguInitialized = false;
 
             return true;
         }
-
-
-
-
     }
+
+
+
+
+    class Factory_ImagePreProcessor : IImagePreProcessor_Creator
+    {
+        public IImagePreProcessor Factory(int intensityRange, int width, int height)
+        {
+            return new ImagePreProcessor(intensityRange, width, height);
+        }
+    }
+
 }

@@ -9,7 +9,7 @@ namespace ImageEvaluator.SearchContourPoints
 {
     class BorderSearcher_Emgu1 : BorderSearcher_Base
     {
-        public BorderSearcher_Emgu1(int border, bool show)
+        internal BorderSearcher_Emgu1(int border, bool show)
         {
             _borderSkipSize = border;
             _showImages = show;
@@ -114,6 +114,20 @@ namespace ImageEvaluator.SearchContourPoints
 
             return new Point((int)(x + 0.5), (int)(y + 0.5));
         }
-
     }
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    class Factory_BorderSearcher_Emgu1 : IBorderSeracher_Creator
+    {
+        public IBorderSearcher Factory(int border, bool showImages)
+        {
+            return new BorderSearcher_Emgu1(border, showImages);
+        }
+    }
+
+
 }

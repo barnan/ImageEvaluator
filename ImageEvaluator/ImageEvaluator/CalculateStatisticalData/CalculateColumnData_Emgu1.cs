@@ -13,7 +13,7 @@ namespace ImageEvaluator.CalculateStatisticalData
         /// </summary>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        public CalculateColumnData_Emgu1(int width, int height)
+        internal CalculateColumnData_Emgu1(int width, int height)
             : base(width, height)
         {
         }
@@ -75,12 +75,30 @@ namespace ImageEvaluator.CalculateStatisticalData
         }
 
 
-        protected override void InitEmguImages(int width, int height)
+        protected override bool InitEmguImages()
         {
+            return true;
         }
 
-        protected override void ClearEmguImages()
+        protected override bool ClearEmguImages()
         {
+            return true;
         }
     }
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    class Factory_CalculateColumnData_Emgu1 : IColumnDataCalculator_Creator
+    {
+        public IColumnDataCalculator Factory(int width, int height)
+        {
+            return new CalculateColumnData_Emgu1(width, height);
+        }
+    }
+
+
+
 }

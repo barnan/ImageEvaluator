@@ -13,7 +13,7 @@ namespace ImageEvaluator.CalculateStatisticalData
         /// </summary>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        public CalculateColumnData_CSharp1(int width, int height)
+        internal CalculateColumnData_CSharp1(int width, int height)
             : base(width, height)
         {
         }
@@ -91,7 +91,21 @@ namespace ImageEvaluator.CalculateStatisticalData
 
             return true;
         }
-
-
     }
+
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    class Factory_CalculateColumnData_CSharp1 : IColumnDataCalculator_Creator
+    {
+        public IColumnDataCalculator Factory(int width, int height)
+        {
+            return new CalculateColumnData_CSharp1(width, height);
+        }
+    }
+
+
 }

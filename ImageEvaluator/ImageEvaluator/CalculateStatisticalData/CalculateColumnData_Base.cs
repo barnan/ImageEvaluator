@@ -21,12 +21,12 @@ namespace ImageEvaluator.CalculateStatisticalData
         /// </summary>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        public CalculateColumnData_Base(int width, int height)
+        internal CalculateColumnData_Base(int width, int height)
         {
             _width = width;
             _height = height;
 
-            Init();
+            InitEmguImages();
         }
 
 
@@ -67,7 +67,7 @@ namespace ImageEvaluator.CalculateStatisticalData
         /// 
         /// </summary>
         /// <returns></returns>
-        protected virtual bool Init()
+        protected virtual bool InitEmguImages()
         {
             if (_initialized)
                 return true;
@@ -87,12 +87,20 @@ namespace ImageEvaluator.CalculateStatisticalData
                 Console.WriteLine($"Error during CalculcateColumnData - Init: {ex.Message}.");
                 return _initialized = false;
             }
+        }
 
+
+        protected virtual bool ClearEmguImages()
+        {
+            _meanVector?.Dispose();
+            _stdVector?.Dispose();
+
+            _initialized = false;
+
+            return true;
         }
 
 
 
-
     }
-
 }

@@ -16,31 +16,18 @@ namespace ImageEvaluator.ReadDirectory
         IDoubleLightImageReader _reader;
 
 
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="name"></param>
-        public DirectoryReader(string directoryName, string extension, IDoubleLightImageReader_Creator reader, int width, int bitDepth)
+        internal DirectoryReader(string directoryName, string extension, IDoubleLightImageReader_Creator reader, int width, int bitNumber)
         {
             _directoryName = directoryName;
             _extension = extension;
-            _reader = reader.Factory(width, bitDepth);
+            _reader = reader.Factory(width, bitNumber);
         }
 
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public bool Init()
-        {
-            if (!CheckDir())
-            {
-                return false;
-            }
-
-            return true;
-        }
 
 
         /// <summary>
@@ -72,6 +59,12 @@ namespace ImageEvaluator.ReadDirectory
         /// <returns></returns>
         public bool GetNextImage(ref Image<Gray, float> img1, ref Image<Gray, float> img2, ref string message)
         {
+            if (!CheckDir())
+            {
+                message = $"the directory ({_directoryName}) does not exist or contains no files with the given extension: ({_extension})";
+                return false;
+            }
+
             int maxLength = _fileList.Length;
 
             if (_currentImageNumber >= maxLength - 1)
@@ -105,10 +98,25 @@ namespace ImageEvaluator.ReadDirectory
         /// <returns></returns>
         public bool Restart()
         {
+            CheckDir();
+
             _currentImageNumber = 0;
             return true;
         }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public bool EndOfDirectory()
+        {
+            CheckDir();
+
+            int maxLength = _fileList.Length;
+
+            return _currentImageNumber >= (maxLength - 1) ? true : false;
+        }
     }
 
 
@@ -116,11 +124,11 @@ namespace ImageEvaluator.ReadDirectory
     /// <summary>
     /// 
     /// </summary>
-    class Factory_DirectoryReader : IDirectoryReader_Creator
+    public class Factory_DirectoryReader : IDirectoryReader_Creator
     {
-        public IDirectoryReader Factory(string directoryName, string extension, IDoubleLightImageReader_Creator reader, int width, int bitDepth)
+        public IDirectoryReader Factory(string directoryName, string extension, IDoubleLightImageReader_Creator reader, int width, int bitNumber)
         {
-            return new DirectoryReader(directoryName, extension, reader, width, bitDepth);
+            return new DirectoryReader(directoryName, extension, reader, width, bitNumber);
         }
     }
 

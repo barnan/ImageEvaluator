@@ -11,7 +11,7 @@ namespace ImageEvaluator.SearchContourPoints
     class BorderSearcher_CSharp1 : BorderSearcher_Base
     {
 
-        public BorderSearcher_CSharp1(int border)
+        internal BorderSearcher_CSharp1(int border)
         {
             _borderSkipSize = border;
         }
@@ -54,7 +54,21 @@ namespace ImageEvaluator.SearchContourPoints
             }
 
         }
+    }
 
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    class Factory_BorderSearcher_CSharp1 : IBorderSeracher_Creator
+    {
+        public IBorderSearcher Factory(int border, bool showImages)
+        {
+            throw new NotImplementedException();
+        }
 
     }
 }
+

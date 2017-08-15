@@ -11,7 +11,6 @@ namespace ImageEvaluator.ReadImage
         protected int _width;
         protected int _height;
         protected int _bitNumber;
-        private int width;
         protected Image<Gray, float> _img1;
         protected Image<Gray, float> _img2;
         private bool _initialized;
@@ -26,8 +25,8 @@ namespace ImageEvaluator.ReadImage
             if (width > 10000 || width < 0)
                 return;
 
-            this.width = width;
-            this._height = width * 2;
+            this._width = width;
+            this._height = width;
 
             InitEmguImages();
         }
@@ -41,6 +40,8 @@ namespace ImageEvaluator.ReadImage
         /// <param name="immg2"></param>
         public bool GetImage(string inputfileName, ref Image<Gray, float> img1, ref Image<Gray, float> img2, ref string outmessage)
         {
+            _fileName = inputfileName;
+
             if (!CheckFileName(inputfileName))
             {
                 outmessage = $"The file name is invalid. It does not exists or the width, height are invalid. ";
@@ -95,7 +96,7 @@ namespace ImageEvaluator.ReadImage
                 return false;
 
             FileInfo fi = new FileInfo(inputfileName);
-            if (fi.Length != (_width * _height * _bitNumber))
+            if (fi.Length != (_width * _height * 2 * _bitNumber))
                 return false;
 
             return true;

@@ -10,8 +10,13 @@ namespace ImageEvaluator
 {
     interface IImagePreProcessor
     {
-
         bool PreProcessImage(Image<Gray, float> inputImage, ref Image<Gray, byte> maskImage);
-
     }
+
+
+    interface IImagePreProcessor_Creator
+    {
+        IImagePreProcessor Factory(int bitDepth, int width, int height);
+    }
+
 }

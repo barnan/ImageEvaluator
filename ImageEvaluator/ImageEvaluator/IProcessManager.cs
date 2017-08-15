@@ -3,6 +3,8 @@ namespace ImageEvaluator
 {
     public interface IProcessManager
     {
-        bool ProcessDir(string inputDirectory);
+        bool Run();
+
+        bool Init(string diretoryName, string fileExtension, int width, int height, int bitDepth, int intensityRange, int borderSkip, bool showImages);
     }
 }

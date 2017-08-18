@@ -1,5 +1,6 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
+using NLog;
 using System;
 using System.IO;
 
@@ -14,14 +15,17 @@ namespace ImageEvaluator.ReadImage
         protected Image<Gray, float> _img1;
         protected Image<Gray, float> _img2;
         private bool _initialized;
+        protected ILogger _logger;
 
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="width"></param>
-        public DoubleLightImageReader_Base(int width)
+        public DoubleLightImageReader_Base(ILogger logger, int width)
         {
+            _logger = logger;
+
             if (width > 10000 || width < 0)
                 return;
 
@@ -40,10 +44,14 @@ namespace ImageEvaluator.ReadImage
         /// <param name="immg2"></param>
         public bool GetImage(string inputfileName, ref Image<Gray, float> img1, ref Image<Gray, float> img2, ref string outmessage)
         {
+            if (_logger?.IsTraceEnabled ?? false)
+                _logger?.Trace($"DoubleLightImageReader_Base GetImage. inputFileName: {inputfileName}");
+
             _fileName = inputfileName;
 
             if (!CheckFileName(inputfileName))
             {
+
                 outmessage = $"The file name is invalid. It does not exists or the width, height are invalid. ";
                 return false;
             }

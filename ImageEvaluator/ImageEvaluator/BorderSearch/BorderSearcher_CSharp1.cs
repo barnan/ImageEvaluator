@@ -1,5 +1,6 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,8 @@ namespace ImageEvaluator.SearchContourPoints
     class BorderSearcher_CSharp1 : BorderSearcher_Base
     {
 
-        internal BorderSearcher_CSharp1(int border)
+        internal BorderSearcher_CSharp1(ILogger logger, int border)
+            : base(logger)
         {
             _borderSkipSize = border;
         }
@@ -64,9 +66,9 @@ namespace ImageEvaluator.SearchContourPoints
     /// </summary>
     class Factory_BorderSearcher_CSharp1 : IBorderSeracher_Creator
     {
-        public IBorderSearcher Factory(int border, bool showImages)
+        public IBorderSearcher Factory(ILogger logger, int border, bool showImages)
         {
-            throw new NotImplementedException();
+            return new BorderSearcher_CSharp1(logger, border);
         }
 
     }

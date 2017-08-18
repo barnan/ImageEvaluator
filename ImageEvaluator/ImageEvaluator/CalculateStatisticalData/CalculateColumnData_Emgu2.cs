@@ -4,6 +4,7 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using System.Drawing;
 using System;
+using NLog;
 
 namespace ImageEvaluator.CalculateStatisticalData
 {
@@ -27,9 +28,10 @@ namespace ImageEvaluator.CalculateStatisticalData
         /// </summary>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        internal CalculateColumnData_Emgu2(int width, int height)
-            : base(width, height)
+        internal CalculateColumnData_Emgu2(ILogger logger, int width, int height)
+            : base(logger, width, height)
         {
+            _logger?.Info("CalculateColumnData_Emgu2 instantiated.");
         }
 
 
@@ -40,7 +42,7 @@ namespace ImageEvaluator.CalculateStatisticalData
         /// <param name="maskImage"></param>
         /// <param name="meanVector"></param>
         /// <param name="stdVector"></param>
-        public override bool CalculateStatistics(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector)
+        public override bool Run(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector)
         {
             if (!CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector))
                 return false;
@@ -165,9 +167,9 @@ namespace ImageEvaluator.CalculateStatisticalData
     /// </summary>
     class Factory_CalculateColumnData_Emgu2 : IColumnDataCalculator_Creator
     {
-        public IColumnDataCalculator Factory(int width, int height)
+        public IColumnDataCalculator Factory(ILogger logger, int width, int height)
         {
-            return new CalculateColumnData_Emgu2(width, height);
+            return new CalculateColumnData_Emgu2(logger, width, height);
         }
     }
 

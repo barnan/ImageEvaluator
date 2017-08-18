@@ -1,5 +1,6 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
+using NLog;
 
 namespace ImageEvaluator
 {
@@ -16,7 +17,7 @@ namespace ImageEvaluator
 
     public interface IDirectoryReader_Creator
     {
-        IDirectoryReader Factory(string directoryName, string extension, IDoubleLightImageReader_Creator reader, int width, int bitDepth);
+        IDirectoryReader Factory(ILogger logger, string directoryName, string extension, IDoubleLightImageReader reader);
     }
 
 

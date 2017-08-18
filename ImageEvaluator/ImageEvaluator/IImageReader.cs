@@ -1,5 +1,6 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace ImageEvaluator
 
     public interface IDoubleLightImageReader_Creator
     {
-        IDoubleLightImageReader Factory(int width, int bitDepth);
+        IDoubleLightImageReader Factory(ILogger logger, int width, int bitDepth);
     }
 
 

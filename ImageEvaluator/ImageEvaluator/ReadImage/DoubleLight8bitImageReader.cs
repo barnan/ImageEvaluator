@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.IO;
 
 namespace ImageEvaluator.ReadImage
@@ -11,9 +12,11 @@ namespace ImageEvaluator.ReadImage
         /// </summary>
         /// <param name="width"></param>
         /// <param name="bitdepth"></param>
-        internal DoubleLight8bitImageReader(int width, int bitdepth) : base(width)
+        internal DoubleLight8bitImageReader(ILogger logger, int width, int bitdepth) : base(logger, width)
         {
             _bitNumber = bitdepth;
+
+            _logger?.Info("DoubleLight8bitImageReader instantiated.");
         }
 
         /// <summary>
@@ -68,9 +71,9 @@ namespace ImageEvaluator.ReadImage
     /// </summary>
     class Factory_DoubleLight8bitImageReader : IDoubleLightImageReader_Creator
     {
-        public IDoubleLightImageReader Factory(int width, int bitDepth)
+        public IDoubleLightImageReader Factory(ILogger logger, int width, int bitDepth)
         {
-            return new DoubleLight8bitImageReader(width, bitDepth);
+            return new DoubleLight8bitImageReader(logger, width, bitDepth);
         }
     }
 

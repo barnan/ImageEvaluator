@@ -2,6 +2,7 @@
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
+using NLog;
 using System;
 using System.Drawing;
 
@@ -9,7 +10,8 @@ namespace ImageEvaluator.SearchContourPoints
 {
     class BorderSearcher_Emgu1 : BorderSearcher_Base
     {
-        internal BorderSearcher_Emgu1(int border, bool show)
+        internal BorderSearcher_Emgu1(ILogger logger, int border, bool show)
+            : base(logger)
         {
             _borderSkipSize = border;
             _showImages = show;
@@ -123,9 +125,9 @@ namespace ImageEvaluator.SearchContourPoints
     /// </summary>
     class Factory_BorderSearcher_Emgu1 : IBorderSeracher_Creator
     {
-        public IBorderSearcher Factory(int border, bool showImages)
+        public IBorderSearcher Factory(ILogger logger, int border, bool showImages)
         {
-            return new BorderSearcher_Emgu1(border, showImages);
+            return new BorderSearcher_Emgu1(logger, border, showImages);
         }
     }
 

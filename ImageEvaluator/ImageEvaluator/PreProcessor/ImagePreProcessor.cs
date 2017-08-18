@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using NLog;
 
 namespace ImageEvaluator.PreProcessor
 {
@@ -23,7 +24,7 @@ namespace ImageEvaluator.PreProcessor
         /// <param name="intensityRange"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        internal ImagePreProcessor(int intensityRange, int width, int height)
+        internal ImagePreProcessor(ILogger logger, int intensityRange, int width, int height)
         {
             _intensityRange = intensityRange;
 
@@ -37,7 +38,7 @@ namespace ImageEvaluator.PreProcessor
         /// <param name="inputImage"></param>
         /// <param name="maskImage"></param>
         /// <returns></returns>
-        public bool PreProcessImage(Image<Gray, float> inputImage, ref Image<Gray, byte> maskImage)
+        public bool Run(Image<Gray, float> inputImage, ref Image<Gray, byte> maskImage)
         {
             try
             {
@@ -158,9 +159,9 @@ namespace ImageEvaluator.PreProcessor
 
     class Factory_ImagePreProcessor : IImagePreProcessor_Creator
     {
-        public IImagePreProcessor Factory(int intensityRange, int width, int height)
+        public IImagePreProcessor Factory(ILogger logger, int intensityRange, int width, int height)
         {
-            return new ImagePreProcessor(intensityRange, width, height);
+            return new ImagePreProcessor(logger, intensityRange, width, height);
         }
     }
 

@@ -1,5 +1,6 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,13 +11,13 @@ namespace ImageEvaluator
 {
     interface IImagePreProcessor
     {
-        bool PreProcessImage(Image<Gray, float> inputImage, ref Image<Gray, byte> maskImage);
+        bool Run(Image<Gray, float> inputImage, ref Image<Gray, byte> maskImage);
     }
 
 
     interface IImagePreProcessor_Creator
     {
-        IImagePreProcessor Factory(int bitDepth, int width, int height);
+        IImagePreProcessor Factory(ILogger logger, int bitDepth, int width, int height);
     }
 
 }

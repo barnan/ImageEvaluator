@@ -4,6 +4,7 @@ using Emgu.CV.Structure;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using NLog;
 
 namespace ImageEvaluator.ReadDirectory
 {
@@ -14,6 +15,7 @@ namespace ImageEvaluator.ReadDirectory
         int _currentImageNumber;
         string[] _fileList;
         IDoubleLightImageReader _reader;
+        ILogger _logger;
 
 
 
@@ -21,11 +23,15 @@ namespace ImageEvaluator.ReadDirectory
         /// 
         /// </summary>
         /// <param name="name"></param>
-        internal DirectoryReader(string directoryName, string extension, IDoubleLightImageReader_Creator reader, int width, int bitNumber)
+        internal DirectoryReader(ILogger logger, string directoryName, string extension, IDoubleLightImageReader reader)
         {
+            _logger = logger;
             _directoryName = directoryName;
             _extension = extension;
-            _reader = reader.Factory(width, bitNumber);
+            _reader = reader;
+
+            _logger?.Info("DirectoryReader instantiated.");
+
         }
 
 
@@ -126,9 +132,9 @@ namespace ImageEvaluator.ReadDirectory
     /// </summary>
     public class Factory_DirectoryReader : IDirectoryReader_Creator
     {
-        public IDirectoryReader Factory(string directoryName, string extension, IDoubleLightImageReader_Creator reader, int width, int bitNumber)
+        public IDirectoryReader Factory(ILogger logger, string directoryName, string extension, IDoubleLightImageReader reader)
         {
-            return new DirectoryReader(directoryName, extension, reader, width, bitNumber);
+            return new DirectoryReader(logger, directoryName, extension, reader);
         }
     }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using NLog;
 
 namespace ImageEvaluator.CalculateStatisticalData
 {
@@ -14,6 +15,7 @@ namespace ImageEvaluator.CalculateStatisticalData
         protected Image<Gray, float> _stdVector;
         protected float[,,] _resultVector1;
         protected float[,,] _resultVector2;
+        protected ILogger _logger;
 
 
         /// <summary>
@@ -21,8 +23,9 @@ namespace ImageEvaluator.CalculateStatisticalData
         /// </summary>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        internal CalculateColumnData_Base(int width, int height)
+        internal CalculateColumnData_Base(ILogger logger, int width, int height)
         {
+            _logger = logger;
             _width = width;
             _height = height;
 
@@ -38,7 +41,7 @@ namespace ImageEvaluator.CalculateStatisticalData
         /// <param name="meanVector"></param>
         /// <param name="stdVector"></param>
         /// <returns></returns>
-        public abstract bool CalculateStatistics(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector);
+        public abstract bool Run(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector);
 
 
 

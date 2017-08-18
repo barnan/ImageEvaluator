@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using NLog;
 
 namespace ImageEvaluator.SearchContourPoints
 {
@@ -14,6 +15,13 @@ namespace ImageEvaluator.SearchContourPoints
         protected int _borderSkipSize;
         protected bool _showImages;
         bool _initialized;
+        protected ILogger _logger;
+
+
+        public BorderSearcher_Base(ILogger logger)
+        {
+            _logger = logger;
+        }
 
 
         /// <summary>
@@ -23,7 +31,7 @@ namespace ImageEvaluator.SearchContourPoints
         /// <param name="pointList"></param>
         /// <param name="outMessage"></param>
         /// <returns></returns>
-        public bool GetBorderPoints(Image<Gray, byte> maskImage, ref int[,] pointList, ref string outMessage)
+        public bool Run(Image<Gray, byte> maskImage, ref int[,] pointList, ref string outMessage)
         {
             try
             {

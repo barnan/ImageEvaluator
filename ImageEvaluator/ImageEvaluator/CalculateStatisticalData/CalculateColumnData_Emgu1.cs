@@ -17,6 +17,8 @@ namespace ImageEvaluator.CalculateStatisticalData
         internal CalculateColumnData_Emgu1(ILogger logger, int width, int height)
             : base(logger, width, height)
         {
+            InitEmguImages();
+
             _logger?.Info("CalculateColumnData_Emgu1 instantiated.");
         }
 
@@ -77,15 +79,6 @@ namespace ImageEvaluator.CalculateStatisticalData
         }
 
 
-        protected override bool InitEmguImages()
-        {
-            return true;
-        }
-
-        protected override bool ClearEmguImages()
-        {
-            return true;
-        }
     }
 
 

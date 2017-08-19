@@ -17,7 +17,7 @@ namespace ImageEvaluator
 
     interface IImagePreProcessor_Creator
     {
-        IImagePreProcessor Factory(ILogger logger, int bitDepth, int width, int height);
+        IImagePreProcessor Factory(ILogger logger, int bitDepth, int width, int height, bool showImages);
     }
 
 }

@@ -52,8 +52,8 @@ namespace ImageEvaluator.ManageProcess
         /// <returns></returns>
         public bool Run()
         {
-            if (_logger.IsTraceEnabled)
-                _logger.Info("MethodManager 1 Run started.");
+            if (_logger?.IsTraceEnabled ?? false)
+                _logger?.Info("MethodManager 1 Run started.");
 
 
             string message = null;

@@ -1,5 +1,6 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
+using Emgu.CV.UI;
 using NLog;
 using System;
 using System.IO;
@@ -16,15 +17,17 @@ namespace ImageEvaluator.ReadImage
         protected Image<Gray, float> _img2;
         private bool _initialized;
         protected ILogger _logger;
+        protected bool _showImages;
 
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="width"></param>
-        public DoubleLightImageReader_Base(ILogger logger, int width)
+        public DoubleLightImageReader_Base(ILogger logger, int width, bool showImages)
         {
             _logger = logger;
+            _showImages = showImages;
 
             if (width > 10000 || width < 0)
                 return;
@@ -73,6 +76,12 @@ namespace ImageEvaluator.ReadImage
             {
                 ReadDoubleLightImage();
 
+                if (_showImages)
+                {
+                    ImageViewer.Show(img1, "iput kep 1");
+                    ImageViewer.Show(img2, "iput kep 2");
+                }
+
                 return true;
             }
             catch (Exception ex)
@@ -83,6 +92,7 @@ namespace ImageEvaluator.ReadImage
 
                 return false;
             }
+
         }
 
 

@@ -12,7 +12,8 @@ namespace ImageEvaluator.ReadImage
         /// </summary>
         /// <param name="width"></param>
         /// <param name="bitdepth"></param>
-        internal DoubleLight8bitImageReader(ILogger logger, int width, int bitdepth) : base(logger, width)
+        internal DoubleLight8bitImageReader(ILogger logger, int width, int bitdepth, bool showImages)
+            : base(logger, width, showImages)
         {
             _bitNumber = bitdepth;
 
@@ -71,9 +72,9 @@ namespace ImageEvaluator.ReadImage
     /// </summary>
     class Factory_DoubleLight8bitImageReader : IDoubleLightImageReader_Creator
     {
-        public IDoubleLightImageReader Factory(ILogger logger, int width, int bitDepth)
+        public IDoubleLightImageReader Factory(ILogger logger, int width, int bitDepth, bool showImages)
         {
-            return new DoubleLight8bitImageReader(logger, width, bitDepth);
+            return new DoubleLight8bitImageReader(logger, width, bitDepth, showImages);
         }
     }
 

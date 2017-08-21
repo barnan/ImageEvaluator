@@ -29,13 +29,8 @@ namespace ImageEvaluator.ReadImage
             _logger = logger;
             _showImages = showImages;
 
-            if (width > 10000 || width < 0)
-                return;
-
             this._width = width;
             this._height = width;
-
-            InitEmguImages();
         }
 
 
@@ -45,7 +40,7 @@ namespace ImageEvaluator.ReadImage
         /// <param name="inputfileName"></param>
         /// <param name="img1"></param>
         /// <param name="immg2"></param>
-        public bool GetImage(string inputfileName, ref Image<Gray, float> img1, ref Image<Gray, float> img2, ref string outmessage)
+        public bool GetImage(string inputfileName, ref Image<Gray, float> img1, ref Image<Gray, float> img2)
         {
             if (_logger?.IsTraceEnabled ?? false)
                 _logger?.Trace($"DoubleLightImageReader_Base GetImage. inputFileName: {inputfileName}");
@@ -55,7 +50,8 @@ namespace ImageEvaluator.ReadImage
             if (!CheckFileName(inputfileName))
             {
 
-                outmessage = $"The file name is invalid. It does not exists or the width, height are invalid. ";
+                string message = $"The file name is invalid. It does not exists or the width, height are invalid. ";
+                _logger?.Error(message);
                 return false;
             }
 
@@ -68,7 +64,8 @@ namespace ImageEvaluator.ReadImage
             }
             catch (Exception ex)
             {
-                outmessage = $"Error during emgu image allocation. {ex.Message}";
+                string message = $"Error during emgu image allocation. {ex.Message}";
+                _logger?.Error(message);
                 return false;
             }
 
@@ -88,7 +85,8 @@ namespace ImageEvaluator.ReadImage
             {
                 ClearEmguImages();
 
-                outmessage = $"Error during double light image reading. {ex.Message}";
+                string message = $"Error during double light image reading. {ex.Message}";
+                _logger?.Error(message);
 
                 return false;
             }
@@ -101,6 +99,32 @@ namespace ImageEvaluator.ReadImage
         /// </summary>
         /// <returns></returns>
         protected abstract void ReadDoubleLightImage();
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool Init()
+        {
+            bool resu = (CheckWidthData() && InitEmguImages());
+
+
+            return _initialized = resu;
+        }
+
+
+
+        private bool CheckWidthData()
+        {
+            if (_width > 10000 || _width < 0)
+            {
+                _logger.Error($"Image width is not proper: {_width}");
+                return false;
+            }
+            return true;
+        }
+
 
 
         /// <summary>
@@ -134,12 +158,12 @@ namespace ImageEvaluator.ReadImage
                 _img1 = new Image<Gray, float>(_width, _height);
                 _img2 = new Image<Gray, float>(_width, _height);
 
-                return _initialized = true;
+                return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"DoubleLightImageReader_Base - InitEmguImages. Error during emgu initialization. {ex.Message}");
-                return _initialized = false;
+                _logger.Error($"DoubleLightImageReader_Base - InitEmguImages. Error during emgu initialization. {ex.Message}");
+                return false;
             }
 
         }
@@ -153,7 +177,7 @@ namespace ImageEvaluator.ReadImage
             _img1?.Dispose();
             _img2?.Dispose();
 
-            return !(_initialized = false);
+            return true;
         }
 
 

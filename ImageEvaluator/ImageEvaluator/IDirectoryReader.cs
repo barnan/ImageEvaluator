@@ -4,10 +4,9 @@ using NLog;
 
 namespace ImageEvaluator
 {
-    public interface IDirectoryReader
-
+    public interface IDirectoryReader : IInitalizable
     {
-        bool GetNextImage(ref Image<Gray, float> img1, ref Image<Gray, float> img2, ref string message);
+        bool GetNextImage(ref Image<Gray, float> img1, ref Image<Gray, float> img2);
 
         bool Restart();
 
@@ -15,6 +14,9 @@ namespace ImageEvaluator
     }
 
 
+    /// <summary>
+    ///  Creator
+    /// </summary>
     public interface IDirectoryReader_Creator
     {
         IDirectoryReader Factory(ILogger logger, string directoryName, string extension, IDoubleLightImageReader reader);

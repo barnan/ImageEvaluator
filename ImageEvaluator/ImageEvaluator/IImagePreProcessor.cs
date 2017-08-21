@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ImageEvaluator
 {
-    interface IImagePreProcessor
+    interface IImagePreProcessor : IInitalizable
     {
         bool Run(Image<Gray, float> inputImage, ref Image<Gray, byte> maskImage);
     }

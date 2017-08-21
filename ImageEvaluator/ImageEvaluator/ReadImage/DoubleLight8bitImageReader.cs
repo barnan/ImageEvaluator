@@ -20,6 +20,8 @@ namespace ImageEvaluator.ReadImage
             _logger?.Info("DoubleLight8bitImageReader instantiated.");
         }
 
+
+
         /// <summary>
         /// 
         /// </summary>

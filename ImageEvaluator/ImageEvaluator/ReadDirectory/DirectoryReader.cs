@@ -10,12 +10,13 @@ namespace ImageEvaluator.ReadDirectory
 {
     class DirectoryReader : IDirectoryReader
     {
-        string _directoryName;
-        string _extension;
-        int _currentImageNumber;
-        string[] _fileList;
-        IDoubleLightImageReader _reader;
-        ILogger _logger;
+        private string _directoryName;
+        private string _extension;
+        private int _currentImageNumber;
+        private string[] _fileList;
+        private IDoubleLightImageReader _reader;
+        private ILogger _logger;
+        private bool _initialized;
 
 
 
@@ -44,18 +45,33 @@ namespace ImageEvaluator.ReadDirectory
         {
             if (!Directory.Exists(_directoryName))
             {
-                return false;
+                _logger?.Error($"The directory ({ _directoryName}) does not exist -> _initialized=false.");
+                return _initialized = false;
             }
 
-            var allList = new List<string>(Directory.GetFiles(_directoryName));
+            List<string> allList = new List<string>(Directory.GetFiles(_directoryName));
             _fileList = allList.Where(p => Path.GetExtension(p) == $".{_extension}").ToArray();
 
             if (_fileList == null || _fileList.Length < 0)
             {
-                return false;
+                _logger?.Error($"The directory ({_directoryName}) contains NO files with the given extension: ({ _extension}) -> _initialized=false.");
+                return _initialized = false;
             }
-
             return true;
+        }
+
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public bool Init()
+        {
+            _initialized = (CheckDir() && _reader.Init());
+            _logger?.Trace("DirectoryReader " + (_initialized ? string.Empty : "NOT") + " initializated.");
+
+            return _initialized;
         }
 
 
@@ -63,11 +79,11 @@ namespace ImageEvaluator.ReadDirectory
         /// 
         /// </summary>
         /// <returns></returns>
-        public bool GetNextImage(ref Image<Gray, float> img1, ref Image<Gray, float> img2, ref string message)
+        public bool GetNextImage(ref Image<Gray, float> img1, ref Image<Gray, float> img2)
         {
-            if (!CheckDir())
+            if (!_initialized)
             {
-                message = $"the directory ({_directoryName}) does not exist or contains no files with the given extension: ({_extension})";
+                _logger?.Error($"The directory reader is not initialized yet.");
                 return false;
             }
 
@@ -78,11 +94,11 @@ namespace ImageEvaluator.ReadDirectory
 
             try
             {
-                bool resu = _reader.GetImage(_fileList[_currentImageNumber], ref img1, ref img2, ref message);
-                _currentImageNumber++;
+                bool resu = _reader.GetImage(_fileList[_currentImageNumber], ref img1, ref img2);
 
                 if (resu)
                 {
+                    _currentImageNumber++;
                     return true;
                 }
                 else
@@ -92,7 +108,7 @@ namespace ImageEvaluator.ReadDirectory
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in GetImage: {ex.Message}");
+                _logger.Trace($"Error in GetImage: {ex.Message}");
                 return false;
             }
         }
@@ -104,10 +120,10 @@ namespace ImageEvaluator.ReadDirectory
         /// <returns></returns>
         public bool Restart()
         {
-            CheckDir();
+            bool resu = Init();
 
             _currentImageNumber = 0;
-            return true;
+            return resu;
         }
 
 
@@ -117,12 +133,15 @@ namespace ImageEvaluator.ReadDirectory
         /// <returns></returns>
         public bool EndOfDirectory()
         {
-            CheckDir();
+            if (!_initialized)
+                return true;
 
             int maxLength = _fileList.Length;
 
             return _currentImageNumber >= (maxLength - 1) ? true : false;
         }
+
+
     }
 
 
@@ -134,7 +153,11 @@ namespace ImageEvaluator.ReadDirectory
     {
         public IDirectoryReader Factory(ILogger logger, string directoryName, string extension, IDoubleLightImageReader reader)
         {
-            return new DirectoryReader(logger, directoryName, extension, reader);
+
+            var dirReader = new DirectoryReader(logger, directoryName, extension, reader);
+            dirReader.Init();
+
+            return dirReader;
         }
     }
 

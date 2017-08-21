@@ -12,13 +12,14 @@ namespace ImageEvaluator.PreProcessor
 {
     class ImagePreProcessor : IImagePreProcessor
     {
-        DenseHistogram _hist;
-        int _intensityRange;
-        //Image<Gray, byte> _maskImage;
-        //Image<Gray, float> _rotatedImage;
+        private DenseHistogram _hist;
+        private int _intensityRange;
         Image<Gray, float> _thresholdedImage;
-        bool _emguInitialized;
+        private bool _initialized;
         protected bool _showImages;
+        private int _width;
+        private int _height;
+        private ILogger _logger;
 
 
         /// <summary>
@@ -30,10 +31,35 @@ namespace ImageEvaluator.PreProcessor
         internal ImagePreProcessor(ILogger logger, int intensityRange, int width, int height, bool showImages)
         {
             _intensityRange = intensityRange;
-
             _showImages = showImages;
+            _width = width;
+            _height = height;
+            _logger = logger;
 
-            InitEmguImages(width, height);
+            //InitEmguImages(width, height);
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public virtual bool Init()
+        {
+            if (!CheckWidthData())
+            {
+                _logger.Error($"Input image width was not proper. {_width}");
+                return _initialized = false;
+            }
+
+            if (!InitEmguImages())
+            {
+                _logger.Error($"Emgu images could nor be initilized.");
+                return _initialized = false;
+            }
+
+
+            return _initialized = true;
         }
 
 
@@ -74,6 +100,18 @@ namespace ImageEvaluator.PreProcessor
                 Console.WriteLine($"Error in ImagePreProcessor - InitEmguImages. {ex.Message}");
                 return false;
             }
+        }
+
+
+
+        private bool CheckWidthData()
+        {
+            if (_width > 10000 || _width < 0)
+            {
+                _logger.Error($"Image width is not proper: {_width}");
+                return false;
+            }
+            return true;
         }
 
 
@@ -132,24 +170,22 @@ namespace ImageEvaluator.PreProcessor
         /// <param name="width"></param>
         /// <param name="height"></param>
         /// <returns></returns>
-        private bool InitEmguImages(int width, int height)
+        private bool InitEmguImages()
         {
-            if (_emguInitialized)
+            if (_initialized)
                 return true;
 
             try
             {
-                //_maskImage = new Image<Gray, byte>(width, height);
-                //_rotatedImage = new Image<Gray, float>(width, height);
-                _thresholdedImage = new Image<Gray, float>(width, height);
+                _thresholdedImage = new Image<Gray, float>(_width, _height);
                 _hist = new DenseHistogram(_intensityRange, new RangeF(0, _intensityRange - 1));
 
-                return _emguInitialized = true;
+                return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in ImagePreProcessor - InitEmguImages. {ex.Message}");
-                return _emguInitialized = false;
+                _logger.Error($"Error in ImagePreProcessor - InitEmguImages. {ex.Message}");
+                return false;
             }
         }
 
@@ -160,14 +196,14 @@ namespace ImageEvaluator.PreProcessor
         /// <returns></returns>
         private bool ClearEmguImages()
         {
-            //_maskImage?.Dispose();
-            //_rotatedImage?.Dispose();
             _thresholdedImage?.Dispose();
 
-            _emguInitialized = false;
+            _initialized = false;
 
             return true;
         }
+
+
     }
 
 

@@ -17,9 +17,10 @@ namespace ImageEvaluator.ReadImage
         {
             _bitNumber = bitnumber;
 
-
             _logger?.Info("DoubleLight16bitImageReader instantiated.");
         }
+
+
 
 
         /// <summary>

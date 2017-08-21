@@ -46,6 +46,21 @@ namespace ImageEvaluator.ManageProcess
         }
 
 
+
+        public bool Init()
+        {
+            bool resu = true;
+
+            resu = resu && _dirReader.Init();
+
+
+
+            return resu;
+        }
+
+
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -60,7 +75,7 @@ namespace ImageEvaluator.ManageProcess
 
             while (!_dirReader.EndOfDirectory())
             {
-                _dirReader.GetNextImage(ref _image1, ref _image2, ref message);
+                _dirReader.GetNextImage(ref _image1, ref _image2);
 
                 _preProc.Run(_image1, ref _mask1);
                 _preProc.Run(_image2, ref _mask2);

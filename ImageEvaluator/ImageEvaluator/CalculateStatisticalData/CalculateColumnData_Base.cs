@@ -35,7 +35,7 @@ namespace ImageEvaluator.CalculateStatisticalData
         {
             _initialized = InitEmguImages();
 
-            _logger.Info("CalculateColumnData_Base " + (_initialized ? string.Empty : "NOT") + " Initialized.");
+            _logger?.Info("CalculateColumnData_Base " + (_initialized ? string.Empty : "NOT") + " Initialized.");
 
             return _initialized;
         }
@@ -65,7 +65,7 @@ namespace ImageEvaluator.CalculateStatisticalData
             {
                 if (inputImage == null || inputImage.Height != _height || inputImage.Width != _width)
                 {
-                    _logger.Error($"Error in the input image size. Predefined width: {_width}, Predefined height: {_height}, image width: {inputImage?.Width}, image height: {inputImage.Height}");
+                    _logger?.Error($"Error in the input image size. Predefined width: {_width}, Predefined height: {_height}, image width: {inputImage?.Width}, image height: {inputImage.Height}");
                     return false;
                 }
                 if (meanVector == null || stdVector == null || meanVector.Height != inputImage.Height || stdVector.Height != inputImage.Height)
@@ -76,7 +76,7 @@ namespace ImageEvaluator.CalculateStatisticalData
             }
             catch (Exception ex)
             {
-                _logger.Error($"Error during CalculateColumnData CheckInputImage: {ex.Message}");
+                _logger?.Error($"Error during CalculateColumnData CheckInputImage: {ex.Message}");
             }
 
             return true;
@@ -104,7 +104,7 @@ namespace ImageEvaluator.CalculateStatisticalData
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error during CalculcateColumnData - Init: {ex.Message}.");
+                _logger?.Error($"Error during CalculcateColumnData - Init: {ex.Message}.");
                 return false;
             }
         }

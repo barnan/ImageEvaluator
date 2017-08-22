@@ -39,7 +39,9 @@ namespace ImageEvaluator.CalculateStatisticalData
             }
 
             if (!CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector))
+            {
                 return false;
+            }
 
             meanVector = _meanVector;
             stdVector = _stdVector;
@@ -79,16 +81,14 @@ namespace ImageEvaluator.CalculateStatisticalData
 
             if (!partResu || pointArray == null || pointArray.Length < 0 || (pointArray.Length / 2) > 10000 || (pointArray.Length / 2) != inputImage.Height)
             {
-                _logger.Error("Error during CheckInputData");
+                _logger?.Error("Error during CheckInputData");
                 return false;
             }
 
             return true;
         }
 
-
     }
-
 
 
     /// <summary>

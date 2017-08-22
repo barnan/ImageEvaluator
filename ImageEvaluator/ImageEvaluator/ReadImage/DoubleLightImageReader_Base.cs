@@ -81,7 +81,7 @@ namespace ImageEvaluator.ReadImage
                     ImageViewer.Show(img2, "iput kep 2");
                 }
 
-                _logger.Trace($"{_fileName} readed.");
+                _logger?.Trace($"{_fileName} readed.");
 
                 return true;
             }
@@ -110,7 +110,7 @@ namespace ImageEvaluator.ReadImage
         {
             _initialized = (CheckWidthData() && InitEmguImages());
 
-            _logger.Info("DoubleLightImageReaderBase " + (_initialized ? string.Empty : "NOT") + " initialized.");
+            _logger?.Info("DoubleLightImageReaderBase " + (_initialized ? string.Empty : "NOT") + " initialized.");
 
             return _initialized;
         }
@@ -121,7 +121,7 @@ namespace ImageEvaluator.ReadImage
         {
             if (_width > 10000 || _width < 0)
             {
-                _logger.Error($"Image width is not proper: {_width}");
+                _logger?.Error($"Image width is not proper: {_width}");
                 return false;
             }
             return true;
@@ -147,7 +147,7 @@ namespace ImageEvaluator.ReadImage
             }
             catch (Exception ex)
             {
-                _logger.Error($"Exception in DoubleLightImageReader_Base-CheckFileName: {ex.Message}");
+                _logger?.Error($"Exception in DoubleLightImageReader_Base-CheckFileName: {ex.Message}");
                 return false;
             }
 
@@ -172,7 +172,7 @@ namespace ImageEvaluator.ReadImage
             }
             catch (Exception ex)
             {
-                _logger.Error($"DoubleLightImageReader_Base - InitEmguImages. Error during emgu initialization. {ex.Message}");
+                _logger?.Error($"DoubleLightImageReader_Base - InitEmguImages. Error during emgu initialization. {ex.Message}");
                 return false;
             }
 

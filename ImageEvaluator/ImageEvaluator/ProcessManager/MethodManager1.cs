@@ -12,6 +12,7 @@ namespace ImageEvaluator.ManageProcess
         IImagePreProcessor _preProc;
         IBorderSearcher _borderSearcher;
         IColumnDataCalculator _columnDataCalculator;
+        private bool _initialized;
 
 
         Image<Gray, float> _image1;
@@ -42,6 +43,8 @@ namespace ImageEvaluator.ManageProcess
             _columnDataCalculator = colummnCalculator;
             _logger = logger;
 
+            Init();
+
             _logger?.Info("MethodManager 1 instantiated.");
         }
 
@@ -50,9 +53,13 @@ namespace ImageEvaluator.ManageProcess
         public bool Init()
         {
             bool resu = true;
+
             resu = resu && _dirReader.Init();
             resu = resu && _preProc.Init();
-            return resu;
+            resu = resu && _borderSearcher.Init();
+            resu = resu && _columnDataCalculator.Init();
+
+            return _initialized = resu;
         }
 
 
@@ -64,8 +71,13 @@ namespace ImageEvaluator.ManageProcess
         /// <returns></returns>
         public bool Run()
         {
-            _logger?.Info("MethodManager 1 Run started.");
+            if (!_initialized)
+            {
+                _logger?.Error("MethodManager Run is not initialized yet.");
+                return false;
+            }
 
+            _logger?.Info("MethodManager 1 Run started.");
 
             string message = null;
 

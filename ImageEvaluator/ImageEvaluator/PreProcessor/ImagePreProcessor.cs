@@ -46,7 +46,7 @@ namespace ImageEvaluator.PreProcessor
         {
             _initialized = (CheckWidthData() && InitEmguImages());
 
-            _logger.Info("ImagePreProcessor " + (_initialized ? string.Empty : "NOT") + " initialized.");
+            _logger?.Info("ImagePreProcessor " + (_initialized ? string.Empty : "NOT") + " initialized.");
 
             return _initialized;
         }
@@ -86,7 +86,7 @@ namespace ImageEvaluator.PreProcessor
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in ImagePreProcessor - InitEmguImages. {ex.Message}");
+                _logger?.Error($"Error in ImagePreProcessor - InitEmguImages. {ex.Message}");
                 return false;
             }
         }
@@ -96,7 +96,7 @@ namespace ImageEvaluator.PreProcessor
         {
             if (_width > 10000 || _width < 0)
             {
-                _logger.Error($"Image width is not proper: {_width}");
+                _logger?.Error($"Image width is not proper: {_width}");
                 return false;
             }
             return true;

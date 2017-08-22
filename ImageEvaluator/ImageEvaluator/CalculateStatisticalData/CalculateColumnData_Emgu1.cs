@@ -38,13 +38,13 @@ namespace ImageEvaluator.CalculateStatisticalData
                 return false;
             }
 
+            meanVector = _meanVector;
+            stdVector = _stdVector;
+
             if (!CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector))
             {
                 return false;
             }
-
-            meanVector = _meanVector;
-            stdVector = _stdVector;
 
             int imageWidth = inputImage.Width;
 

@@ -79,8 +79,6 @@ namespace ImageEvaluator.ManageProcess
 
             _logger?.Info("MethodManager 1 Run started.");
 
-            string message = null;
-
             while (!_dirReader.EndOfDirectory())
             {
                 _dirReader.GetNextImage(ref _image1, ref _image2);

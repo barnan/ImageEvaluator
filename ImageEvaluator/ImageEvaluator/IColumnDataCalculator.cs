@@ -4,7 +4,7 @@ using NLog;
 
 namespace ImageEvaluator
 {
-    public interface IColumnDataCalculator
+    public interface IColumnDataCalculator : IInitalizable
     {
         //bool GetStatisticalData(Image<Gray, float> inputImage, Image<Gray, byte> maskimage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector);
 

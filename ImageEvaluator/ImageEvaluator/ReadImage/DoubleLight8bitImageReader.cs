@@ -28,7 +28,7 @@ namespace ImageEvaluator.ReadImage
         /// <param name="inputFileName"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        protected override void ReadDoubleLightImage()
+        protected override bool ReadDoubleLightImage()
         {
             try
             {
@@ -58,14 +58,14 @@ namespace ImageEvaluator.ReadImage
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error during fileread (8 bit double light): {(string.IsNullOrEmpty(_fileName) ? string.Empty : _fileName)}. {ex.Message}");
+                _logger.Error($"Exception during file read (8 bit double light): {(string.IsNullOrEmpty(_fileName) ? string.Empty : _fileName)}. {ex.Message}");
+                return false;
             }
+
+            return true;
         }
 
-
     }
-
-
 
 
 

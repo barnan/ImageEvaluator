@@ -21,11 +21,5 @@ namespace ImageEvaluator.CalculateStatisticalData
 
 
 
-        //protected abstract void InitEmguImages(int width, int height);
-
-
-
-        //protected abstract void ClearEmguImages();
-
     }
 }

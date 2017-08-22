@@ -35,8 +35,6 @@ namespace ImageEvaluator.PreProcessor
             _width = width;
             _height = height;
             _logger = logger;
-
-            //InitEmguImages(width, height);
         }
 
 
@@ -46,20 +44,11 @@ namespace ImageEvaluator.PreProcessor
         /// <returns></returns>
         public virtual bool Init()
         {
-            if (!CheckWidthData())
-            {
-                _logger.Error($"Input image width was not proper. {_width}");
-                return _initialized = false;
-            }
+            _initialized = (CheckWidthData() && InitEmguImages());
 
-            if (!InitEmguImages())
-            {
-                _logger.Error($"Emgu images could nor be initilized.");
-                return _initialized = false;
-            }
+            _logger.Info("ImagePreProcessor " + (_initialized ? string.Empty : "NOT") + " initialized.");
 
-
-            return _initialized = true;
+            return _initialized;
         }
 
 
@@ -103,7 +92,6 @@ namespace ImageEvaluator.PreProcessor
         }
 
 
-
         private bool CheckWidthData()
         {
             if (_width > 10000 || _width < 0)
@@ -111,6 +99,47 @@ namespace ImageEvaluator.PreProcessor
                 _logger.Error($"Image width is not proper: {_width}");
                 return false;
             }
+            return true;
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="intensityRange"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <returns></returns>
+        private bool InitEmguImages()
+        {
+            if (_initialized)
+                return true;
+
+            try
+            {
+                _thresholdedImage = new Image<Gray, float>(_width, _height);
+                _hist = new DenseHistogram(_intensityRange, new RangeF(0, _intensityRange - 1));
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error($"Error in ImagePreProcessor - InitEmguImages. {ex.Message}");
+                return false;
+            }
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        private bool ClearEmguImages()
+        {
+            _thresholdedImage?.Dispose();
+
+            _initialized = false;
+
             return true;
         }
 
@@ -160,47 +189,6 @@ namespace ImageEvaluator.PreProcessor
             }
 
             return minpos;
-        }
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="intensityRange"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <returns></returns>
-        private bool InitEmguImages()
-        {
-            if (_initialized)
-                return true;
-
-            try
-            {
-                _thresholdedImage = new Image<Gray, float>(_width, _height);
-                _hist = new DenseHistogram(_intensityRange, new RangeF(0, _intensityRange - 1));
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"Error in ImagePreProcessor - InitEmguImages. {ex.Message}");
-                return false;
-            }
-        }
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        private bool ClearEmguImages()
-        {
-            _thresholdedImage?.Dispose();
-
-            _initialized = false;
-
-            return true;
         }
 
 

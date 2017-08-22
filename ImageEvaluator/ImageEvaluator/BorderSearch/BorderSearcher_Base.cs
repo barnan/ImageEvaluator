@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using NLog;
@@ -11,16 +7,32 @@ namespace ImageEvaluator.SearchContourPoints
 {
     abstract class BorderSearcher_Base : IBorderSearcher
     {
+
         protected int[,] _borderPoints;
         protected int _borderSkipSize;
         protected bool _showImages;
-        bool _initialized;
+        private bool _initialized;
+        private int _imageHeight;
+        private Image<Gray, byte> _maskImage;
         protected ILogger _logger;
 
 
-        public BorderSearcher_Base(ILogger logger)
+        public BorderSearcher_Base(ILogger logger, int imageHeight)
         {
+            _imageHeight = imageHeight;
             _logger = logger;
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public bool Init()
+        {
+            _initialized = InitArrays();
+            _logger?.Info("BorderSearcher_Base " + (_initialized ? string.Empty : "NOT") + " initialized.");
+            return _initialized;
         }
 
 
@@ -29,35 +41,37 @@ namespace ImageEvaluator.SearchContourPoints
         /// </summary>
         /// <param name="maskImage"></param>
         /// <param name="pointList"></param>
-        /// <param name="outMessage"></param>
         /// <returns></returns>
-        public bool Run(Image<Gray, byte> maskImage, ref int[,] pointList, ref string outMessage)
+        public bool Run(Image<Gray, byte> maskImage, ref int[,] pointList)
         {
+            if (!_initialized)
+            {
+                _logger?.Error("BorderSearch is not initialized yet.");
+                return false;
+            }
+
             try
             {
                 if (!CheckInputImage(maskImage))
                 {
-                    outMessage = "GetBorderPoints - Invalid input image.";
+                    _logger?.Error("GetBorderPoints - Invalid input image.");
                     return false;
                 }
 
-                Init(maskImage.Height);
-
                 ResetPointList();
-
                 pointList = _borderPoints;
-
                 CalculatePoints(maskImage);
-
             }
             catch (Exception ex)
             {
-                outMessage = $"Exception during border points calculation: {ex.Message}";
+                _logger?.Error($"Exception during border points calculation: {ex.Message}");
                 return false;
             }
 
             return true;
         }
+
+
 
         protected abstract void CalculatePoints(Image<Gray, byte> maskImage);
 
@@ -67,20 +81,23 @@ namespace ImageEvaluator.SearchContourPoints
         /// </summary>
         /// <param name="height"></param>
         /// <returns></returns>
-        protected bool Init(int height)
+        protected bool InitArrays()
         {
             if (_initialized)
-                return true;
+                return _initialized;
 
-            _borderPoints = new int[height, 2];
+            _borderPoints = new int[_imageHeight, 2];
 
-            return _initialized = true;
+            return true;
         }
 
 
 
         protected bool ResetPointList()
         {
+            if (!_initialized)
+                return false;
+
             for (int i = 0; i < _borderPoints.Length / 2; i++)
             {
                 _borderPoints[i, 0] = 0;
@@ -98,12 +115,13 @@ namespace ImageEvaluator.SearchContourPoints
         /// <returns></returns>
         protected bool CheckInputImage(Image<Gray, byte> maskImage)
         {
-            if (maskImage == null || maskImage.Height < 0 || maskImage.Height > 10000 || maskImage.Width < 0 || maskImage.Width > 10000)
+            if (maskImage == null || maskImage.Height != _imageHeight || maskImage.Width != _imageHeight)
             {
                 return false;
             }
             return true;
         }
+
 
     }
 }

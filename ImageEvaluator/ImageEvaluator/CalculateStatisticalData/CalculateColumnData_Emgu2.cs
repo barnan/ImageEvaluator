@@ -44,6 +44,12 @@ namespace ImageEvaluator.CalculateStatisticalData
         /// <param name="stdVector"></param>
         public override bool Run(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector)
         {
+            if (!_initialized)
+            {
+                _logger.Error("CalculateColumnData_CSharp2 is not initialized.");
+                return false;
+            }
+
             if (!CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector))
                 return false;
 

@@ -30,6 +30,12 @@ namespace ImageEvaluator.CalculateStatisticalData
         /// <param name="stdVector"></param>
         public override bool Run(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector)
         {
+            if (!_initialized)
+            {
+                _logger.Error("CalculateColumnData_CSharp2 is not initialized.");
+                return false;
+            }
+
             if (!CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector))
                 return false;
 
@@ -76,11 +82,13 @@ namespace ImageEvaluator.CalculateStatisticalData
         /// <returns></returns>
         protected override bool CheckInputData(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, float> meanVector, Image<Gray, float> stdVector)
         {
-            base.CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector);
+            bool partResu = base.CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector);
 
-            if (pointArray == null || pointArray.Length < 0 || (pointArray.Length / 2) > 10000 || (pointArray.Length / 2) != inputImage.Height)
+            if (!partResu || pointArray == null || pointArray.Length < 0 || (pointArray.Length / 2) > 10000 || (pointArray.Length / 2) != inputImage.Height)
+            {
+                _logger.Error("Error during CheckInputData");
                 return false;
-
+            }
 
             return true;
         }

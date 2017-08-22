@@ -29,7 +29,7 @@ namespace ImageEvaluator.ReadImage
         /// <param name="inputFileName"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        protected override void ReadDoubleLightImage()
+        protected override bool ReadDoubleLightImage()
         {
             try
             {
@@ -55,14 +55,15 @@ namespace ImageEvaluator.ReadImage
                         emguImage1_Array[i, j, 0] = dataRow1[2 * j] + (dataRow1[2 * j + 1] << 8);
                         emguImage2_Array[i, j, 0] = dataRow2[2 * j] + (dataRow2[2 * j + 1] << 8);
                     }
-
                 }
-
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error during fileread (16 bit double light): {(string.IsNullOrEmpty(_fileName) ? string.Empty : _fileName)}. {ex.Message}");
+                _logger.Error($"Exception during file read (16 bit double light): {(string.IsNullOrEmpty(_fileName) ? string.Empty : _fileName)}. {ex.Message}");
+                return false;
             }
+
+            return true;
         }
 
 

@@ -28,8 +28,16 @@ namespace ImageEvaluator.CalculateStatisticalData
             _logger = logger;
             _width = width;
             _height = height;
+        }
 
-            InitEmguImages();
+
+        public bool Init()
+        {
+            _initialized = InitEmguImages();
+
+            _logger.Info("CalculateColumnData_Base " + (_initialized ? string.Empty : "NOT") + " Initialized.");
+
+            return _initialized;
         }
 
 
@@ -53,13 +61,22 @@ namespace ImageEvaluator.CalculateStatisticalData
         /// <returns></returns>
         protected virtual bool CheckInputData(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, float> meanVector, Image<Gray, float> stdVector)
         {
-            if (inputImage == null || inputImage.Height < 0 || inputImage.Height > 10000 || inputImage.Width < 0 || inputImage.Width > 10000)
+            try
             {
-                return false;
+                if (inputImage == null || inputImage.Height != _height || inputImage.Width != _width)
+                {
+                    _logger.Error($"Error in the input image size. Predefined width: {_width}, Predefined height: {_height}, image width: {inputImage?.Width}, image height: {inputImage.Height}");
+                    return false;
+                }
+                if (meanVector == null || stdVector == null || meanVector.Height != inputImage.Height || stdVector.Height != inputImage.Height)
+                {
+                    _logger?.Error($"Error in the meanVector and stdVector length. meanVector height:{meanVector.Height} stdVector height:{stdVector.Height} meanVector height:{inputImage.Height}.");
+                    return false;
+                }
             }
-            if (meanVector == null || stdVector == null || meanVector.Height != inputImage.Height || stdVector.Height != inputImage.Height)
+            catch (Exception ex)
             {
-                return false;
+                _logger.Error($"Error during CalculateColumnData CheckInputImage: {ex.Message}");
             }
 
             return true;
@@ -83,12 +100,12 @@ namespace ImageEvaluator.CalculateStatisticalData
                 _resultVector1 = _meanVector.Data;
                 _resultVector2 = _stdVector.Data;
 
-                return _initialized = true;
+                return true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error during CalculcateColumnData - Init: {ex.Message}.");
-                return _initialized = false;
+                return false;
             }
         }
 
@@ -102,7 +119,6 @@ namespace ImageEvaluator.CalculateStatisticalData
 
             return true;
         }
-
 
 
     }

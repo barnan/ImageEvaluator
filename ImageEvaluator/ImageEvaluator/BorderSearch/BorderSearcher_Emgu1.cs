@@ -10,14 +10,20 @@ namespace ImageEvaluator.SearchContourPoints
 {
     class BorderSearcher_Emgu1 : BorderSearcher_Base
     {
-        internal BorderSearcher_Emgu1(ILogger logger, int border, bool show)
-            : base(logger)
+        internal BorderSearcher_Emgu1(ILogger logger, int border, bool show, int imageHeight)
+            : base(logger, imageHeight)
         {
             _borderSkipSize = border;
             _showImages = show;
+
+            _logger?.Info("BorderSearcher_Emgu1 instantiated.");
         }
 
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="maskImage"></param>
         protected override void CalculatePoints(Image<Gray, byte> maskImage)
         {
             using (Mat hierarchy = new Mat())
@@ -77,7 +83,7 @@ namespace ImageEvaluator.SearchContourPoints
                     }
                     catch (Exception ex)
                     {
-                        throw new Exception($"Exception caught in BorderSearcher_Emgu1-CalculatePoints: {ex.Message}.");
+                        _logger?.Error($"Exception caught in BorderSearcher_Emgu1-CalculatePoints: {ex.Message}.");
                     }
                 }
             }
@@ -91,7 +97,6 @@ namespace ImageEvaluator.SearchContourPoints
         /// <returns>intersection Point</returns>
         private Point GetIntersection(LineSegment2D line1, LineSegment2D line2)
         {
-
             if (line1.P1.X == line1.P2.X)
             {
                 return new Point((int)line1.P2.X, line2.P2.Y);
@@ -115,7 +120,9 @@ namespace ImageEvaluator.SearchContourPoints
             double y = a1 * x + b1;
 
             return new Point((int)(x + 0.5), (int)(y + 0.5));
+
         }
+
     }
 
 
@@ -125,9 +132,9 @@ namespace ImageEvaluator.SearchContourPoints
     /// </summary>
     class Factory_BorderSearcher_Emgu1 : IBorderSeracher_Creator
     {
-        public IBorderSearcher Factory(ILogger logger, int border, bool showImages)
+        public IBorderSearcher Factory(ILogger logger, int border, int imageHeight, bool showImages)
         {
-            return new BorderSearcher_Emgu1(logger, border, showImages);
+            return new BorderSearcher_Emgu1(logger, border, showImages, imageHeight);
         }
     }
 

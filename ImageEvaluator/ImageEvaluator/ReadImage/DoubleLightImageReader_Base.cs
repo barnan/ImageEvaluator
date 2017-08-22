@@ -42,16 +42,19 @@ namespace ImageEvaluator.ReadImage
         /// <param name="immg2"></param>
         public bool GetImage(string inputfileName, ref Image<Gray, float> img1, ref Image<Gray, float> img2)
         {
-            if (_logger?.IsTraceEnabled ?? false)
-                _logger?.Trace($"DoubleLightImageReader_Base GetImage. inputFileName: {inputfileName}");
+            if (!_initialized)
+            {
+                _logger.Trace("DoubleLightImageReader is not initialized yet.");
+                return false;
+            }
+
+            _logger?.Trace($"DoubleLightImageReader_Base GetImage. inputFileName: {inputfileName}");
 
             _fileName = inputfileName;
 
             if (!CheckFileName(inputfileName))
             {
-
-                string message = $"The file name is invalid. It does not exists or the width, height are invalid. ";
-                _logger?.Error(message);
+                _logger?.Error($"The file name is invalid. It does not exists or the width, height are invalid.");
                 return false;
             }
 
@@ -64,8 +67,7 @@ namespace ImageEvaluator.ReadImage
             }
             catch (Exception ex)
             {
-                string message = $"Error during emgu image allocation. {ex.Message}";
-                _logger?.Error(message);
+                _logger?.Error($"Error during emgu image allocation. {ex.Message}");
                 return false;
             }
 
@@ -79,15 +81,14 @@ namespace ImageEvaluator.ReadImage
                     ImageViewer.Show(img2, "iput kep 2");
                 }
 
+                _logger.Trace($"{_fileName} readed.");
+
                 return true;
             }
             catch (Exception ex)
             {
                 ClearEmguImages();
-
-                string message = $"Error during double light image reading. {ex.Message}";
-                _logger?.Error(message);
-
+                _logger?.Error($"Error during double light image reading. {ex.Message}");
                 return false;
             }
 
@@ -98,7 +99,7 @@ namespace ImageEvaluator.ReadImage
         /// 
         /// </summary>
         /// <returns></returns>
-        protected abstract void ReadDoubleLightImage();
+        protected abstract bool ReadDoubleLightImage();
 
 
         /// <summary>
@@ -107,10 +108,11 @@ namespace ImageEvaluator.ReadImage
         /// <returns></returns>
         public virtual bool Init()
         {
-            bool resu = (CheckWidthData() && InitEmguImages());
+            _initialized = (CheckWidthData() && InitEmguImages());
 
+            _logger.Info("DoubleLightImageReaderBase " + (_initialized ? string.Empty : "NOT") + " initialized.");
 
-            return _initialized = resu;
+            return _initialized;
         }
 
 
@@ -134,12 +136,20 @@ namespace ImageEvaluator.ReadImage
         /// <returns></returns>
         protected bool CheckFileName(string inputfileName)
         {
-            if (!File.Exists(inputfileName))
-                return false;
+            try
+            {
+                if (!File.Exists(inputfileName))
+                    return false;
 
-            FileInfo fi = new FileInfo(inputfileName);
-            if (fi.Length != (_width * _height * 2 * _bitNumber))
+                FileInfo fi = new FileInfo(inputfileName);
+                if (fi.Length != (_width * _height * 2 * _bitNumber))
+                    return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Exception in DoubleLightImageReader_Base-CheckFileName: {ex.Message}");
                 return false;
+            }
 
             return true;
         }

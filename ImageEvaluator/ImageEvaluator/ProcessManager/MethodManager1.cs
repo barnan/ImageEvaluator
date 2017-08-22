@@ -50,9 +50,8 @@ namespace ImageEvaluator.ManageProcess
         public bool Init()
         {
             bool resu = true;
-
             resu = resu && _dirReader.Init();
-            
+            resu = resu && _preProc.Init();
             return resu;
         }
 
@@ -77,8 +76,8 @@ namespace ImageEvaluator.ManageProcess
                 _preProc.Run(_image1, ref _mask1);
                 _preProc.Run(_image2, ref _mask2);
 
-                _borderSearcher.Run(_mask1, ref _borderPoints1, ref message);
-                _borderSearcher.Run(_mask2, ref _borderPoints2, ref message);
+                _borderSearcher.Run(_mask1, ref _borderPoints1);
+                _borderSearcher.Run(_mask2, ref _borderPoints2);
 
                 _columnDataCalculator.Run(_image1, _mask1, _borderPoints1, ref _meanVector1, ref _stdVector1);
                 _columnDataCalculator.Run(_image2, _mask2, _borderPoints2, ref _meanVector2, ref _stdVector2);

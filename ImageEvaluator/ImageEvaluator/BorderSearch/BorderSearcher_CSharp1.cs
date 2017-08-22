@@ -2,20 +2,18 @@
 using Emgu.CV.Structure;
 using NLog;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ImageEvaluator.SearchContourPoints
 {
     class BorderSearcher_CSharp1 : BorderSearcher_Base
     {
 
-        internal BorderSearcher_CSharp1(ILogger logger, int border)
-            : base(logger)
+        internal BorderSearcher_CSharp1(ILogger logger, int border, int imageHeight)
+            : base(logger, imageHeight)
         {
             _borderSkipSize = border;
+
+            _logger?.Info("BorderSearcher_CSharp1 instantiated.");
         }
 
 
@@ -52,7 +50,7 @@ namespace ImageEvaluator.SearchContourPoints
             }
             catch (Exception ex)
             {
-                throw new Exception($"Exception caught in BorderSearcher_CSharp1-CalculatePoints: {ex.Message}.");
+                _logger?.Error($"Exception caught in BorderSearcher_CSharp1-CalculatePoints: {ex.Message}.");
             }
 
         }
@@ -66,11 +64,10 @@ namespace ImageEvaluator.SearchContourPoints
     /// </summary>
     class Factory_BorderSearcher_CSharp1 : IBorderSeracher_Creator
     {
-        public IBorderSearcher Factory(ILogger logger, int border, bool showImages)
+        public IBorderSearcher Factory(ILogger logger, int border, int imageHeight, bool showImages)
         {
-            return new BorderSearcher_CSharp1(logger, border);
+            return new BorderSearcher_CSharp1(logger, border, imageHeight);
         }
-
     }
 }
 

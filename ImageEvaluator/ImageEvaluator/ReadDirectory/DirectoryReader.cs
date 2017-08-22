@@ -43,20 +43,29 @@ namespace ImageEvaluator.ReadDirectory
         /// <returns></returns>
         private bool CheckDir()
         {
-            if (!Directory.Exists(_directoryName))
+            try
             {
-                _logger?.Error($"The directory ({ _directoryName}) does not exist -> _initialized=false.");
+                if (!Directory.Exists(_directoryName))
+                {
+                    _logger?.Error($"The directory ({ _directoryName}) does not exist -> _initialized=false.");
+                    return _initialized = false;
+                }
+
+                List<string> allList = new List<string>(Directory.GetFiles(_directoryName));
+                _fileList = allList.Where(p => Path.GetExtension(p) == $".{_extension}").ToArray();
+
+                if (_fileList == null || _fileList.Length < 0)
+                {
+                    _logger?.Error($"The directory ({_directoryName}) contains NO files with the given extension: ({ _extension}) -> _initialized=false.");
+                    return _initialized = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error($"Exception during DirReader-CheckDir: {ex.Message}");
                 return _initialized = false;
             }
 
-            List<string> allList = new List<string>(Directory.GetFiles(_directoryName));
-            _fileList = allList.Where(p => Path.GetExtension(p) == $".{_extension}").ToArray();
-
-            if (_fileList == null || _fileList.Length < 0)
-            {
-                _logger?.Error($"The directory ({_directoryName}) contains NO files with the given extension: ({ _extension}) -> _initialized=false.");
-                return _initialized = false;
-            }
             return true;
         }
 
@@ -99,16 +108,18 @@ namespace ImageEvaluator.ReadDirectory
                 if (resu)
                 {
                     _currentImageNumber++;
+                    _logger?.Trace($"Image arrived. CurrentImageNumber: {_currentImageNumber}");
                     return true;
                 }
                 else
                 {
+                    _logger?.Trace($"Image couldn't get. CurrentImageNumber: {_currentImageNumber}");
                     return false;
                 }
             }
             catch (Exception ex)
             {
-                _logger.Trace($"Error in GetImage: {ex.Message}");
+                _logger.Trace($"Exception in GetNextImage: {ex.Message}");
                 return false;
             }
         }

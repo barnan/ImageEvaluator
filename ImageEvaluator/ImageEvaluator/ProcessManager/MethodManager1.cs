@@ -7,11 +7,11 @@ namespace ImageEvaluator.ManageProcess
 
     class MethodManager1 : IMethodManager
     {
-        ILogger _logger;
-        IDirectoryReader _dirReader;
-        IImagePreProcessor _preProc;
-        IBorderSearcher _borderSearcher;
-        IColumnDataCalculator _columnDataCalculator;
+        readonly ILogger _logger;
+        readonly IDirectoryReader _dirReader;
+        readonly IImagePreProcessor _preProc;
+        readonly IBorderSearcher _borderSearcher;
+        readonly IColumnDataCalculator _columnDataCalculator;
         private bool _initialized;
 
 
@@ -43,9 +43,11 @@ namespace ImageEvaluator.ManageProcess
             _columnDataCalculator = colummnCalculator;
             _logger = logger;
 
-            Init();
-
             _logger?.Info("MethodManager 1 instantiated.");
+
+            Init();
+            _logger?.Info("MethodManager1 " + (_initialized ? string.Empty : "NOT") + " initialized.");
+
         }
 
 
@@ -55,14 +57,25 @@ namespace ImageEvaluator.ManageProcess
             bool resu = true;
 
             resu = resu && _dirReader.Init();
+            CheckInit(resu, nameof(_dirReader));
+
             resu = resu && _preProc.Init();
+            CheckInit(resu, nameof(_preProc));
+
             resu = resu && _borderSearcher.Init();
+            CheckInit(resu, nameof(_borderSearcher));
+
             resu = resu && _columnDataCalculator.Init();
+            CheckInit(resu, nameof(_columnDataCalculator));
 
             return _initialized = resu;
         }
 
 
+        private void CheckInit(bool resu, string dirreader)
+        {
+            _logger?.Info(resu ? $"Initialization SUCCED: {dirreader}" : $"Initialization FAILED: {dirreader}");
+        }
 
 
         /// <summary>

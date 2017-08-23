@@ -7,6 +7,7 @@ namespace ImageEvaluator
     public interface IBorderSearcher : IInitalizable
     {
         bool Run(Image<Gray, byte> maskImage, ref int[,] pointList);
+
     }
 
     interface IBorderSeracher_Creator

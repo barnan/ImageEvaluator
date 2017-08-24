@@ -10,6 +10,7 @@ namespace ImageEvaluator
 {
     interface IMeasurementResult
     {
+        string Name { get; set; }
         Image<Gray, float> MeanVector { get; set; }
         Image<Gray, float> StdVector { get; set; }
     }

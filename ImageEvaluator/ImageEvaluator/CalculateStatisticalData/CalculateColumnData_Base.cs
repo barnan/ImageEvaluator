@@ -94,8 +94,8 @@ namespace ImageEvaluator.CalculateStatisticalData
 
             try
             {
-                _meanVector = new Image<Gray, float>(_width, _height);
-                _stdVector = new Image<Gray, float>(_width, _height);
+                _meanVector = new Image<Gray, float>(1, _height);
+                _stdVector = new Image<Gray, float>(1, _height);
 
                 _resultVector1 = _meanVector.Data;
                 _resultVector2 = _stdVector.Data;

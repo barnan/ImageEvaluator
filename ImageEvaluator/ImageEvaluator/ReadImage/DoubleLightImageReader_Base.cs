@@ -3,6 +3,7 @@ using Emgu.CV.Structure;
 using Emgu.CV.UI;
 using NLog;
 using System;
+using System.Drawing;
 using System.IO;
 
 namespace ImageEvaluator.ReadImage
@@ -18,6 +19,7 @@ namespace ImageEvaluator.ReadImage
         private bool _initialized;
         protected ILogger _logger;
         protected bool _showImages;
+        protected Rectangle _fullROI;
 
 
         /// <summary>
@@ -161,12 +163,21 @@ namespace ImageEvaluator.ReadImage
         private bool InitEmguImages()
         {
             if (_initialized)
+            {
+                if (_img1.IsROISet)
+                    _img1.ROI = _fullROI;
+
+                if (_img2.IsROISet)
+                    _img2.ROI = _fullROI;
+
                 return true;
+            }
 
             try
             {
                 _img1 = new Image<Gray, float>(_width, _height);
                 _img2 = new Image<Gray, float>(_width, _height);
+                _fullROI = new Rectangle(0,0, _width, _height);
 
                 return true;
             }

@@ -82,7 +82,10 @@
     <Compile Include="CalculateStatisticalData\CalculateColumnData_CSharp1.cs" />
     <Compile Include="CalculateStatisticalData\CalculateColumnData_Emgu2.cs" />
     <Compile Include="CalculateStatisticalData\CalculateColumnData_Emgu1.cs" />
-    <Compile Include="DataSaver\ResultSaver.cs" />
+    <Compile Include="DataSaver\CsvResultSaver.cs" />
+    <Compile Include="DataSaver\MeasurementResult.cs" />
+    <Compile Include="DataSaver\PngResultSaver.cs" />
+    <Compile Include="DataSaver\ResultSaver_Base.cs" />
     <Compile Include="IResultSaver.cs" />
     <Compile Include="IImagePreProcessor.cs" />
     <Compile Include="IMeasurementResult.cs" />

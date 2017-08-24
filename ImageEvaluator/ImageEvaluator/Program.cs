@@ -1,4 +1,6 @@
-﻿using ImageEvaluator.CalculateStatisticalData;
+﻿using System.IO;
+using ImageEvaluator.CalculateStatisticalData;
+using ImageEvaluator.DataSaver;
 using ImageEvaluator.ManageProcess;
 using ImageEvaluator.PreProcessor;
 using ImageEvaluator.ReadDirectory;
@@ -21,7 +23,8 @@ namespace ImageEvaluator
 
             IDoubleLightImageReader imageReader = new Factory_DoubleLight16bitImageReader().Factory(logger, width, 2, true);
 
-            IDirectoryReader dirReader = new Factory_DirectoryReader().Factory(logger, @"f:\Quantify_Image_Quality\homogenity test wins13", "raw", imageReader);
+            string inputFolder = @"d:\_SW_Projects\Quantify_Image_Quality\homogenity test wins13\";
+            IDirectoryReader dirReader = new Factory_DirectoryReader().Factory(logger, inputFolder, "raw", imageReader);
 
             IImagePreProcessor preProcessor = new Factory_ImagePreProcessor().Factory(logger, 4096, width, height, true);
 
@@ -29,7 +32,10 @@ namespace ImageEvaluator
 
             IColumnDataCalculator columnDataCalculator = new Factory_CalculateColumnData_Emgu1().Factory(logger, width, height);
 
-            IMethodManager manager = new MethodManager1(logger, dirReader, preProcessor, borderSearcher, columnDataCalculator);
+            string outputFolder = Path.Combine(inputFolder, "output");
+            IResultSaver saver = new Factory_PngResultSaver().Factory(outputFolder, "StatCalc", logger);
+
+            IMethodManager manager = new MethodManager1(logger, dirReader, preProcessor, borderSearcher, columnDataCalculator, saver);
 
             manager.Run();
 

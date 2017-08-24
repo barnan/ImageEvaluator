@@ -1,5 +1,6 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
+using ImageEvaluator.DataSaver;
 using NLog;
 
 namespace ImageEvaluator.ManageProcess
@@ -12,6 +13,7 @@ namespace ImageEvaluator.ManageProcess
         readonly IImagePreProcessor _preProc;
         readonly IBorderSearcher _borderSearcher;
         readonly IColumnDataCalculator _columnDataCalculator;
+        private readonly IResultSaver _saver;
         private bool _initialized;
 
 
@@ -27,6 +29,7 @@ namespace ImageEvaluator.ManageProcess
         Image<Gray, float> _stdVector2;
 
 
+
         /// <summary>
         /// 
         /// </summary>
@@ -35,12 +38,13 @@ namespace ImageEvaluator.ManageProcess
         /// <param name="preProc"></param>
         /// <param name="borderSearcher"></param>
         /// <param name="colummnCalculator"></param>
-        public MethodManager1(ILogger logger, IDirectoryReader dirReader, IImagePreProcessor preProc, IBorderSearcher borderSearcher, IColumnDataCalculator colummnCalculator)
+        public MethodManager1(ILogger logger, IDirectoryReader dirReader, IImagePreProcessor preProc, IBorderSearcher borderSearcher, IColumnDataCalculator colummnCalculator, IResultSaver saver)
         {
             _dirReader = dirReader;
             _preProc = preProc;
             _borderSearcher = borderSearcher;
             _columnDataCalculator = colummnCalculator;
+            _saver = saver;
             _logger = logger;
 
             _logger?.Info("MethodManager 1 instantiated.");
@@ -67,6 +71,9 @@ namespace ImageEvaluator.ManageProcess
 
             resu = resu && _columnDataCalculator.Init();
             CheckInit(resu, nameof(_columnDataCalculator));
+
+            resu = resu && _saver.Init();
+            CheckInit(resu, nameof(_saver));
 
             return _initialized = resu;
         }
@@ -104,7 +111,15 @@ namespace ImageEvaluator.ManageProcess
 
                 _columnDataCalculator.Run(_image1, _mask1, _borderPoints1, ref _meanVector1, ref _stdVector1);
                 _columnDataCalculator.Run(_image2, _mask2, _borderPoints2, ref _meanVector2, ref _stdVector2);
+
+                IMeasurementResult result1 = new MeasurementResult {Name = "img1", MeanVector = _meanVector1, StdVector = _stdVector1};
+                IMeasurementResult result2 = new MeasurementResult {Name = "img2", MeanVector = _meanVector2, StdVector = _stdVector2};
+
+                _saver.SaveResult(result1);
+                _saver.SaveResult(result2);
             }
+
+            _logger?.Info("MethodManager 1 Run started.");
 
             return true;
         }

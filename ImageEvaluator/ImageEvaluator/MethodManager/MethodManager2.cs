@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ImageEvaluator.Interfaces;
 
-namespace ImageEvaluator.ProcessManager
+namespace ImageEvaluator.MethodManager
 {
     class MethodManager2 : IMethodManager
     {

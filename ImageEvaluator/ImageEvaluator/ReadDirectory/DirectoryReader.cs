@@ -88,7 +88,7 @@ namespace ImageEvaluator.ReadDirectory
         /// 
         /// </summary>
         /// <returns></returns>
-        public bool GetNextImage(ref Image<Gray, float> img1, ref Image<Gray, float> img2)
+        public bool GetNextImage(ref Image<Gray, float> img1, ref Image<Gray, float> img2, ref string name)
         {
             if (!_initialized)
             {
@@ -98,7 +98,7 @@ namespace ImageEvaluator.ReadDirectory
 
             int maxLength = _fileList.Length;
 
-            if (_currentImageNumber >= maxLength - 1)
+            if (_currentImageNumber >= maxLength)
                 return false;
 
             try
@@ -107,6 +107,7 @@ namespace ImageEvaluator.ReadDirectory
 
                 if (resu)
                 {
+                    name = _fileList[_currentImageNumber];
                     _currentImageNumber++;
                     _logger?.Trace($"Image arrived. CurrentImageNumber: {_currentImageNumber}");
                     return true;
@@ -149,7 +150,7 @@ namespace ImageEvaluator.ReadDirectory
 
             int maxLength = _fileList.Length;
 
-            return _currentImageNumber >= (maxLength - 1) ? true : false;
+            return _currentImageNumber >= (maxLength) ? true : false;
         }
 
 

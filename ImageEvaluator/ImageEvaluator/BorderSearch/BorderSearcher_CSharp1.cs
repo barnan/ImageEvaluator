@@ -5,7 +5,7 @@ using System;
 
 namespace ImageEvaluator.SearchContourPoints
 {
-    class BorderSearcher_CSharp1 : BorderSearcher_Base
+    class BorderSearcher_CSharp1 : BorderSearcherBase
     {
 
         internal BorderSearcher_CSharp1(ILogger logger, int border, int imageHeight)

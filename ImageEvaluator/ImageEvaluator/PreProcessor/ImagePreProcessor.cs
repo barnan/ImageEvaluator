@@ -60,8 +60,6 @@ namespace ImageEvaluator.PreProcessor
         /// <returns></returns>
         public bool Run(Image<Gray, float> inputImage, ref Image<Gray, byte> maskImage)
         {
-            // TODO : re-set image roi !! 
-
             try
             {
                 CvInvoke.Transpose(inputImage, inputImage);

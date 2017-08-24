@@ -1,5 +1,6 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
+using ImageEvaluator.Interfaces;
 
 namespace ImageEvaluator.DataSaver
 {

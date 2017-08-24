@@ -1,5 +1,5 @@
 ﻿
-namespace ImageEvaluator
+namespace ImageEvaluator.Interfaces
 {
     public interface IMethodManager
     {

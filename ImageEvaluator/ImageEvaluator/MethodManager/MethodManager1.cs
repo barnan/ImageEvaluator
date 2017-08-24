@@ -1,9 +1,10 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
 using ImageEvaluator.DataSaver;
+using ImageEvaluator.Interfaces;
 using NLog;
 
-namespace ImageEvaluator.ManageProcess
+namespace ImageEvaluator.MethodManager
 {
 
     class MethodManager1 : IMethodManager
@@ -58,9 +59,7 @@ namespace ImageEvaluator.ManageProcess
 
         public bool Init()
         {
-            bool resu = true;
-
-            resu = resu && _dirReader.Init();
+            bool resu = _dirReader.Init();
             CheckInit(resu, nameof(_dirReader));
 
             resu = resu && _preProc.Init();
@@ -101,7 +100,9 @@ namespace ImageEvaluator.ManageProcess
 
             while (!_dirReader.EndOfDirectory())
             {
-                _dirReader.GetNextImage(ref _image1, ref _image2);
+
+                string name = string.Empty;
+                _dirReader.GetNextImage(ref _image1, ref _image2, ref name);
 
                 _preProc.Run(_image1, ref _mask1);
                 _preProc.Run(_image2, ref _mask2);
@@ -115,8 +116,8 @@ namespace ImageEvaluator.ManageProcess
                 IMeasurementResult result1 = new MeasurementResult {Name = "img1", MeanVector = _meanVector1, StdVector = _stdVector1};
                 IMeasurementResult result2 = new MeasurementResult {Name = "img2", MeanVector = _meanVector2, StdVector = _stdVector2};
 
-                _saver.SaveResult(result1);
-                _saver.SaveResult(result2);
+                _saver.SaveResult(result1, name);
+                _saver.SaveResult(result2, name);
             }
 
             _logger?.Info("MethodManager 1 Run started.");

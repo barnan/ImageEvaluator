@@ -16,13 +16,13 @@ namespace ImageEvaluator.DataSaver
         }
 
 
-
         /// <summary>
         /// 
         /// </summary>
         /// <param name="result"></param>
+        /// <param name="inputFileName"></param>
         /// <returns></returns>
-        public override bool SaveResult(IMeasurementResult result)
+        public override bool SaveResult(IMeasurementResult result, string inputFileName)
         {
             try
             {
@@ -33,9 +33,23 @@ namespace ImageEvaluator.DataSaver
                 {
                     object obj = prop.GetValue(result);
 
-                    (obj as Image<Gray, float>)?.Save(Path.Combine(_outputFolder, $"{_prefix}_{prop.Name}_{DateTime.Now.ToString("MMdd_HH_mm")}.png"));
+                    if (!(obj is Image<Gray, float>))
+                        continue;
 
-                    _logger?.Trace("Image " + prop.Name + " " + ((obj is Image<Gray, float>) ? string.Empty : "NOT") + " saved.");
+                    string fileNameBase = Path.GetFileNameWithoutExtension(inputFileName);
+                    string finalOutputName = Path.Combine(_outputFolder, $"{fileNameBase}_{_prefix}_{prop.Name}.csv");
+
+                    
+                    using (StreamWriter sw = new StreamWriter(finalOutputName))
+                    {
+                        float[,,] data = (obj as Image<Gray, float>)?.Data;
+
+                        for (int i = 0; i < data?.Length; i++)
+                        {
+                            sw.WriteLine(data[i,0,0]);
+                        }
+                    }
+                    _logger?.Trace("Image " + finalOutputName + " saved.");
                 }
             }
             catch (Exception ex)

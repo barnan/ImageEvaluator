@@ -8,7 +8,7 @@ using NLog;
 
 namespace ImageEvaluator.CalculateStatisticalData
 {
-    class CalculateColumnData_Emgu2 : CalculateColumnData_Base_Emgu
+    class CalculateColumnData_Emgu2 : CalculateColumnDataBase_Emgu
     {
 
         Image<Gray, byte> _complementaryMask;

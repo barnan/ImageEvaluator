@@ -8,7 +8,7 @@ using System.Drawing;
 
 namespace ImageEvaluator.SearchContourPoints
 {
-    class BorderSearcher_Emgu1 : BorderSearcher_Base
+    class BorderSearcher_Emgu1 : BorderSearcherBase
     {
         internal BorderSearcher_Emgu1(ILogger logger, int border, bool show, int imageHeight)
             : base(logger, imageHeight)

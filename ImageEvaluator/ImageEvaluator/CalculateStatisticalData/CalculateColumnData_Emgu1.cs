@@ -6,7 +6,7 @@ using NLog;
 
 namespace ImageEvaluator.CalculateStatisticalData
 {
-    class CalculateColumnData_Emgu1 : CalculateColumnData_Base_Emgu
+    class CalculateColumnData_Emgu1 : CalculateColumnDataBase_Emgu
     {
 
         /// <summary>

@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Drawing;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using NLog;
 
 namespace ImageEvaluator.CalculateStatisticalData
 {
-    abstract class CalculateColumnData_Base : IColumnDataCalculator
+    abstract class CalculateColumnDataBase : IColumnDataCalculator
     {
 
         protected bool _initialized;
@@ -16,6 +17,7 @@ namespace ImageEvaluator.CalculateStatisticalData
         protected float[,,] _resultVector1;
         protected float[,,] _resultVector2;
         protected ILogger _logger;
+        protected Rectangle _fullMask;
 
 
         /// <summary>
@@ -23,7 +25,7 @@ namespace ImageEvaluator.CalculateStatisticalData
         /// </summary>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        internal CalculateColumnData_Base(ILogger logger, int width, int height)
+        protected CalculateColumnDataBase(ILogger logger, int width, int height)
         {
             _logger = logger;
             _width = width;
@@ -65,12 +67,12 @@ namespace ImageEvaluator.CalculateStatisticalData
             {
                 if (inputImage == null || inputImage.Height != _height || inputImage.Width != _width)
                 {
-                    _logger?.Error($"Error in the input image size. Predefined width: {_width}, Predefined height: {_height}, image width: {inputImage?.Width}, image height: {inputImage.Height}");
+                    _logger?.Error($"Error in the input image size. Predefined width: {_width}, Predefined height: {_height}, image width: {inputImage?.Width}, image height: {inputImage?.Height}");
                     return false;
                 }
                 if (meanVector == null || stdVector == null || meanVector.Height != inputImage.Height || stdVector.Height != inputImage.Height)
                 {
-                    _logger?.Error($"Error in the meanVector and stdVector length. meanVector height:{meanVector.Height} stdVector height:{stdVector.Height} meanVector height:{inputImage.Height}.");
+                    _logger?.Error($"Error in the meanVector and stdVector length. meanVector height:{meanVector?.Height} stdVector height:{stdVector?.Height} meanVector height:{inputImage.Height}.");
                     return false;
                 }
             }
@@ -96,6 +98,7 @@ namespace ImageEvaluator.CalculateStatisticalData
             {
                 _meanVector = new Image<Gray, float>(1, _height);
                 _stdVector = new Image<Gray, float>(1, _height);
+                _fullMask = new Rectangle(0, 0, _width, _height);
 
                 _resultVector1 = _meanVector.Data;
                 _resultVector2 = _stdVector.Data;

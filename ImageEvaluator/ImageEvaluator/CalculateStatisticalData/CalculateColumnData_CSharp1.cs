@@ -6,7 +6,7 @@ using System;
 
 namespace ImageEvaluator.CalculateStatisticalData
 {
-    class CalculateColumnData_CSharp1 : CalculateColumnData_Base
+    class CalculateColumnData_CSharp1 : CalculateColumnDataBase
     {
 
         /// <summary>

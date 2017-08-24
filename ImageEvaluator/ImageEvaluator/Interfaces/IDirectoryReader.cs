@@ -2,11 +2,11 @@
 using Emgu.CV.Structure;
 using NLog;
 
-namespace ImageEvaluator
+namespace ImageEvaluator.Interfaces
 {
     public interface IDirectoryReader : IInitalizable
     {
-        bool GetNextImage(ref Image<Gray, float> img1, ref Image<Gray, float> img2);
+        bool GetNextImage(ref Image<Gray, float> img1, ref Image<Gray, float> img2, ref string name);
 
         bool Restart();
 

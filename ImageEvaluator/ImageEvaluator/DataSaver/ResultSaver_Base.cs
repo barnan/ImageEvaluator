@@ -14,7 +14,7 @@ namespace ImageEvaluator.DataSaver
 
 
 
-        public ResultSaver_Base(string outputFolder, string prefix, ILogger logger)
+        protected ResultSaver_Base(string outputFolder, string prefix, ILogger logger)
         {
             _outputFolder = outputFolder;
             _prefix = prefix;
@@ -32,7 +32,7 @@ namespace ImageEvaluator.DataSaver
             return _initialized;
         }
 
-
+        
         /// <summary>
         /// 
         /// </summary>
@@ -59,9 +59,7 @@ namespace ImageEvaluator.DataSaver
         }
 
 
-
-
-        public abstract bool SaveResult(IMeasurementResult result);
+        public abstract bool SaveResult(IMeasurementResult result, string inputfilename);
 
 
 

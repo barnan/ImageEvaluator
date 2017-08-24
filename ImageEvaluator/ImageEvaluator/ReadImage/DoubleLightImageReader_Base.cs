@@ -26,7 +26,7 @@ namespace ImageEvaluator.ReadImage
         /// 
         /// </summary>
         /// <param name="width"></param>
-        public DoubleLightImageReader_Base(ILogger logger, int width, bool showImages)
+        protected DoubleLightImageReader_Base(ILogger logger, int width, bool showImages)
         {
             _logger = logger;
             _showImages = showImages;

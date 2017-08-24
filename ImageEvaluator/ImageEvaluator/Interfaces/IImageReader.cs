@@ -1,13 +1,8 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
 using NLog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ImageEvaluator
+namespace ImageEvaluator.Interfaces
 {
     public interface IDoubleLightImageReader : IInitalizable
     {

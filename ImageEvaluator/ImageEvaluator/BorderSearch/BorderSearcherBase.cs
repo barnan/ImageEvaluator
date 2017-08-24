@@ -5,7 +5,7 @@ using NLog;
 
 namespace ImageEvaluator.SearchContourPoints
 {
-    abstract class BorderSearcher_Base : IBorderSearcher
+    abstract class BorderSearcherBase : IBorderSearcher
     {
 
         protected int[,] _borderPoints;
@@ -17,7 +17,7 @@ namespace ImageEvaluator.SearchContourPoints
         protected ILogger _logger;
 
 
-        public BorderSearcher_Base(ILogger logger, int imageHeight)
+        public BorderSearcherBase(ILogger logger, int imageHeight)
         {
             _imageHeight = imageHeight;
             _logger = logger;

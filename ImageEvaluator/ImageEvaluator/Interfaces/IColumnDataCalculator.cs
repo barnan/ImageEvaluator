@@ -2,7 +2,7 @@
 using Emgu.CV.Structure;
 using NLog;
 
-namespace ImageEvaluator
+namespace ImageEvaluator.Interfaces
 {
     public interface IColumnDataCalculator : IInitalizable
     {

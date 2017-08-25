@@ -1,6 +1,11 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using ImageEvaluator.CalculateStatisticalData;
 using ImageEvaluator.DataSaver;
+using ImageEvaluator.FindEdgeLines;
+using ImageEvaluator.Interfaces;
 using ImageEvaluator.MethodManager;
 using ImageEvaluator.PreProcessor;
 using ImageEvaluator.ReadDirectory;
@@ -36,11 +41,19 @@ namespace ImageEvaluator
             string outputFolder = Path.Combine(inputFolder, "output");
             IResultSaver saver = new Factory_CsvResultSaver().Factory(outputFolder, "StatCalc", logger);
 
-            IMethodManager manager = new MethodManager1(logger, dirReader, preProcessor, borderSearcher, columnDataCalculator, saver);
+
+            Dictionary<SearchOrientations, Rectangle> calcareas = new Dictionary<SearchOrientations, Rectangle>();
+            calcareas.Add(SearchOrientations.TopToBottom, new Rectangle(1000, 50, 2000, 450));
+            calcareas.Add(SearchOrientations.LeftToRight, new Rectangle(50, 1000, 450, 2000));
+            calcareas.Add(SearchOrientations.BottomToTop, new Rectangle(1000, height - 501, 2000, 500));
+            calcareas.Add(SearchOrientations.RightToLeft, new Rectangle(width - 501, 1000, 500, 2000));
+            IEdgeLineFinder finder = new Factory_EdgeLineFinder_CSharp1().Factory (logger, calcareas);
+
+            IMethodManager manager = new MethodManager1(logger, dirReader, preProcessor, borderSearcher, columnDataCalculator, saver, finder);
 
             manager.Run();
 
-
+            Console.ReadKey();
 
         }
     }

@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using ImageEvaluator.Interfaces;
 
 namespace ImageEvaluator.DataSaver
 {

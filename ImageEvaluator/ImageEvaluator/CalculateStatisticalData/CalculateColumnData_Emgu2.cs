@@ -4,6 +4,7 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using System.Drawing;
 using System;
+using ImageEvaluator.Interfaces;
 using NLog;
 
 namespace ImageEvaluator.CalculateStatisticalData

@@ -2,6 +2,7 @@
 using System.Drawing;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using ImageEvaluator.Interfaces;
 using NLog;
 
 namespace ImageEvaluator.CalculateStatisticalData

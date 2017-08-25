@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using ImageEvaluator.Interfaces;
 using NLog;
 
 namespace ImageEvaluator.DataSaver

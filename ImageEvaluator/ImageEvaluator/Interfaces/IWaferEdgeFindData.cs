@@ -8,10 +8,10 @@ namespace ImageEvaluator.Interfaces
     interface IWaferEdgeFindData
     {
 
-        VectorOfPointF LeftSide { get; set; }
-        VectorOfPointF RightSide { get; set; }
-        VectorOfPointF TopSide { get; set; }
-        VectorOfPointF BottomSide { get; set; }
+        VectorOfPoint LeftSide { get; set; }
+        VectorOfPoint RightSide { get; set; }
+        VectorOfPoint TopSide { get; set; }
+        VectorOfPoint BottomSide { get; set; }
 
     }
 }

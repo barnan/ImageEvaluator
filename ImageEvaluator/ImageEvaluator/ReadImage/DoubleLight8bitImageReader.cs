@@ -1,6 +1,7 @@
 ﻿using NLog;
 using System;
 using System.IO;
+using ImageEvaluator.Interfaces;
 
 namespace ImageEvaluator.ReadImage
 {

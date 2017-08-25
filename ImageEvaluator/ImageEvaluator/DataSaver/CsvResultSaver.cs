@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using ImageEvaluator.Interfaces;
 using NLog;
 
 namespace ImageEvaluator.DataSaver

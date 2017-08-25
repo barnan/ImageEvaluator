@@ -5,6 +5,7 @@ using NLog;
 using System;
 using System.Drawing;
 using System.IO;
+using ImageEvaluator.Interfaces;
 
 namespace ImageEvaluator.ReadImage
 {

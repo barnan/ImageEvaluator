@@ -3,6 +3,7 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using NLog;
 using System;
+using ImageEvaluator.Interfaces;
 
 namespace ImageEvaluator.CalculateStatisticalData
 {

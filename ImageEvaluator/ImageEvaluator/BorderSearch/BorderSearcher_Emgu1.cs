@@ -5,6 +5,7 @@ using Emgu.CV.Util;
 using NLog;
 using System;
 using System.Drawing;
+using ImageEvaluator.Interfaces;
 
 namespace ImageEvaluator.SearchContourPoints
 {

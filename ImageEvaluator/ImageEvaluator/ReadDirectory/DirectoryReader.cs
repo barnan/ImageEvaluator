@@ -4,6 +4,7 @@ using Emgu.CV.Structure;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using ImageEvaluator.Interfaces;
 using NLog;
 
 namespace ImageEvaluator.ReadDirectory

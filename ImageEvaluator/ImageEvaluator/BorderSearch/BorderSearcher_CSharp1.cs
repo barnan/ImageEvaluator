@@ -10,10 +10,8 @@ namespace ImageEvaluator.SearchContourPoints
     {
 
         internal BorderSearcher_CSharp1(ILogger logger, int border, int imageHeight)
-            : base(logger, imageHeight)
+            : base(logger, imageHeight, border)
         {
-            _borderSkipSize = border;
-
             _logger?.Info("BorderSearcher_CSharp1 instantiated.");
         }
 

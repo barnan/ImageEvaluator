@@ -24,7 +24,10 @@ namespace ImageEvaluator.ReadDirectory
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="logger"></param>
+        /// <param name="directoryName"></param>
+        /// <param name="extension"></param>
+        /// <param name="reader"></param>
         internal DirectoryReader(ILogger logger, string directoryName, string extension, IDoubleLightImageReader reader)
         {
             _logger = logger;

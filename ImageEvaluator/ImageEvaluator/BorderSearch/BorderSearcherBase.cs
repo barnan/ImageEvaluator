@@ -18,10 +18,11 @@ namespace ImageEvaluator.SearchContourPoints
         protected ILogger _logger;
 
 
-        public BorderSearcherBase(ILogger logger, int imageHeight)
+        public BorderSearcherBase(ILogger logger, int imageHeight, int border)
         {
             _imageHeight = imageHeight;
             _logger = logger;
+            _borderSkipSize = border;
         }
 
 

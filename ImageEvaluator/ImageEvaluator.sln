@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageEvaluator", "ImageEvaluator\ImageEvaluator.csproj", "{E897A626-5BD5-4DC1-9D95-2FFBCE20E6A5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FindSawmarkOrientation", "FindSawmarkOrientation\FindSawmarkOrientation.csproj", "{02409825-DBB0-4A22-B74C-95ACA01E4A63}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{E897A626-5BD5-4DC1-9D95-2FFBCE20E6A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E897A626-5BD5-4DC1-9D95-2FFBCE20E6A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E897A626-5BD5-4DC1-9D95-2FFBCE20E6A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02409825-DBB0-4A22-B74C-95ACA01E4A63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02409825-DBB0-4A22-B74C-95ACA01E4A63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02409825-DBB0-4A22-B74C-95ACA01E4A63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02409825-DBB0-4A22-B74C-95ACA01E4A63}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

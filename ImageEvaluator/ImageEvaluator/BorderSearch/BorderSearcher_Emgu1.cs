@@ -12,9 +12,8 @@ namespace ImageEvaluator.SearchContourPoints
     class BorderSearcher_Emgu1 : BorderSearcherBase
     {
         internal BorderSearcher_Emgu1(ILogger logger, int border, bool show, int imageHeight)
-            : base(logger, imageHeight)
+            : base(logger, imageHeight, border)
         {
-            _borderSkipSize = border;
             _showImages = show;
 
             _logger?.Info("BorderSearcher_Emgu1 instantiated.");
@@ -96,7 +95,7 @@ namespace ImageEvaluator.SearchContourPoints
         /// <param name="line1">linesegment 1</param>
         /// <param name="line2">linesegment 2</param>
         /// <returns>intersection Point</returns>
-        private Point GetIntersection(LineSegment2D line1, LineSegment2D line2)
+        protected Point GetIntersection(LineSegment2D line1, LineSegment2D line2)
         {
             if (line1.P1.X == line1.P2.X)
             {

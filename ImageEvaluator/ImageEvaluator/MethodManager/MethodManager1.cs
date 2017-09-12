@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using Emgu.CV;
 using Emgu.CV.Structure;
@@ -12,15 +10,16 @@ using NLog;
 namespace ImageEvaluator.MethodManager
 {
 
-    public class MethodManager1 : IMethodManager
+    public class MethodManager1 : MethodManagerBase
     {
-        readonly ILogger _logger;
+        
         readonly IDirectoryReader _dirReader;
         readonly IImagePreProcessor _preProc;
         readonly IBorderSearcher _borderSearcher;
         readonly IColumnDataCalculator _columnDataCalculator;
         readonly IResultSaver _saver;
         private readonly IEdgeLineFinder _edgeFinder;
+        private readonly IEdgeLineFitter _edgeFitter;
         bool _initialized;
 
 
@@ -45,7 +44,10 @@ namespace ImageEvaluator.MethodManager
         /// <param name="borderSearcher"></param>
         /// <param name="colummnCalculator"></param>
         /// <param name="saver"></param>
-        public MethodManager1(ILogger logger, IDirectoryReader dirReader, IImagePreProcessor preProc, IBorderSearcher borderSearcher, IColumnDataCalculator colummnCalculator, IResultSaver saver, IEdgeLineFinder edgeFinder)
+        /// <param name="edgeFinder"></param>
+        /// <param name="edgeFitter"></param>
+        public MethodManager1(ILogger logger, IDirectoryReader dirReader, IImagePreProcessor preProc, IBorderSearcher borderSearcher, IColumnDataCalculator colummnCalculator, IResultSaver saver, IEdgeLineFinder edgeFinder, IEdgeLineFitter edgeFitter)
+            :base (logger)
         {
             _dirReader = dirReader;
             _preProc = preProc;
@@ -53,7 +55,7 @@ namespace ImageEvaluator.MethodManager
             _columnDataCalculator = colummnCalculator;
             _saver = saver;
             _edgeFinder = edgeFinder;
-            _logger = logger;
+            _edgeFitter = edgeFitter;
 
             _logger?.Info("MethodManager 1 instantiated.");
 
@@ -64,7 +66,7 @@ namespace ImageEvaluator.MethodManager
 
 
 
-        public bool Init()
+        public override bool Init()
         {
             bool resu = _dirReader.Init();
             CheckInit(resu, nameof(_dirReader));
@@ -84,21 +86,19 @@ namespace ImageEvaluator.MethodManager
             resu = resu && _edgeFinder.Init();
             CheckInit(resu, nameof(_edgeFinder));
 
+            resu = resu && _edgeFitter.Init();
+            CheckInit(resu, nameof(_edgeFitter));
+
             return _initialized = resu;
         }
 
-
-        private void CheckInit(bool resu, string message)
-        {
-            _logger?.Info(resu ? $"Initialization SUCCED: {message}" : $"Initialization FAILED: {message}");
-        }
 
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
-        public bool Run()
+        public override bool Run()
         {
             if (!_initialized)
             {
@@ -146,12 +146,18 @@ namespace ImageEvaluator.MethodManager
                 IWaferEdgeFindData waferEdgeFindData1 = null;
                 IWaferEdgeFindData waferEdgeFindData2 = null;
 
-
-                _edgeFinder.FindEdgeLines(_image1, _mask1, ref waferEdgeFindData1);
-                _edgeFinder.FindEdgeLines(_image2, _mask2, ref waferEdgeFindData2);
-
+                _edgeFinder.Run(_image1, _mask1, ref waferEdgeFindData1);
+                _edgeFinder.Run(_image2, _mask2, ref waferEdgeFindData2);
 
                 LogElapsedTime(watch1, $"Edge finder");
+
+                IWaferFittingData waferEdgeFittingData1 = null;
+                IWaferFittingData waferEdgeFittingData2 = null;
+
+                _edgeFitter.Run(waferEdgeFindData1, ref waferEdgeFittingData1);
+                _edgeFitter.Run(waferEdgeFindData2, ref waferEdgeFittingData2);
+
+                LogElapsedTime(watch1, $"Edge fitter");
 
                 Console.WriteLine();
             }
@@ -161,17 +167,7 @@ namespace ImageEvaluator.MethodManager
             return true;
         }
 
-        private void LogElapsedTime(Stopwatch watch1, string outermessage = null)
-        {
-            if (watch1 == null)
-                return;
-
-            string message = $"{outermessage ?? string.Empty}. Elapsed time: {watch1.ElapsedMilliseconds}";
-            _logger?.Trace(message);
-            Console.WriteLine(message);
-
-            watch1.Restart();
-        }
+        
     }
 
 }

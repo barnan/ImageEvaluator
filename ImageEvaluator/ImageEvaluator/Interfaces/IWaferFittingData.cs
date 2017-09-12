@@ -2,7 +2,7 @@
 
 namespace ImageEvaluator.Interfaces
 {
-    interface IWaferFittingData
+    public interface IWaferFittingData
     {
         OutputArray LeftSideLineData { get; set; }
         OutputArray RightSideLineData { get; set; }

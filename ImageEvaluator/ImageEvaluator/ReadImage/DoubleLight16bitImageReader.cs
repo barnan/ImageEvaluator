@@ -1,5 +1,6 @@
 ﻿using NLog;
 using System;
+using System.Diagnostics;
 using System.IO;
 using ImageEvaluator.Interfaces;
 
@@ -22,20 +23,22 @@ namespace ImageEvaluator.ReadImage
         }
 
 
-
-
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="inputFileName"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
+        /// <returns></returns>
         protected override bool ReadDoubleLightImage()
         {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
             try
             {
                 byte[] inputImage = File.ReadAllBytes(_fileName);
                 int stride = _width * 2;
+
+                Console.WriteLine($"       DoubleLight16bitImageReader - Image reading time: {sw.ElapsedMilliseconds}ms.");
+                sw.Restart();
 
                 byte[] dataRow1 = new byte[stride];
                 byte[] dataRow2 = new byte[stride];
@@ -57,6 +60,8 @@ namespace ImageEvaluator.ReadImage
                         emguImage2_Array[i, j, 0] = dataRow2[2 * j] + (dataRow2[2 * j + 1] << 8);
                     }
                 }
+
+                Console.WriteLine($"       DoubleLight16bitImageReader - Image convertsion time to emgu-image: {sw.ElapsedMilliseconds}ms.");
             }
             catch (Exception ex)
             {

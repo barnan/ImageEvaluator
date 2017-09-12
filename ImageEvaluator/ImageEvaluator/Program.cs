@@ -5,6 +5,7 @@ using System.IO;
 using ImageEvaluator.CalculateStatisticalData;
 using ImageEvaluator.DataSaver;
 using ImageEvaluator.FindEdgeLines;
+using ImageEvaluator.FitEdgeLines;
 using ImageEvaluator.Interfaces;
 using ImageEvaluator.MethodManager;
 using ImageEvaluator.PreProcessor;
@@ -49,7 +50,9 @@ namespace ImageEvaluator
             calcareas.Add(SearchOrientations.RightToLeft, new Rectangle(width - 501, 1000, 500, 2000));
             IEdgeLineFinder finder = new Factory_EdgeLineFinder_CSharp1().Factory (logger, calcareas);
 
-            IMethodManager manager = new MethodManager1(logger, dirReader, preProcessor, borderSearcher, columnDataCalculator, saver, finder);
+            IEdgeLineFitter fitter = new Factory_EdgeLineFitter_Emgu1().Factory();
+
+            IMethodManager manager = new MethodManager1(logger, dirReader, preProcessor, borderSearcher, columnDataCalculator, saver, finder, fitter);
 
             manager.Run();
 

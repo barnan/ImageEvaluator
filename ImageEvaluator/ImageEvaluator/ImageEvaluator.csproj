@@ -102,6 +102,7 @@
     <Compile Include="Interfaces\IMeasurementResult.cs" />
     <Compile Include="Interfaces\IWaferEdgeFindData.cs" />
     <Compile Include="Interfaces\IWaferFittingData.cs" />
+    <Compile Include="MethodManager\MethodManagerBase.cs" />
     <Compile Include="PreProcessor\ImagePreProcessor.cs" />
     <Compile Include="MethodManager\MethodManager1.cs" />
     <Compile Include="Interfaces\IBorderSearcher.cs" />
@@ -116,6 +117,7 @@
     <Compile Include="ReadDirectory\DirectoryReader.cs" />
     <Compile Include="ReadImage\DoubleLight16bitImageReader.cs" />
     <Compile Include="ReadImage\DoubleLight8bitImageReader.cs" />
+    <Compile Include="ReadImage\DoubleLight8bitImageReader_ver2.cs" />
     <Compile Include="ReadImage\DoubleLightImageReader_Base.cs" />
   </ItemGroup>
   <ItemGroup>

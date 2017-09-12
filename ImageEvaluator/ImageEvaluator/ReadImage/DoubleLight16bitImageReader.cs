@@ -14,10 +14,10 @@ namespace ImageEvaluator.ReadImage
         /// </summary>
         /// <param name="width"></param>
         /// <param name="bitnumber"></param>
-        internal DoubleLight16bitImageReader(ILogger logger, int width, int bitnumber, bool showImages)
+        internal DoubleLight16bitImageReader(ILogger logger, int width, bool showImages)
             : base(logger, width, showImages)
         {
-            _bitNumber = bitnumber;
+            _bitNumber = 2;
 
             _logger?.Info("DoubleLight16bitImageReader instantiated.");
         }
@@ -81,9 +81,9 @@ namespace ImageEvaluator.ReadImage
     /// </summary>
     public class Factory_DoubleLight16bitImageReader : IDoubleLightImageReader_Creator
     {
-        public IDoubleLightImageReader Factory(ILogger logger, int width, int bitnumber, bool showImages)
+        public IDoubleLightImageReader Factory(ILogger logger, int width, bool showImages)
         {
-            return new DoubleLight16bitImageReader(logger, width, bitnumber, showImages);
+            return new DoubleLight16bitImageReader(logger, width, showImages);
         }
     }
 

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.IO;
 using Emgu.CV;
 using Emgu.CV.Structure;
+using ImageEvaluator.DataSaver;
 using ImageEvaluator.Interfaces;
 using NLog;
 
@@ -8,13 +10,8 @@ namespace ImageEvaluator.MethodManager
 {
     class MethodManager2 : MethodManagerBase
     {
-        readonly IDirectoryReader _dirReader;
-        readonly IImagePreProcessor _preProc;
-        readonly IBorderSearcher _borderSearcher;
-        readonly IColumnDataCalculator _columnDataCalculator;
-        readonly IResultSaver _saver;
-        private readonly IEdgeLineFinder _edgeFinder;
-        private readonly IEdgeLineFitter _edgeFitter;
+        private readonly IDirectoryReader _dirReader;
+        private readonly ISawmarkDeterminer _sawmarkDet;
         bool _initialized;
 
         Image<Gray, float> _image1;
@@ -23,22 +20,17 @@ namespace ImageEvaluator.MethodManager
         Image<Gray, byte> _mask2;
 
 
-        public MethodManager2(ILogger logger, IDirectoryReader dirReader, IImagePreProcessor preProc, IBorderSearcher borderSearcher, IColumnDataCalculator colummnCalculator, IResultSaver saver, IEdgeLineFinder edgeFinder, IEdgeLineFitter edgeFitter)
+        public MethodManager2(ILogger logger, IDirectoryReader dirReader, ISawmarkDeterminer sawmarkDet)
             :base (logger)
         {
             _dirReader = dirReader;
-            _preProc = preProc;
-            _borderSearcher = borderSearcher;
-            _columnDataCalculator = colummnCalculator;
-            _saver = saver;
-            _edgeFinder = edgeFinder;
-            _edgeFitter = edgeFitter;
+            _sawmarkDet = sawmarkDet;
 
-            _logger?.Info("MethodManager 1 instantiated.");
+            _logger?.Info("MethodManager 2 instantiated.");
 
             Init();
 
-            _logger?.Info("MethodManager1 " + (_initialized? string.Empty : "NOT") + " initialized.");
+            _logger?.Info("MethodManager 2 " + (_initialized? string.Empty : "NOT") + " initialized.");
 
         }
 
@@ -48,30 +40,44 @@ namespace ImageEvaluator.MethodManager
             bool resu = _dirReader.Init();
             CheckInit(resu, nameof(_dirReader));
 
-            resu = resu && _preProc.Init();
-            CheckInit(resu, nameof(_preProc));
-
-            resu = resu && _borderSearcher.Init();
-            CheckInit(resu, nameof(_borderSearcher));
-
-            resu = resu && _columnDataCalculator.Init();
-            CheckInit(resu, nameof(_columnDataCalculator));
-
-            resu = resu && _saver.Init();
-            CheckInit(resu, nameof(_saver));
-
-            resu = resu && _edgeFinder.Init();
-            CheckInit(resu, nameof(_edgeFinder));
-
-            resu = resu && _edgeFitter.Init();
-            CheckInit(resu, nameof(_edgeFitter));
+            resu = resu & _sawmarkDet.Init();
+            CheckInit(resu, nameof(_sawmarkDet));
 
             return _initialized = resu;
         }
 
         public override bool Run()
         {
-            throw new NotImplementedException();
+            if (!_initialized)
+            {
+                _logger?.Error("MethodManager 2 Run is not initialized yet.");
+                return false;
+            }
+
+            _logger?.Info("MethodManager 2 Run started.");
+            Console.WriteLine("MethodManager 2 Run started.");
+
+            while (!_dirReader.EndOfDirectory())
+            {
+                _watch1.Restart();
+
+                string name = string.Empty;
+                _dirReader.GetNextImage(ref _image1, ref _image2, ref name);
+
+                LogElapsedTime(_watch1, $"Image reading: {Path.GetFileName(name)}");
+
+                _sawmarkDet.Run(_image1);
+
+                LogElapsedTime(_watch1, $"Determine sawmark orientation: {Path.GetFileName(name)}");
+
+
+                Console.WriteLine();
+            }
+
+            _logger?.Info("MethodManager 2 Run ended.");
+
+            return true;
+
         }
 
     }

@@ -12,6 +12,10 @@ using NLog;
 
 namespace ImageEvaluator.BorderSearch
 {
+
+    /// <summary>
+    /// it is using ChainApproxNone-t hence the line fitting can be eliminated
+    /// </summary>
     class BorderSearcher_Emgu2 : BorderSearcherBase
     {
         public BorderSearcher_Emgu2(ILogger logger, int border, bool show, int imageHeight)

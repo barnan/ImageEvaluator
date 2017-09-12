@@ -13,7 +13,7 @@ namespace ImageEvaluator.Interfaces
 
     public interface IDoubleLightImageReader_Creator
     {
-        IDoubleLightImageReader Factory(ILogger logger, int width, int bitDepth, bool showImages);
+        IDoubleLightImageReader Factory(ILogger logger, int width, bool showImages);
     }
 
 

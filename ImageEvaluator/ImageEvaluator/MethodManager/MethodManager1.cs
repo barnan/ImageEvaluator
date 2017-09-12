@@ -60,7 +60,8 @@ namespace ImageEvaluator.MethodManager
             _logger?.Info("MethodManager 1 instantiated.");
 
             Init();
-            _logger?.Info("MethodManager1 " + (_initialized ? string.Empty : "NOT") + " initialized.");
+
+            _logger?.Info("MethodManager 1 " + (_initialized ? string.Empty : "NOT") + " initialized.");
 
         }
 
@@ -102,38 +103,36 @@ namespace ImageEvaluator.MethodManager
         {
             if (!_initialized)
             {
-                _logger?.Error("MethodManager Run is not initialized yet.");
+                _logger?.Error("MethodManager 1 Run is not initialized yet.");
                 return false;
             }
 
             _logger?.Info("MethodManager 1 Run started.");
             Console.WriteLine("MethodManager 1 Run started.");
 
-            Stopwatch watch1 = new Stopwatch(); 
-
             while (!_dirReader.EndOfDirectory())
             {
-                watch1.Restart();
+                _watch1.Restart();
 
                 string name = string.Empty;
                 _dirReader.GetNextImage(ref _image1, ref _image2, ref name);
 
-                LogElapsedTime(watch1, $"Image reading: {Path.GetFileName(name)}");
+                LogElapsedTime(_watch1, $"Image reading: {Path.GetFileName(name)}");
 
                 _preProc.Run(_image1, ref _mask1);
                 _preProc.Run(_image2, ref _mask2);
 
-                LogElapsedTime(watch1, $"Image pre-processing: {Path.GetFileName(name)}");
+                LogElapsedTime(_watch1, $"Image pre-processing: {Path.GetFileName(name)}");
 
                 _borderSearcher.Run(_mask1, ref _borderPoints1);
                 _borderSearcher.Run(_mask2, ref _borderPoints2);
 
-                LogElapsedTime(watch1, $"Border search: {Path.GetFileName(name)}");
+                LogElapsedTime(_watch1, $"Border search: {Path.GetFileName(name)}");
 
                 _columnDataCalculator.Run(_image1, _mask1, _borderPoints1, ref _meanVector1, ref _stdVector1);
                 _columnDataCalculator.Run(_image2, _mask2, _borderPoints2, ref _meanVector2, ref _stdVector2);
 
-                LogElapsedTime(watch1, $"Column data, statistical calculation: {Path.GetFileName(name)}");
+                LogElapsedTime(_watch1, $"Column data, statistical calculation: {Path.GetFileName(name)}");
 
                 IMeasurementResult result1 = new MeasurementResult {Name = "img1", MeanVector = _meanVector1, StdVector = _stdVector1};
                 IMeasurementResult result2 = new MeasurementResult {Name = "img2", MeanVector = _meanVector2, StdVector = _stdVector2};
@@ -141,7 +140,7 @@ namespace ImageEvaluator.MethodManager
                 _saver.SaveResult(result1, name);
                 _saver.SaveResult(result2, name);
 
-                LogElapsedTime(watch1, $"Result saving: {Path.GetFileName(name)}");
+                LogElapsedTime(_watch1, $"Result saving: {Path.GetFileName(name)}");
 
                 IWaferEdgeFindData waferEdgeFindData1 = null;
                 IWaferEdgeFindData waferEdgeFindData2 = null;
@@ -149,7 +148,7 @@ namespace ImageEvaluator.MethodManager
                 _edgeFinder.Run(_image1, _mask1, ref waferEdgeFindData1);
                 _edgeFinder.Run(_image2, _mask2, ref waferEdgeFindData2);
 
-                LogElapsedTime(watch1, $"Edge finder");
+                LogElapsedTime(_watch1, $"Edge finder");
 
                 IWaferFittingData waferEdgeFittingData1 = null;
                 IWaferFittingData waferEdgeFittingData2 = null;
@@ -157,12 +156,12 @@ namespace ImageEvaluator.MethodManager
                 _edgeFitter.Run(waferEdgeFindData1, ref waferEdgeFittingData1);
                 _edgeFitter.Run(waferEdgeFindData2, ref waferEdgeFittingData2);
 
-                LogElapsedTime(watch1, $"Edge fitter");
+                LogElapsedTime(_watch1, $"Edge fitter");
 
                 Console.WriteLine();
             }
 
-            _logger?.Info("MethodManager 1 Run started.");
+            _logger?.Info("MethodManager 1 Run ended.");
 
             return true;
         }

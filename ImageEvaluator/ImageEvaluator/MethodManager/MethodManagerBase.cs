@@ -8,6 +8,7 @@ namespace ImageEvaluator.MethodManager
     public abstract class MethodManagerBase : IMethodManager
     {
         protected readonly ILogger _logger;
+        protected Stopwatch _watch1;
 
         public abstract bool Run();
 
@@ -17,6 +18,7 @@ namespace ImageEvaluator.MethodManager
         protected MethodManagerBase(ILogger logger)
         {
             _logger = logger;
+            _watch1 = new Stopwatch();
         }
         
 

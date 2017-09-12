@@ -3,7 +3,7 @@ using Emgu.CV.Structure;
 
 namespace ImageEvaluator.Interfaces
 {
-    interface IMeasurementResult
+    public interface IMeasurementResult
     {
         string Name { get; set; }
         Image<Gray, float> MeanVector { get; set; }

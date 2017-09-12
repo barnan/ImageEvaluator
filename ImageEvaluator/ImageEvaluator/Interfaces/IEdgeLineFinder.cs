@@ -6,13 +6,13 @@ using NLog;
 
 namespace ImageEvaluator.Interfaces
 {
-    interface IEdgeLineFinder : IInitalizable
+    public interface IEdgeLineFinder : IInitalizable
     {
-        bool FindEdgeLines(Image<Gray, float> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData);
+        bool Run(Image<Gray, float> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData);
     }
 
 
-    internal enum SearchOrientations
+    public enum SearchOrientations
     {
         TopToBottom,
         BottomToTop,
@@ -20,7 +20,7 @@ namespace ImageEvaluator.Interfaces
         RightToLeft
     }
 
-    interface IEdgeLineFinder_Creator
+    public interface IEdgeLineFinder_Creator
     {
         IEdgeLineFinder Factory(ILogger logger, Dictionary<SearchOrientations, Rectangle> calcAreas);
     }

@@ -10,4 +10,18 @@ namespace ImageEvaluator.FindEdgeLines
         public VectorOfPoint TopSide { get; set; }
         public VectorOfPoint BottomSide { get; set; }
     }
+
+
+
+    class MyCalculationRectangle
+    {
+        public int StartX { get; set; } = 0;
+        public int StartY { get; set; } = 0;
+        public int StopX { get; set; } = 0;
+        public int StopY { get; set; } = 0;
+        public int StepX { get; set; } = 0;
+        public int StepY { get; set; } = 0;
+    }
+
+
 }

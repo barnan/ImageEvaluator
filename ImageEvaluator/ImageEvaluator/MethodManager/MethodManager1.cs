@@ -12,7 +12,7 @@ using NLog;
 namespace ImageEvaluator.MethodManager
 {
 
-    class MethodManager1 : IMethodManager
+    public class MethodManager1 : IMethodManager
     {
         readonly ILogger _logger;
         readonly IDirectoryReader _dirReader;
@@ -146,11 +146,12 @@ namespace ImageEvaluator.MethodManager
                 IWaferEdgeFindData waferEdgeFindData1 = null;
                 IWaferEdgeFindData waferEdgeFindData2 = null;
 
-                
 
                 _edgeFinder.FindEdgeLines(_image1, _mask1, ref waferEdgeFindData1);
                 _edgeFinder.FindEdgeLines(_image2, _mask2, ref waferEdgeFindData2);
 
+
+                LogElapsedTime(watch1, $"Edge finder");
 
                 Console.WriteLine();
             }

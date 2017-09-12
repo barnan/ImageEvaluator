@@ -192,7 +192,7 @@ namespace ImageEvaluator.PreProcessor
 
 
 
-    class Factory_ImagePreProcessor : IImagePreProcessor_Creator
+    public class Factory_ImagePreProcessor : IImagePreProcessor_Creator
     {
         public IImagePreProcessor Factory(ILogger logger, int intensityRange, int width, int height, bool showImages)
         {

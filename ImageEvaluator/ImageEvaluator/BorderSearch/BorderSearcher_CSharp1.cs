@@ -61,7 +61,7 @@ namespace ImageEvaluator.SearchContourPoints
     /// <summary>
     /// 
     /// </summary>
-    class Factory_BorderSearcher_CSharp1 : IBorderSeracher_Creator
+    public class Factory_BorderSearcher_CSharp1 : IBorderSeracher_Creator
     {
         public IBorderSearcher Factory(ILogger logger, int border, int imageHeight, bool showImages)
         {

@@ -1,18 +1,25 @@
 ﻿
+using Emgu.CV;
 using ImageEvaluator.Interfaces;
 
 namespace ImageEvaluator
 {
-    abstract class EdgeLineFitter :IEdgeLineFitter
+    abstract class EdgeLineFitterBase :IEdgeLineFitter
     {
-
-        public abstract IWaferFittingData FitWaferEdges(IWaferEdgeFindData data);
-
-
 
         public bool Init()
         {
             return true;
         }
+
+        public void Run(IWaferEdgeFindData edgeFindData, ref IWaferFittingData edgeFitData)
+        {
+            
+        }
+
+
+
+        protected abstract OutputArray FitEdge(IWaferEdgeFindData edgepoints);
+
     }
 }

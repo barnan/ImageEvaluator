@@ -21,7 +21,7 @@ namespace ImageEvaluator.FindEdgeLines
         }
 
 
-        public abstract bool FindEdgeLines(Image<Gray, float> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData);
+        public abstract bool Run(Image<Gray, float> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData);
 
 
         public bool Init()

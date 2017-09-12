@@ -74,7 +74,7 @@ namespace ImageEvaluator.ReadImage
     /// <summary>
     /// 
     /// </summary>
-    class Factory_DoubleLight16bitImageReader : IDoubleLightImageReader_Creator
+    public class Factory_DoubleLight16bitImageReader : IDoubleLightImageReader_Creator
     {
         public IDoubleLightImageReader Factory(ILogger logger, int width, int bitnumber, bool showImages)
         {

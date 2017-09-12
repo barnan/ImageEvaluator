@@ -88,6 +88,7 @@
     <Compile Include="DataSaver\PngResultSaver.cs" />
     <Compile Include="DataSaver\ResultSaver_Base.cs" />
     <Compile Include="FindEdgeLines\WaferEdgeFindData.cs" />
+    <Compile Include="FitEdgeLines\EdgeLineFitter_Emgu1.cs" />
     <Compile Include="FitEdgeLines\WaferEdgeLineFitterBase.cs" />
     <Compile Include="FindCorners\CornerFinder.cs" />
     <Compile Include="FindEdgeLines\EdgeLineFinderBase.cs" />

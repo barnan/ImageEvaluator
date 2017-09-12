@@ -5,7 +5,7 @@ using Emgu.CV.Util;
 
 namespace ImageEvaluator.Interfaces
 {
-    interface IWaferEdgeFindData
+    public interface IWaferEdgeFindData
     {
 
         VectorOfPoint LeftSide { get; set; }

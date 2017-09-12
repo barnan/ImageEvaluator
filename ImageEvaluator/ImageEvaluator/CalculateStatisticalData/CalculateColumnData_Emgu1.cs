@@ -96,7 +96,7 @@ namespace ImageEvaluator.CalculateStatisticalData
     /// <summary>
     /// 
     /// </summary>
-    class Factory_CalculateColumnData_Emgu1 : IColumnDataCalculator_Creator
+    public class Factory_CalculateColumnData_Emgu1 : IColumnDataCalculator_Creator
     {
         public IColumnDataCalculator Factory(ILogger logger, int width, int height)
         {

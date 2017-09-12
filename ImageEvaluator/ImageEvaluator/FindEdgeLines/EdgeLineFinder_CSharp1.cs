@@ -9,7 +9,7 @@ using NLog;
 
 namespace ImageEvaluator.FindEdgeLines
 {
-    class EdgeLineFinder_CSharp1 : EdgeLineFinderBase
+    internal class EdgeLineFinder_CSharp1 : EdgeLineFinderBase
     {
         public EdgeLineFinder_CSharp1(ILogger logger, Dictionary<SearchOrientations, Rectangle> calcareas)
             : base(logger, calcareas)
@@ -23,9 +23,8 @@ namespace ImageEvaluator.FindEdgeLines
         /// <param name="originalImage"></param>
         /// <param name="maskImage"></param>
         /// <param name="edgeFindData"></param>
-        /// <param name="calcAreas"></param>
         /// <returns></returns>
-        public override bool FindEdgeLines(Image<Gray, float> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData)
+        public override bool Run(Image<Gray, float> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData)
         {
             if (!CheckInputData(originalImage, maskImage, _calcAreas))
             {
@@ -57,58 +56,14 @@ namespace ImageEvaluator.FindEdgeLines
         }
 
 
-
-
-
         private Point[] FindPoints(Image<Gray, byte> maskImage, Rectangle calcRectangle, SearchOrientations orientation)
         {
             _logger?.Trace($"FindPoints started. orientation: {orientation}");
 
-            int startX = 0;
-            int startY = 0;
-            int stopX = 0;
-            int stopY = 0;
-            int stepX = 0;
-            int stepY = 0;
-
             byte[,,] maskData = maskImage.Data;
             Point[] result = null;
 
-            switch (orientation)
-            {
-                case SearchOrientations.TopToBottom:
-                    startX = calcRectangle.X;
-                    startY = calcRectangle.Y;
-                    stopX = calcRectangle.X + calcRectangle.Width;
-                    stopY = calcRectangle.Y + calcRectangle.Height;
-                    stepY = 1;
-                    stepX = 1;
-                    break;
-                case SearchOrientations.BottomToTop:
-                    startX = calcRectangle.X;
-                    startY = calcRectangle.Y + calcRectangle.Height;
-                    stopX = calcRectangle.X + calcRectangle.Width;
-                    stopY = calcRectangle.Y;
-                    stepY = -1;
-                    stepX = 1;
-                    break;
-                case SearchOrientations.LeftToRight:
-                    startX = calcRectangle.X;
-                    startY = calcRectangle.Y;
-                    stopX = calcRectangle.X + calcRectangle.Width;
-                    stopY = calcRectangle.Y + calcRectangle.Height;
-                    stepY = 1;
-                    stepX = 1;
-                    break;
-                case SearchOrientations.RightToLeft:
-                    startX = calcRectangle.X + calcRectangle.Width;
-                    startY = calcRectangle.Y;
-                    stopX = calcRectangle.X;
-                    stopY = calcRectangle.Y + calcRectangle.Height;
-                    stepY = 1;
-                    stepX = -1;
-                    break;
-            }
+            MyCalculationRectangle rect = DetermineMyRectangle(calcRectangle, orientation);
 
             try
             {
@@ -118,13 +73,13 @@ namespace ImageEvaluator.FindEdgeLines
                     case SearchOrientations.BottomToTop:
                         result = new Point[calcRectangle.Width];
 
-                        for (int i = startX; i < stopX; i += stepX)
+                        for (int i = rect.StartX; i < rect.StopX; i += rect.StepX)
                         {
-                            for (int j = 0; j < Math.Abs(stopY - startY); j++)
+                            for (int j = 0; j < Math.Abs(rect.StopY - rect.StartY); j++)
                             {
-                                if (maskData[startY + j*stepY, i, 0] <= 0) continue;
+                                if (maskData[rect.StartY + j* rect.StepY, i, 0] <= 0) continue;
 
-                                result[i - startX] = new Point(j, i);
+                                result[i - rect.StartX] = new Point(j, i);
                                 break;
                             }
                         }
@@ -134,13 +89,13 @@ namespace ImageEvaluator.FindEdgeLines
                     case SearchOrientations.RightToLeft:
                         result = new Point[calcRectangle.Height];
 
-                        for (int j = startY; j < stopY; j += stepY)
+                        for (int j = rect.StartY; j < rect.StopY; j += rect.StepY)
                         {
-                            for (int i = 0; i < Math.Abs(stopX - startX); i++)
+                            for (int i = 0; i < Math.Abs(rect.StopX - rect.StartX); i++)
                             {
-                                if (maskData[j, startX + i*stepX, 0] <= 0) continue;
+                                if (maskData[j, rect.StartX + i* rect.StepX, 0] <= 0) continue;
 
-                                result[j - startY] = new Point(j, i);
+                                result[j - rect.StartY] = new Point(j, i);
                                 break;
                             }
                         }
@@ -149,18 +104,69 @@ namespace ImageEvaluator.FindEdgeLines
             }
             catch (Exception)
             {
-
-                throw;
+                _logger?.Error($"Exception during FindPoints, orientation {orientation.ToString()}");
             }
 
 
             return result;
         }
 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="calcRectangle"></param>
+        /// <param name="orientation"></param>
+        /// <returns></returns>
+        private MyCalculationRectangle DetermineMyRectangle(Rectangle calcRectangle, SearchOrientations orientation)
+        {
+            MyCalculationRectangle myrectangle = new MyCalculationRectangle();
+
+            switch (orientation)
+            {
+                case SearchOrientations.TopToBottom:
+                    myrectangle.StartX = calcRectangle.X;
+                    myrectangle.StartY = calcRectangle.Y;
+                    myrectangle.StopX = calcRectangle.X + calcRectangle.Width;
+                    myrectangle.StopY = calcRectangle.Y + calcRectangle.Height;
+                    myrectangle.StepY = 1;
+                    myrectangle.StepX = 1;
+                    break;
+                case SearchOrientations.BottomToTop:
+                    myrectangle.StartX = calcRectangle.X;
+                    myrectangle.StartY = calcRectangle.Y + calcRectangle.Height;
+                    myrectangle.StopX = calcRectangle.X + calcRectangle.Width;
+                    myrectangle.StopY = calcRectangle.Y;
+                    myrectangle.StepY = -1;
+                    myrectangle.StepX = 1;
+                    break;
+                case SearchOrientations.LeftToRight:
+                    myrectangle.StartX = calcRectangle.X;
+                    myrectangle.StartY = calcRectangle.Y;
+                    myrectangle.StopX = calcRectangle.X + calcRectangle.Width;
+                    myrectangle.StopY = calcRectangle.Y + calcRectangle.Height;
+                    myrectangle.StepY = 1;
+                    myrectangle.StepX = 1;
+                    break;
+                case SearchOrientations.RightToLeft:
+                    myrectangle.StartX = calcRectangle.X + calcRectangle.Width;
+                    myrectangle.StartY = calcRectangle.Y;
+                    myrectangle.StopX = calcRectangle.X;
+                    myrectangle.StopY = calcRectangle.Y + calcRectangle.Height;
+                    myrectangle.StepY = 1;
+                    myrectangle.StepX = -1;
+                    break;
+            }
+
+            return myrectangle;
+        }
     }
 
-
-    class Factory_EdgeLineFinder_CSharp1 : IEdgeLineFinder_Creator
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public class Factory_EdgeLineFinder_CSharp1 : IEdgeLineFinder_Creator
     {
         public IEdgeLineFinder Factory(ILogger logger, Dictionary<SearchOrientations, Rectangle> calcAreas)
         {

@@ -65,7 +65,7 @@ namespace ImageEvaluator.DataSaver
     }
 
 
-    class Factory_CsvResultSaver : IResultSaver_Creator
+    public class Factory_CsvResultSaver : IResultSaver_Creator
     {
         public IResultSaver Factory(string outputFolder, string prefix, ILogger logger)
         {

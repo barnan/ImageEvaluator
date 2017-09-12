@@ -110,7 +110,7 @@ namespace ImageEvaluator.CalculateStatisticalData
     /// <summary>
     /// 
     /// </summary>
-    class Factory_CalculateColumnData_CSharp1 : IColumnDataCalculator_Creator
+    public class Factory_CalculateColumnData_CSharp1 : IColumnDataCalculator_Creator
     {
         public IColumnDataCalculator Factory(ILogger logger, int width, int height)
         {

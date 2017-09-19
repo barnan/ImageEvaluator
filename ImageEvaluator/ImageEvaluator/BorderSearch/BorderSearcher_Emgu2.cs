@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
+using ImageEvaluator.Interfaces;
 using ImageEvaluator.SearchContourPoints;
 using NLog;
 
@@ -39,34 +37,50 @@ namespace ImageEvaluator.BorderSearch
 
                         for (int i = 0; i < contour.Size; i++)
                         {
-                           
-                            
+                           Point[] coordinateList = contour[i].ToArray();
+
+                            for (int j = 0; j < contour[i].Size - 1; j++)
+                            {
+                                if ((coordinateList[j].Y != coordinateList[j + 1].Y) && (Math.Abs(coordinateList[j].Y - coordinateList[j + 1].Y) < magicNumber1))
+                                {
+                                    if (coordinateList[j].X < verticalCenterLine)
+                                    {
+                                        if (_borderPoints[coordinateList[j].Y, 0] < coordinateList[j].X)
+                                        {
+                                            _borderPoints[coordinateList[j].Y, 0] = coordinateList[j].X;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (_borderPoints[coordinateList[j].Y, 1] > coordinateList[j].X)
+                                        {
+                                            _borderPoints[coordinateList[j].Y, 1] = coordinateList[j].X;
+                                        }
+                                    }
 
 
-
-
+                                }
+                            }
 
                         }
-
-
-
-
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        throw;
+                        _logger?.Error($"Exception caught in BorderSearcher_Emgu1-CalculatePoints: {ex.Message}.");
                     }
-
-
-
 
                 }
             }
 
+        }
+    }
 
 
-
-
+    public class Factory_BorderSearcher_Emgu2 : IBorderSeracher_Creator
+    {
+        public IBorderSearcher Factory(ILogger logger, int border, int imageHeight, bool showImages)
+        {
+            return new BorderSearcher_Emgu1(logger, border, showImages, imageHeight);
         }
     }
 

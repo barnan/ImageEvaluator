@@ -87,6 +87,7 @@
     <Compile Include="DataSaver\MeasurementResult.cs" />
     <Compile Include="DataSaver\PngResultSaver.cs" />
     <Compile Include="DataSaver\ResultSaver_Base.cs" />
+    <Compile Include="DetermineSawmarkOrientation\WaferOrientationDetector.cs" />
     <Compile Include="DetermineSawmarkOrientation\DetermineSawmarkOrientation.cs" />
     <Compile Include="FindEdgeLines\WaferEdgeFindData.cs" />
     <Compile Include="FitEdgeLines\EdgeLineFitter_Emgu1.cs" />
@@ -104,6 +105,7 @@
     <Compile Include="Interfaces\ISawmarkDeterminer.cs" />
     <Compile Include="Interfaces\IWaferEdgeFindData.cs" />
     <Compile Include="Interfaces\IWaferFittingData.cs" />
+    <Compile Include="Interfaces\IWaferOrientationDetector.cs" />
     <Compile Include="MethodManager\MethodManagerBase.cs" />
     <Compile Include="PreProcessor\ImagePreProcessor.cs" />
     <Compile Include="MethodManager\MethodManager1.cs" />

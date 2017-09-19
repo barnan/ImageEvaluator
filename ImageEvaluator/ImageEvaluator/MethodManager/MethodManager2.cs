@@ -16,8 +16,6 @@ namespace ImageEvaluator.MethodManager
 
         Image<Gray, float> _image1;
         Image<Gray, float> _image2;
-        Image<Gray, byte> _mask1;
-        Image<Gray, byte> _mask2;
 
 
         public MethodManager2(ILogger logger, IDirectoryReader dirReader, ISawmarkDeterminer sawmarkDet)
@@ -66,9 +64,9 @@ namespace ImageEvaluator.MethodManager
 
                 LogElapsedTime(_watch1, $"Image reading: {Path.GetFileName(name)}");
 
-                _sawmarkDet.Run(_image1);
+                _sawmarkDet.Run(_image1, name);
 
-                LogElapsedTime(_watch1, $"Determine sawmark orientation: {Path.GetFileName(name)}");
+                LogElapsedTime(_watch1, $"Determine wafer orientation: {Path.GetFileName(name)}");
 
 
                 Console.WriteLine();

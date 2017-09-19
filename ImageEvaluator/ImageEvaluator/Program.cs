@@ -58,6 +58,7 @@ namespace ImageEvaluator
 
 
             
+            
             int width = 4096;
             //int height = 4096;
 
@@ -66,10 +67,16 @@ namespace ImageEvaluator
 
             IDoubleLightImageReader imageReader = new Factory_DoubleLight8bitImageReader().Factory(logger, width, show);
 
-            string inputFolder = @"d:\WaferOrientationCheck\MCI_Images\Diamond_Multi_0degree\";
+            //string inputFolder = @"d:\WaferOrientationCheck\MCI_Images\Diamond_Mono_0degree_U5\";
+            if (args[0] == null)
+                return;
+
+            string inputFolder = args[0];
             IDirectoryReader dirReader = new Factory_DirectoryReader().Factory(logger, inputFolder, "raw", imageReader);
 
-            ISawmarkDeterminer sawmarkDeterminer = new Factory_DetermineSawmarkOrientation().Factory();
+            IWaferOrientationDetector det = new WaferOrientationDetector(null, 4096, 4096, 1024, 3072);
+
+            ISawmarkDeterminer sawmarkDeterminer = new Factory_DetermineSawmarkOrientation().Factory(det);
 
             MethodManager2 manager2 = new MethodManager2(logger, dirReader, sawmarkDeterminer);
 

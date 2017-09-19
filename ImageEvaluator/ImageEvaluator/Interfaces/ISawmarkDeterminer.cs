@@ -10,14 +10,14 @@ namespace ImageEvaluator.Interfaces
 {
     public interface ISawmarkDeterminer : IInitalizable
     {
-        void Run(Image<Gray, float> image);
+        void Run(Image<Gray, float> image, string name);
     }
 
 
 
     public interface ISawmarkDeterminer_Creator
     {
-        ISawmarkDeterminer Factory();
+        ISawmarkDeterminer Factory(IWaferOrientationDetector detector);
     }
 
 }

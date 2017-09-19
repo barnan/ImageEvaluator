@@ -49,11 +49,11 @@ namespace ImageEvaluator.CalculateStatisticalData
         /// </summary>
         /// <param name="inputImage"></param>
         /// <param name="maskImage"></param>
+        /// <param name="pointArray"></param>
         /// <param name="meanVector"></param>
         /// <param name="stdVector"></param>
         /// <returns></returns>
         public abstract bool Run(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector);
-
 
 
         /// <summary>
@@ -61,6 +61,9 @@ namespace ImageEvaluator.CalculateStatisticalData
         /// </summary>
         /// <param name="inputImage"></param>
         /// <param name="maskImage"></param>
+        /// <param name="pointArray"></param>
+        /// <param name="meanVector"></param>
+        /// <param name="stdVector"></param>
         /// <returns></returns>
         protected virtual bool CheckInputData(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, float> meanVector, Image<Gray, float> stdVector)
         {

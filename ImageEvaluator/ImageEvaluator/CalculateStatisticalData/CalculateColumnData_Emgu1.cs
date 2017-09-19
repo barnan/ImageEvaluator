@@ -9,10 +9,10 @@ namespace ImageEvaluator.CalculateStatisticalData
 {
     class CalculateColumnData_Emgu1 : CalculateColumnDataBase_Emgu
     {
-
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="logger"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
         internal CalculateColumnData_Emgu1(ILogger logger, int width, int height)

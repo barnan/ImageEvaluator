@@ -45,8 +45,7 @@ namespace ImageEvaluator.SearchContourPoints
                             {
                                 if ((coordinateList[j].Y != coordinateList[j + 1].Y) && (Math.Abs(coordinateList[j].Y - coordinateList[j + 1].Y) < magicNumber1))
                                 {
-                                    LineSegment2D contourLineSegment = new LineSegment2D(new Point(coordinateList[j].X, coordinateList[j].Y),
-                                        new Point(coordinateList[j + 1].X, coordinateList[j + 1].Y));
+                                    LineSegment2D contourLineSegment = new LineSegment2D(new Point(coordinateList[j].X, coordinateList[j].Y), new Point(coordinateList[j + 1].X, coordinateList[j + 1].Y));
 
                                     LineSegment2D horizontalLine;
                                     for (int k = 0; k < Math.Abs(coordinateList[j + 1].Y - coordinateList[j].Y); k++)
@@ -54,8 +53,7 @@ namespace ImageEvaluator.SearchContourPoints
                                         int difference = coordinateList[j + 1].Y - coordinateList[j].Y;
                                         int yCoord = coordinateList[j].Y + k * (difference / Math.Abs(difference));
 
-                                        horizontalLine = new LineSegment2D(new Point(0, yCoord),
-                                            new Point(4095, yCoord));
+                                        horizontalLine = new LineSegment2D(new Point(0, yCoord), new Point(4095, yCoord));
 
                                         var resu = GetIntersection(horizontalLine, contourLineSegment);
 

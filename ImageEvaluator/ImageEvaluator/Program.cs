@@ -25,17 +25,17 @@ namespace ImageEvaluator
             int height = 4096;
 
             Logger logger = null;// LogManager.GetCurrentClassLogger();
-            bool show = false;
+            bool show = true;
 
             IDoubleLightImageReader imageReader = new Factory_DoubleLight16bitImageReader().Factory(logger, width, show);
 
-            string inputFolder = @"d:\_SW_Projects\Quantify_Image_Quality\homogenity test wins13\";
+            string inputFolder = @"f:\Quantify_Image_Quality\homogenity test wins13\";
             string name = string.Empty;
             IDirectoryReader dirReader = new Factory_DirectoryReader().Factory(logger, inputFolder, "raw", imageReader);
 
             IImagePreProcessor preProcessor = new Factory_ImagePreProcessor().Factory(logger, 4096, width, height, show);
 
-            IBorderSearcher borderSearcher = new Factory_BorderSearcher_Emgu1().Factory(logger, 10, height, show);
+            IBorderSearcher borderSearcher = new Factory_BorderSearcher_Emgu2().Factory(logger, 10, height, show);
 
             IColumnDataCalculator columnDataCalculator = new Factory_CalculateColumnData_Emgu1().Factory(logger, width, height);
 
@@ -52,15 +52,15 @@ namespace ImageEvaluator
 
             IEdgeLineFitter fitter = new Factory_EdgeLineFitter_Emgu1().Factory();
 
-            IMethodManager manager = new MethodManager1(logger, dirReader, preProcessor, borderSearcher, columnDataCalculator, saver, finder, fitter);
+            IMethodManager manager1 = new MethodManager1(logger, dirReader, preProcessor, borderSearcher, columnDataCalculator, saver, finder, fitter);
 
-            manager.Run();
+            manager1.Run();
 
 
 
 
             //int width = 4096;
-            ////int height = 4096;
+            //int height = 4096;
 
             //Logger logger = null;// LogManager.GetCurrentClassLogger();
             //bool show = false;
@@ -81,6 +81,8 @@ namespace ImageEvaluator
             //MethodManager2 manager2 = new MethodManager2(logger, dirReader, sawmarkDeterminer);
 
             //manager2.Run();
+
+
 
 
             Console.ReadKey();

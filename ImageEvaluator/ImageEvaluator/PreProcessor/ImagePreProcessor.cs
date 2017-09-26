@@ -73,8 +73,15 @@ namespace ImageEvaluator.PreProcessor
 
                 if (_showImages)
                 {
-                    ImageViewer.Show(inputImage, "rotated image");
-                    ImageViewer.Show(maskImage, "mask image");
+                    Image<Gray, byte> tempImage = inputImage.Convert<Gray, byte>();
+                    CvInvoke.Imshow("inputImage", tempImage);
+                    CvInvoke.WaitKey(500);
+                    CvInvoke.DestroyWindow("inputImage");
+                    tempImage?.Dispose();
+
+                    CvInvoke.Imshow("maskImage", maskImage);
+                    CvInvoke.WaitKey(500);
+                    CvInvoke.DestroyWindow("maskImage");
                 }
 
                 return true;

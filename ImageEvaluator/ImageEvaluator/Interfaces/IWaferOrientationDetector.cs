@@ -6,7 +6,7 @@ namespace ImageEvaluator.Interfaces
 {
     public interface IWaferOrientationDetector : IInitalizable
     {
-        WaferOrientation? Run(byte[] inputRawImage, CancellationToken cancelToken, double orientationThresholdInAdu, int lineScanWidthInPixel, int lowerSpatialLimitInPixel,
+        WaferOrientation? Run(byte[] inputRawImage, CancellationToken cancelToken, double orientationThresholdInAdu, int sectionWidthInPixel, int lowerSpatialLimitInPixel,
             int upperSpatialLimitInPixel);
     }
 

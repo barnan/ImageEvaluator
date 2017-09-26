@@ -28,7 +28,7 @@ namespace ImageEvaluator.DetermineSawmarkOrientation
         private int _originalImageHeight = 4096;
         private int _linescanStartInPixel = 1024;
         private int _linescanEndInPixel = 3072;
-        private int _lineScanWidthInPixel = 10;
+        private int _sectionWidthInPixel = 10;
         private int _lowerFreqLimitIn1PerN = 60;
         private int _upperFreqLimitIn1PerN = 800;
         private bool _initialized;
@@ -122,14 +122,14 @@ namespace ImageEvaluator.DetermineSawmarkOrientation
             }
         }
 
-        public int LinescanWidthInPixel
+        public int SectionWidthInPixel
         {
-            get { return _lineScanWidthInPixel; }
+            get { return _sectionWidthInPixel; }
             set
             {
                 if (value < 50 && value >= 0)
                 {
-                    _lineScanWidthInPixel = value;
+                    _sectionWidthInPixel = value;
                 }
             }
         }
@@ -163,13 +163,13 @@ namespace ImageEvaluator.DetermineSawmarkOrientation
         #endregion
 
 
-        public WaferOrientationDetector(ILogger logger, int originalImageWidth, int originalImageHeight, int linescanHeightStartInPixel, int linescanHeightEndInPixel)
+        public WaferOrientationDetector(ILogger logger, int originalImageWidth, int originalImageHeight, int linescanStartInPixel, int linescanEndInPixel)
         {
             _logger = logger;
             OriginalImageWidth = originalImageWidth;
             OriginalImageHeight = originalImageHeight;
-            LinescanStartInPixel = linescanHeightStartInPixel;
-            LinescanEndInPixel = linescanHeightEndInPixel;
+            LinescanStartInPixel = linescanStartInPixel;
+            LinescanEndInPixel = linescanEndInPixel;
 
             _logger?.Info("WaferOrientationDetector instantiated.");
         }
@@ -191,11 +191,11 @@ namespace ImageEvaluator.DetermineSawmarkOrientation
             Monitor.Enter(_detectorLock);
             try
             {
-                _inputSectionVertical = new Image<Gray, float>(_lineScanWidthInPixel, _linescanEndInPixel - _linescanStartInPixel);
-                _inputSectionHorizontal = new Image<Gray, float>(_lineScanWidthInPixel, _linescanEndInPixel - _linescanStartInPixel);
+                _inputSectionVertical = new Image<Gray, float>(_sectionWidthInPixel, _linescanEndInPixel - _linescanStartInPixel);
+                _inputSectionHorizontal = new Image<Gray, float>(_sectionWidthInPixel, _linescanEndInPixel - _linescanStartInPixel);
                 //_inputSectionHorizontalTransposed = new Image<Gray, float>(_linescanEnd - _linescanStart, _lineScanWidth);
-                _byteInputSectionHorizontalTransposed = new Image<Gray, byte>(_linescanEndInPixel - _linescanStartInPixel, _lineScanWidthInPixel);
-                _rawInputSectionHorizontalTransposed = new byte[_lineScanWidthInPixel*(_linescanEndInPixel - _linescanStartInPixel)];
+                _byteInputSectionHorizontalTransposed = new Image<Gray, byte>(_linescanEndInPixel - _linescanStartInPixel, _sectionWidthInPixel);
+                _rawInputSectionHorizontalTransposed = new byte[_sectionWidthInPixel*(_linescanEndInPixel - _linescanStartInPixel)];
 
                 _blurredInputSectionVertical = new Image<Gray, float>(_inputSectionVertical.Width, _inputSectionVertical.Height);
                 _blurredInputSectionHorizontal = new Image<Gray, float>(_inputSectionHorizontal.Width, _inputSectionHorizontal.Height);
@@ -308,11 +308,11 @@ namespace ImageEvaluator.DetermineSawmarkOrientation
         /// <param name="inputRawImage">4Kx8Kx8bit input RAW double light image</param>
         /// <param name="cancelToken"></param>
         /// <param name="orientationThresholdInAdu"></param>
-        /// <param name="lineScanWidthInPixel"></param>
+        /// <param name="sectionWidthInPixel"></param>
         /// <param name="lowerSpatialLimitInPixel"></param>
         /// <param name="upperSpatialLimitInPixel"></param>
         /// <returns>WaferOrientation.NormalWaferOrientation OR WaferOrientation.RotatedWafer</returns>
-        public WaferOrientation? Run(byte[] inputRawImage, CancellationToken cancelToken, double orientationThresholdInAdu, int lineScanWidthInPixel, int lowerSpatialLimitInPixel, int upperSpatialLimitInPixel)
+        public WaferOrientation? Run(byte[] inputRawImage, CancellationToken cancelToken, double orientationThresholdInAdu, int sectionWidthInPixel, int lowerSpatialLimitInPixel, int upperSpatialLimitInPixel)
         {
             WaferOrientation? orienatation = null; 
 
@@ -334,7 +334,7 @@ namespace ImageEvaluator.DetermineSawmarkOrientation
                 }
 
                 // frequency calculation:
-                LinescanWidthInPixel = lineScanWidthInPixel;
+                SectionWidthInPixel = sectionWidthInPixel;
                 LowerFreqLimitIn1PerN = (LinescanEndInPixel - LinescanStartInPixel) / upperSpatialLimitInPixel;
                 UpperFreqLimitIn1PerN = (LinescanEndInPixel - LinescanStartInPixel) / lowerSpatialLimitInPixel;
 
@@ -469,7 +469,7 @@ namespace ImageEvaluator.DetermineSawmarkOrientation
                 float[,,] outVerticalScanData = _inputSectionVertical.Data;
 
                 //crop the vertical linescan ( ~ w10 x h2048):
-                int scanHalf = LinescanWidthInPixel / 2;
+                int scanHalf = SectionWidthInPixel / 2;
                 for (int i = 0; i < (LinescanEndInPixel - LinescanStartInPixel); i++)
                 {
                     int verticalIndex = (i + LinescanStartInPixel) * OriginalImageWidth * 2 + verticalColumnCoord;
@@ -479,7 +479,7 @@ namespace ImageEvaluator.DetermineSawmarkOrientation
                 }
 
                 // crop the horizontal linescan ( ~ w2048 x h10)
-                for (int i = 0; i < LinescanWidthInPixel; i++)
+                for (int i = 0; i < SectionWidthInPixel; i++)
                 {
                     int verticalIndex = (horizontalRowCoord - scanHalf + i)*OriginalImageWidth*2 + LinescanStartInPixel;
                     Array.Copy(inputImage, verticalIndex, _rawInputSectionHorizontalTransposed, i * (LinescanEndInPixel - LinescanStartInPixel), (LinescanEndInPixel - LinescanStartInPixel));

@@ -80,8 +80,18 @@ namespace ImageEvaluator.ReadImage
 
                 if (_showImages)
                 {
-                    ImageViewer.Show(img1, "iput kep 1");
-                    ImageViewer.Show(img2, "iput kep 2");
+                    Image<Gray, byte> tempImage = img1.Convert<Gray, byte>();
+
+                    CvInvoke.Imshow("img1", tempImage);
+                    CvInvoke.WaitKey(500);
+                    CvInvoke.DestroyWindow("img1");
+
+                    tempImage = img2.Convert<Gray, byte>();
+                    CvInvoke.Imshow("img2", tempImage);
+                    CvInvoke.WaitKey(500);
+                    CvInvoke.DestroyWindow("img2");
+
+                    tempImage?.Dispose();
                 }
 
                 _logger?.Trace($"{_fileName} readed.");
@@ -178,7 +188,7 @@ namespace ImageEvaluator.ReadImage
             {
                 _img1 = new Image<Gray, float>(_width, _height);
                 _img2 = new Image<Gray, float>(_width, _height);
-                _fullROI = new Rectangle(0,0, _width, _height);
+                _fullROI = new Rectangle(0, 0, _width, _height);
 
                 return true;
             }

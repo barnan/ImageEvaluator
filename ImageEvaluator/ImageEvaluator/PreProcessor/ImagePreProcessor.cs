@@ -73,15 +73,8 @@ namespace ImageEvaluator.PreProcessor
 
                 if (_showImages)
                 {
-                    Image<Gray, byte> tempImage = inputImage.Convert<Gray, byte>();
-                    CvInvoke.Imshow("inputImage", tempImage);
-                    CvInvoke.WaitKey(500);
-                    CvInvoke.DestroyWindow("inputImage");
-                    tempImage?.Dispose();
-
-                    CvInvoke.Imshow("maskImage", maskImage);
-                    CvInvoke.WaitKey(500);
-                    CvInvoke.DestroyWindow("maskImage");
+                    ImageViewer.Show(inputImage, "ImagePreProcessor - input image");
+                    ImageViewer.Show(maskImage, "ImagePreProcessor - maskImage");
                 }
 
                 return true;

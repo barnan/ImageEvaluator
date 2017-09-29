@@ -6,8 +6,8 @@ using NLog;
 namespace ImageEvaluator.Interfaces
 {
     public interface IEdgeLineFitter : IInitalizable
-    { 
-        void Run(IWaferEdgeFindData edgeFindData, ref IWaferFittingData edgeFitData);
+    {
+        bool Run(IWaferEdgeFindData edgeFindData, ref IWaferFittingData edgeFitData);
     }
 
 

@@ -6,6 +6,7 @@ using NLog;
 using System;
 using System.Drawing;
 using ImageEvaluator.Interfaces;
+using Emgu.CV.UI;
 
 namespace ImageEvaluator.SearchContourPoints
 {
@@ -40,6 +41,14 @@ namespace ImageEvaluator.SearchContourPoints
                         for (int i = 0; i < contour.Size; i++)
                         {
                             Point[] coordinateList = contour[i].ToArray();
+
+                            if (_showImages)
+                            {
+                                maskImage.SetValue(new Gray(100.0), maskImage);
+
+                                maskImage.Draw(coordinateList, new Gray(200.0), 2);
+                                ImageViewer.Show(maskImage, "BorderSearcher_Emgu2 - contour points");
+                            }
 
                             for (int j = 0; j < contour[i].Size - 1; j++)
                             {

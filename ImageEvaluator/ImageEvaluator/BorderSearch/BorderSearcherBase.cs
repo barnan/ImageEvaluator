@@ -62,6 +62,7 @@ namespace ImageEvaluator.SearchContourPoints
 
                 ResetPointList();
                 pointList = _borderPoints;
+
                 CalculatePoints(maskImage);
             }
             catch (Exception ex)

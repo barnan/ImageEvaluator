@@ -80,18 +80,8 @@ namespace ImageEvaluator.ReadImage
 
                 if (_showImages)
                 {
-                    Image<Gray, byte> tempImage = img1.Convert<Gray, byte>();
-
-                    CvInvoke.Imshow("img1", tempImage);
-                    CvInvoke.WaitKey(500);
-                    CvInvoke.DestroyWindow("img1");
-
-                    tempImage = img2.Convert<Gray, byte>();
-                    CvInvoke.Imshow("img2", tempImage);
-                    CvInvoke.WaitKey(500);
-                    CvInvoke.DestroyWindow("img2");
-
-                    tempImage?.Dispose();
+                    ImageViewer.Show(_img1, "DoubleLightImageReader_Base - input image 1");
+                    ImageViewer.Show(_img2, "DoubleLightImageReader_Base - input image 2");
                 }
 
                 _logger?.Trace($"{_fileName} readed.");

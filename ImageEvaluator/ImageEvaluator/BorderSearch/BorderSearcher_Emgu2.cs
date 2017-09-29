@@ -8,6 +8,7 @@ using ImageEvaluator.Interfaces;
 using ImageEvaluator.SearchContourPoints;
 using NLog;
 using System.Threading;
+using Emgu.CV.UI;
 
 namespace ImageEvaluator.SearchContourPoints
 {
@@ -40,13 +41,10 @@ namespace ImageEvaluator.SearchContourPoints
 
                         if (_showImages)
                         {
-                            Image<Gray, byte> tempImage = new Image<Gray, byte>(maskImage.Width, maskImage.Height);
-                            tempImage.Draw(coordinateList, new Gray(100.0), 2);
-                            CvInvoke.Imshow("contourImage", tempImage);
-                            CvInvoke.WaitKey(0);
-                            CvInvoke.DestroyWindow("contourImage");
-                            tempImage?.Dispose();
-                            //Thread.Sleep(10000);
+                            maskImage.SetValue(new Gray(100.0), maskImage);
+
+                            maskImage.Draw(coordinateList, new Gray(200.0), 2);
+                            ImageViewer.Show(maskImage, "BorderSearcher_Emgu2 - contour points");
                         }
 
                         for (int j = 0; j < contour[i].Size - 1; j++)

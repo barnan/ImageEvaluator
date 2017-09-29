@@ -35,7 +35,7 @@ namespace ImageEvaluator
 
             IImagePreProcessor preProcessor = new Factory_ImagePreProcessor().Factory(logger, 4096, width, height, show);
 
-            IBorderSearcher borderSearcher = new Factory_BorderSearcher_Emgu2().Factory(logger, 10, height, show);
+            IBorderSearcher borderSearcher = new Factory_BorderSearcher_Emgu1().Factory(logger, 10, height, show);
 
             IColumnDataCalculator columnDataCalculator = new Factory_CalculateColumnData_Emgu1().Factory(logger, width, height);
 

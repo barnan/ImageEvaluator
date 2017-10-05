@@ -52,7 +52,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
     <Compile Include="IBorderSearcher.cs" />
     <Compile Include="IColumnDataCalculator.cs" />
     <Compile Include="ICornerfinder.cs" />

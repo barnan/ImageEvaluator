@@ -2,8 +2,8 @@
 using System.IO;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using ImageEvaluator.DataSaver;
-using ImageEvaluator.Interfaces;
+using ImageEvaluatorLib.DataSaver;
+using ImageEvaluatorInterfaces;
 using NLog;
 
 namespace ImageEvaluator.MethodManager
@@ -19,7 +19,7 @@ namespace ImageEvaluator.MethodManager
 
 
         public MethodManager2(ILogger logger, IDirectoryReader dirReader, ISawmarkDeterminer sawmarkDet)
-            :base (logger)
+            : base(logger)
         {
             _dirReader = dirReader;
             _sawmarkDet = sawmarkDet;
@@ -28,7 +28,7 @@ namespace ImageEvaluator.MethodManager
 
             Init();
 
-            _logger?.Info("MethodManager 2 " + (_initialized? string.Empty : "NOT") + " initialized.");
+            _logger?.Info("MethodManager 2 " + (_initialized ? string.Empty : "NOT") + " initialized.");
 
         }
 

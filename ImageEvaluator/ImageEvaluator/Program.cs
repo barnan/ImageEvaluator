@@ -2,17 +2,16 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using ImageEvaluator.CalculateStatisticalData;
-using ImageEvaluator.DataSaver;
-using ImageEvaluator.DetermineSawmarkOrientation;
-using ImageEvaluator.FindEdgeLines;
-using ImageEvaluator.FitEdgeLines;
-using ImageEvaluator.Interfaces;
+using ImageEvaluatorLib.CalculateStatisticalData;
+using ImageEvaluatorLib.DataSaver;
+using ImageEvaluatorLib.FindEdgeLines;
+using ImageEvaluatorLib.FitEdgeLines;
+using ImageEvaluatorInterfaces;
 using ImageEvaluator.MethodManager;
-using ImageEvaluator.PreProcessor;
-using ImageEvaluator.ReadDirectory;
-using ImageEvaluator.ReadImage;
-using ImageEvaluator.SearchContourPoints;
+using ImageEvaluatorLib.PreProcessor;
+using ImageEvaluatorLib.ReadDirectory;
+using ImageEvaluatorLib.ReadImage;
+using ImageEvaluatorLib.SearchContourPoints;
 using NLog;
 
 namespace ImageEvaluator

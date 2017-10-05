@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-using ImageEvaluator.Interfaces;
+using ImageEvaluatorInterfaces;
 using NLog;
 
 namespace ImageEvaluator.MethodManager
@@ -20,7 +20,7 @@ namespace ImageEvaluator.MethodManager
             _logger = logger;
             _watch1 = new Stopwatch();
         }
-        
+
 
         protected void CheckInit(bool resu, string message)
         {

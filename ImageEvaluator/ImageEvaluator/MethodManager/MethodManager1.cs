@@ -3,8 +3,8 @@ using System.Diagnostics;
 using System.IO;
 using Emgu.CV;
 using Emgu.CV.Structure;
-using ImageEvaluator.DataSaver;
-using ImageEvaluator.Interfaces;
+using ImageEvaluatorLib.DataSaver;
+using ImageEvaluatorInterfaces;
 using NLog;
 
 namespace ImageEvaluator.MethodManager
@@ -12,7 +12,7 @@ namespace ImageEvaluator.MethodManager
 
     public class MethodManager1 : MethodManagerBase
     {
-        
+
         readonly IDirectoryReader _dirReader;
         readonly IImagePreProcessor _preProc;
         readonly IBorderSearcher _borderSearcher;
@@ -47,7 +47,7 @@ namespace ImageEvaluator.MethodManager
         /// <param name="edgeFinder"></param>
         /// <param name="edgeFitter"></param>
         public MethodManager1(ILogger logger, IDirectoryReader dirReader, IImagePreProcessor preProc, IBorderSearcher borderSearcher, IColumnDataCalculator colummnCalculator, IResultSaver saver, IEdgeLineFinder edgeFinder, IEdgeLineFitter edgeFitter)
-            :base (logger)
+            : base(logger)
         {
             _dirReader = dirReader;
             _preProc = preProc;
@@ -134,8 +134,8 @@ namespace ImageEvaluator.MethodManager
 
                 LogElapsedTime(_watch1, $"Column data, statistical calculation: {Path.GetFileName(name)}");
 
-                IMeasurementResult result1 = new MeasurementResult {Name = "img1", MeanVector = _meanVector1, StdVector = _stdVector1};
-                IMeasurementResult result2 = new MeasurementResult {Name = "img2", MeanVector = _meanVector2, StdVector = _stdVector2};
+                IMeasurementResult result1 = new MeasurementResult { Name = "img1", MeanVector = _meanVector1, StdVector = _stdVector1 };
+                IMeasurementResult result2 = new MeasurementResult { Name = "img2", MeanVector = _meanVector2, StdVector = _stdVector2 };
 
                 _saver.SaveResult(result1, name);
                 _saver.SaveResult(result2, name);
@@ -166,7 +166,7 @@ namespace ImageEvaluator.MethodManager
             return true;
         }
 
-        
+
     }
 
 }

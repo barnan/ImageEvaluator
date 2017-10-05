@@ -5,6 +5,10 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageEvaluator", "ImageEvaluator\ImageEvaluator.csproj", "{E897A626-5BD5-4DC1-9D95-2FFBCE20E6A5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageEvaluatorLib", "ImageEvaluatorLib\ImageEvaluatorLib.csproj", "{1F20BE2B-7B75-4B22-A259-20F3379A66ED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageEvaluatorInterfaces", "ImageEvaluatorInterfaces\ImageEvaluatorInterfaces.csproj", "{D1BC58D7-7881-45BF-A21C-E16DA4DEC2B0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{E897A626-5BD5-4DC1-9D95-2FFBCE20E6A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E897A626-5BD5-4DC1-9D95-2FFBCE20E6A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E897A626-5BD5-4DC1-9D95-2FFBCE20E6A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F20BE2B-7B75-4B22-A259-20F3379A66ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F20BE2B-7B75-4B22-A259-20F3379A66ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F20BE2B-7B75-4B22-A259-20F3379A66ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F20BE2B-7B75-4B22-A259-20F3379A66ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1BC58D7-7881-45BF-A21C-E16DA4DEC2B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1BC58D7-7881-45BF-A21C-E16DA4DEC2B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1BC58D7-7881-45BF-A21C-E16DA4DEC2B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1BC58D7-7881-45BF-A21C-E16DA4DEC2B0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

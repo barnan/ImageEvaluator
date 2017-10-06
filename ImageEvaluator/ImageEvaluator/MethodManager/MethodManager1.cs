@@ -67,6 +67,12 @@ namespace ImageEvaluator.MethodManager
 
 
 
+        public bool Instantiate()
+        {
+            return true;
+        }
+
+
         public override bool Init()
         {
             bool resu = _dirReader.Init();

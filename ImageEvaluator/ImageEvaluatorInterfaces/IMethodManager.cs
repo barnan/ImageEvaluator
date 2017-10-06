@@ -1,10 +1,8 @@
 ﻿
 namespace ImageEvaluatorInterfaces
 {
-    public interface IMethodManager
+    public interface IMethodManager : IInitalizable
     {
         bool Run();
-
-        //bool Init(string diretoryName, string fileExtension, int width, int height, int bitDepth, int intensityRange, int borderSkip, bool showImages);
     }
 }

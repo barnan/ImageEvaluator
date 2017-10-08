@@ -65,7 +65,7 @@ namespace ImageEvaluatorLib.ReadImage
             }
             catch (Exception ex)
             {
-                _logger.Error($"Exception during file read (16 bit double light): {(string.IsNullOrEmpty(_fileName) ? string.Empty : _fileName)}. {ex.Message}");
+                _logger.Error($"Exception during file read (16 bit double light): {(string.IsNullOrEmpty(_fileName) ? string.Empty : _fileName)}. {ex}");
                 return false;
             }
 
@@ -83,6 +83,7 @@ namespace ImageEvaluatorLib.ReadImage
     {
         public IDoubleLightImageReader Factory(ILogger logger, int width, bool showImages)
         {
+            logger?.Info($"{typeof(Factory_DoubleLight16bitImageReader).ToString()} factory called.");
             return new DoubleLight16bitImageReader(logger, width, showImages);
         }
     }

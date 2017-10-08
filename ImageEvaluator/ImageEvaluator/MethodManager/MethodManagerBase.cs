@@ -1,45 +1,74 @@
 ﻿using System;
-using System.Diagnostics;
 using ImageEvaluatorInterfaces;
 using NLog;
+using System.IO;
 
 namespace ImageEvaluator.MethodManager
 {
     public abstract class MethodManagerBase : IMethodManager
     {
-        protected readonly ILogger _logger;
-        protected Stopwatch _watch1;
+        protected bool _initialized;
+        protected Logger _logger;
+        protected IEvaluationProcessor _evaluationProcessor;
+        protected string[] _inputPaths;
+        protected int _pathIndex;
 
-        public abstract bool Run();
 
-        public abstract bool Init();
-
-
-        protected MethodManagerBase(ILogger logger)
+        public MethodManagerBase(string[] paths)
         {
-            _logger = logger;
-            _watch1 = new Stopwatch();
+            _inputPaths = paths;
         }
 
 
-        protected void CheckInit(bool resu, string message)
+        private int? CheckInput()
         {
-            _logger?.Info(resu ? $"Initialization SUCCED: {message}" : $"Initialization FAILED: {message}");
+            if (_inputPaths == null)
+                return null;
+
+            for (int i = 0; i < _inputPaths.Length; i++)
+            {
+                if (Directory.Exists(_inputPaths[i]))
+                {
+                    _logger?.Trace($"InputDirectory checking: {_inputPaths[i]}{Environment.NewLine}Directory is existing.");
+                    return i;
+                }
+            }
+
+            _logger?.Trace($"InputDirectory array did not contain valid directory path.");
+            return null;
         }
 
 
-        protected void LogElapsedTime(Stopwatch watch1, string outermessage = null)
+        public bool Init()
         {
-            if (watch1 == null)
-                return;
+            int? resu = CheckInput();
+            if (resu != null)
+            {
+                _pathIndex = (int)resu;
+                Instantiate();
+            }
+            else
+            {
+                return _initialized = false;
+            }
 
-            string message = $"{outermessage ?? string.Empty}. Elapsed time: {watch1.ElapsedMilliseconds}";
-            _logger?.Trace(message);
-            Console.WriteLine(message);
-
-            watch1.Restart();
+            return _initialized = true;
         }
 
+
+        public bool Run()
+        {
+            if (!_initialized)
+            {
+                _logger?.Info($"Methodmanager is not initialized properly!!!");
+                return false;
+            }
+
+            return _evaluationProcessor.Run();
+        }
+
+
+        public abstract bool Instantiate();
 
     }
 }

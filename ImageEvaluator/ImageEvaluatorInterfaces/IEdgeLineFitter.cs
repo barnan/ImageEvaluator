@@ -13,7 +13,7 @@ namespace ImageEvaluatorInterfaces
 
     public interface IEdgeLineFitter_Creator
     {
-        IEdgeLineFitter Factory();
+        IEdgeLineFitter Factory(ILogger logger);
     }
 
 }

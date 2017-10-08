@@ -1,5 +1,6 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
+using NLog;
 
 namespace ImageEvaluatorInterfaces
 {
@@ -12,7 +13,7 @@ namespace ImageEvaluatorInterfaces
 
     public interface ISawmarkDeterminer_Creator
     {
-        ISawmarkDeterminer Factory(IWaferOrientationDetector detector);
+        ISawmarkDeterminer Factory(ILogger logger, IWaferOrientationDetector detector);
     }
 
 }

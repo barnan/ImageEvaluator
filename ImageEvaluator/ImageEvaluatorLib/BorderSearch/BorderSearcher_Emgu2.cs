@@ -73,7 +73,7 @@ namespace ImageEvaluatorLib.SearchContourPoints
                 }
                 catch (Exception ex)
                 {
-                    _logger?.Error($"Exception caught in BorderSearcher_Emgu1-CalculatePoints: {ex.Message}.");
+                    _logger?.Error($"Exception caught in BorderSearcher_Emgu1-CalculatePoints: {ex}.");
                 }
 
             }

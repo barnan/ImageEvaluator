@@ -1,11 +1,22 @@
 ﻿
 using Emgu.CV;
 using ImageEvaluatorInterfaces;
+using NLog;
 
 namespace ImageEvaluatorLib.FitEdgeLines
 {
     abstract class EdgeLineFitterBase : IEdgeLineFitter
     {
+        protected ILogger _logger;
+
+
+
+        public EdgeLineFitterBase(ILogger logger)
+        {
+            _logger = logger;
+        }
+
+
 
         public bool Init()
         {

@@ -17,6 +17,7 @@ namespace ImageEvaluatorLib.DataSaver
         public PngResultSaver(string outputFolder, string prefix, ILogger logger)
             : base(outputFolder, prefix, logger)
         {
+            _logger?.Info($"{typeof(PngResultSaver)} instantiated.");
         }
 
 
@@ -54,7 +55,7 @@ namespace ImageEvaluatorLib.DataSaver
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Exception in PngResultSaver-SaveResult: {ex.Message}");
+                _logger?.Error($"Exception in PngResultSaver-SaveResult: {ex}");
                 return false;
             }
             finally

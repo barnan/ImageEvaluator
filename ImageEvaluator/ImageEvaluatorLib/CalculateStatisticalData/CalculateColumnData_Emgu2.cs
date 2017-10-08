@@ -142,7 +142,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error during InitEmguImages: {ex.Message}");
+                Console.WriteLine($"Error during InitEmguImages: {ex}");
                 return _initialized = false;
             }
 

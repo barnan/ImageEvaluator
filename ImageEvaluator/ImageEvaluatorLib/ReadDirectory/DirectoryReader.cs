@@ -30,7 +30,8 @@ namespace ImageEvaluatorLib.ReadDirectory
         /// <param name="reader"></param>
         internal DirectoryReader(ILogger logger, string directoryName, string extension, IDoubleLightImageReader reader)
         {
-            _logger = logger;
+            //_logger = logger;
+            _logger = LogManager.GetCurrentClassLogger();
             _directoryName = directoryName;
             _extension = extension;
             _reader = reader;
@@ -82,7 +83,7 @@ namespace ImageEvaluatorLib.ReadDirectory
         public bool Init()
         {
             _initialized = (CheckDir() && _reader.Init());
-            _logger?.Trace("DirectoryReader " + (_initialized ? string.Empty : "NOT") + " initializated.");
+            _logger?.Trace("DirectoryReader " + (_initialized ? string.Empty : "NOT") + " initialized.");
 
             return _initialized;
         }
@@ -124,7 +125,7 @@ namespace ImageEvaluatorLib.ReadDirectory
             }
             catch (Exception ex)
             {
-                _logger.Trace($"Exception in GetNextImage: {ex.Message}");
+                _logger.Trace($"Exception in GetNextImage: {ex}");
                 return false;
             }
         }
@@ -169,7 +170,7 @@ namespace ImageEvaluatorLib.ReadDirectory
     {
         public IDirectoryReader Factory(ILogger logger, string directoryName, string extension, IDoubleLightImageReader reader)
         {
-
+            logger?.Info($"{typeof(Factory_DirectoryReader).ToString()} factory called.");
             var dirReader = new DirectoryReader(logger, directoryName, extension, reader);
             dirReader.Init();
 

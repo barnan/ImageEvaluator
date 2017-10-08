@@ -58,6 +58,7 @@
     <Compile Include="IDirectoryReader.cs" />
     <Compile Include="IEdgeLineFinder.cs" />
     <Compile Include="IEdgeLineFitter.cs" />
+    <Compile Include="IEvaluationProcessor.cs" />
     <Compile Include="IImagePreProcessor.cs" />
     <Compile Include="IImageReader.cs" />
     <Compile Include="IInitalizable.cs" />

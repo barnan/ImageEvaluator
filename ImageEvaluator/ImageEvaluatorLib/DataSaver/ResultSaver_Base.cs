@@ -50,7 +50,7 @@ namespace ImageEvaluatorLib.DataSaver
                 }
                 catch (Exception ex)
                 {
-                    _logger?.Error($"Exception during ResultSaver-CheckDir: {ex.Message}");
+                    _logger?.Error($"Exception during ResultSaver-CheckDir: {ex}");
                     return _initialized = false;
                 }
 

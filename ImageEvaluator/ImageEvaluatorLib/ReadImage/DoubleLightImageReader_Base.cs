@@ -91,7 +91,7 @@ namespace ImageEvaluatorLib.ReadImage
             catch (Exception ex)
             {
                 ClearEmguImages();
-                _logger?.Error($"Error during double light image reading. {ex.Message}");
+                _logger?.Error($"Error during double light image reading. {ex}");
                 return false;
             }
 
@@ -150,7 +150,7 @@ namespace ImageEvaluatorLib.ReadImage
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Exception in DoubleLightImageReader_Base-CheckFileName: {ex.Message}");
+                _logger?.Error($"Exception in DoubleLightImageReader_Base-CheckFileName: {ex}");
                 return false;
             }
 
@@ -184,7 +184,7 @@ namespace ImageEvaluatorLib.ReadImage
             }
             catch (Exception ex)
             {
-                _logger?.Error($"DoubleLightImageReader_Base - InitEmguImages. Error during emgu initialization. {ex.Message}");
+                _logger?.Error($"DoubleLightImageReader_Base - InitEmguImages. Error during emgu initialization. {ex}");
                 return false;
             }
 

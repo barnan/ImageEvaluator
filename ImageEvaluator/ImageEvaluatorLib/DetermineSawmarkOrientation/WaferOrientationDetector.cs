@@ -227,7 +227,7 @@ namespace ImageEvaluatorLib.DetermineSawmarkOrientation
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Exception in WaferOrientationDetector-CreateEmguImages: {ex.Message}.");
+                _logger?.Error($"Exception in WaferOrientationDetector-CreateEmguImages: {ex}.");
                 return _initialized = false;
             }
             finally
@@ -283,7 +283,7 @@ namespace ImageEvaluatorLib.DetermineSawmarkOrientation
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Exception occured in DestroyAllEmguImages: {ex.Message}");
+                _logger?.Error($"Exception occured in DestroyAllEmguImages: {ex}");
                 return false;
             }
             finally
@@ -436,7 +436,7 @@ namespace ImageEvaluatorLib.DetermineSawmarkOrientation
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Exception during WaferOrientation detection: {ex.Message}");
+                _logger?.Error($"Exception during WaferOrientation detection: {ex}");
             }
             finally
             {
@@ -483,7 +483,7 @@ namespace ImageEvaluatorLib.DetermineSawmarkOrientation
             }
             catch (Exception ex)
             {
-                _logger.Error($"Exception occured in WaferOrientationDetector-SplitDoubleLightImage: {ex.Message}.");
+                _logger.Error($"Exception occured in WaferOrientationDetector-SplitDoubleLightImage: {ex}.");
                 return false;
             }
             return true;

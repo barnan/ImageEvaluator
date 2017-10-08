@@ -66,7 +66,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error during the CalculateColumnData_CSharp2-CalculateStatistics, i:{i}, message: {ex.Message}.");
+                    Console.WriteLine($"Error during the CalculateColumnData_CSharp2-CalculateStatistics, i:{i}, message: {ex}.");
                     return false;
                 }
             }

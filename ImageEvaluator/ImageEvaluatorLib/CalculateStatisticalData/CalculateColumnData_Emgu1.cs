@@ -100,6 +100,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
     {
         public IColumnDataCalculator Factory(ILogger logger, int width, int height)
         {
+            logger?.Info($"{typeof(Factory_CalculateColumnData_Emgu1).ToString()} factory called.");
             return new CalculateColumnData_Emgu1(logger, width, height);
         }
     }

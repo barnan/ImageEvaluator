@@ -6,6 +6,7 @@ using System.Threading;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using ImageEvaluatorInterfaces;
+using NLog;
 
 namespace ImageEvaluatorLib.DetermineSawmarkOrientation
 {
@@ -44,8 +45,9 @@ namespace ImageEvaluatorLib.DetermineSawmarkOrientation
 
     public class Factory_DetermineSawmarkOrientation : ISawmarkDeterminer_Creator
     {
-        public ISawmarkDeterminer Factory(IWaferOrientationDetector detector)
+        public ISawmarkDeterminer Factory(ILogger logger, IWaferOrientationDetector detector)
         {
+            logger?.Info($"{typeof(Factory_DetermineSawmarkOrientation).ToString()} factory called.");
             return new DetermineSawmarkOrientation(detector);
         }
     }

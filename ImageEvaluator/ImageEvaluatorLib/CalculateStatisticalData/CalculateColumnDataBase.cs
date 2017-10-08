@@ -82,7 +82,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Error during CalculateColumnData CheckInputImage: {ex.Message}");
+                _logger?.Error($"Error during CalculateColumnData CheckInputImage: {ex}");
             }
 
             return true;
@@ -111,7 +111,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Error during CalculcateColumnData - Init: {ex.Message}.");
+                _logger?.Error($"Error during CalculcateColumnData - Init: {ex}.");
                 return false;
             }
         }

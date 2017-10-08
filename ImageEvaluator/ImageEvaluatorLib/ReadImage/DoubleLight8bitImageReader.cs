@@ -68,7 +68,7 @@ namespace ImageEvaluatorLib.ReadImage
             }
             catch (Exception ex)
             {
-                _logger.Error($"Exception during file read (8 bit double light): {(string.IsNullOrEmpty(_fileName) ? string.Empty : _fileName)}. {ex.Message}");
+                _logger.Error($"Exception during file read (8 bit double light): {(string.IsNullOrEmpty(_fileName) ? string.Empty : _fileName)}. {ex}");
                 return false;
             }
 

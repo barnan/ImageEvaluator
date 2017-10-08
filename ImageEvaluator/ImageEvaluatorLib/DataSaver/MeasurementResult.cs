@@ -4,7 +4,7 @@ using ImageEvaluatorInterfaces;
 
 namespace ImageEvaluatorLib.DataSaver
 {
-    public class MeasurementResult : IMeasurementResult
+    public class ColumnStatisticMeasurementResult : IMeasurementResult
     {
         public string Name { get; set; }
 

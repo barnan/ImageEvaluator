@@ -67,7 +67,7 @@ namespace ImageEvaluatorLib.SearchContourPoints
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Exception during border points calculation: {ex.Message}");
+                _logger?.Error($"Exception during border points calculation: {ex}");
                 return false;
             }
 

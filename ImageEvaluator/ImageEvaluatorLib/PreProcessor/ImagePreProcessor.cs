@@ -81,7 +81,7 @@ namespace ImageEvaluatorLib.PreProcessor
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Error in ImagePreProcessor - InitEmguImages. {ex.Message}");
+                _logger?.Error($"Error in ImagePreProcessor - InitEmguImages. {ex}");
                 return false;
             }
         }
@@ -119,7 +119,7 @@ namespace ImageEvaluatorLib.PreProcessor
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Error in ImagePreProcessor - InitEmguImages. {ex.Message}");
+                _logger?.Error($"Error in ImagePreProcessor - InitEmguImages. {ex}");
                 return false;
             }
         }
@@ -196,6 +196,7 @@ namespace ImageEvaluatorLib.PreProcessor
     {
         public IImagePreProcessor Factory(ILogger logger, int intensityRange, int width, int height, bool showImages)
         {
+            logger?.Info($"{typeof(Factory_ImagePreProcessor).ToString()} factory called.");
             return new ImagePreProcessor(logger, intensityRange, width, height, showImages);
         }
     }

@@ -14,6 +14,7 @@ namespace ImageEvaluatorLib.DataSaver
         public CsvResultSaver(string outputFolder, string prefix, ILogger logger)
             : base(outputFolder, prefix, logger)
         {
+            _logger?.Info($"{typeof(CsvResultSaver)} instantiated.");
         }
 
 
@@ -55,7 +56,7 @@ namespace ImageEvaluatorLib.DataSaver
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Exception in CsvResultSaver-SaveResult: {ex.Message}");
+                _logger?.Error($"Exception in CsvResultSaver-SaveResult: {ex}");
                 return false;
             }
 
@@ -69,6 +70,7 @@ namespace ImageEvaluatorLib.DataSaver
     {
         public IResultSaver Factory(string outputFolder, string prefix, ILogger logger)
         {
+            logger?.Info($"{typeof(Factory_CsvResultSaver).ToString()} factory called.");
             return new CsvResultSaver(outputFolder, prefix, logger);
 
         }

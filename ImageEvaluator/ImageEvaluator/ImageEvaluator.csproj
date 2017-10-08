@@ -74,6 +74,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EvaluationProcessor\EvaluationProcessor1.cs" />
+    <Compile Include="EvaluationProcessor\EvaluationProcessor2.cs" />
+    <Compile Include="EvaluationProcessor\EvaluationProcessorBase.cs" />
+    <Compile Include="MethodManager\MethodManager3.cs" />
     <Compile Include="MethodManager\MethodManagerBase.cs" />
     <Compile Include="MethodManager\MethodManager1.cs" />
     <Compile Include="MethodManager\MethodManager2.cs" />

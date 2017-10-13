@@ -25,9 +25,10 @@ namespace ImageEvaluatorLib.FindEdgeLines
 
         public bool Init()
         {
-            return true;
+            return IsInitialized = true;
         }
 
+        public bool IsInitialized { get; protected set; }
 
 
         protected bool CheckInputData(Image<Gray, float> originalImage, Image<Gray, byte> maskImage, Dictionary<SearchOrientations, Rectangle> calcAreas)

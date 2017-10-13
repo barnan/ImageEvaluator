@@ -4,12 +4,12 @@ using NLog;
 using System;
 using ImageEvaluatorInterfaces;
 
-namespace ImageEvaluatorLib.SearchContourPoints
+namespace ImageEvaluatorLib.BorderSearch
 {
-    class BorderSearcher_CSharp1 : BorderSearcherBase
+    class BorderSearcherCSharp1 : BorderSearcherBase
     {
 
-        internal BorderSearcher_CSharp1(ILogger logger, int border, int imageHeight)
+        internal BorderSearcherCSharp1(ILogger logger, int border, int imageHeight)
             : base(logger, imageHeight, border)
         {
             _logger?.Info("BorderSearcher_CSharp1 instantiated.");
@@ -61,11 +61,11 @@ namespace ImageEvaluatorLib.SearchContourPoints
     /// <summary>
     /// 
     /// </summary>
-    public class Factory_BorderSearcher_CSharp1 : IBorderSeracher_Creator
+    public class FactoryBorderSearcherCSharp1 : IBorderSeracher_Creator
     {
         public IBorderSearcher Factory(ILogger logger, int border, int imageHeight, bool showImages)
         {
-            return new BorderSearcher_CSharp1(logger, border, imageHeight);
+            return new BorderSearcherCSharp1(logger, border, imageHeight);
         }
     }
 }

@@ -9,7 +9,7 @@ using ImageEvaluatorInterfaces;
 
 namespace ImageEvaluatorLib.ReadImage
 {
-    abstract class DoubleLightImageReader_Base : IDoubleLightImageReader
+    internal abstract class DoubleLightImageReader_Base : IDoubleLightImageReader
     {
         protected string _fileName;
         protected int _width;
@@ -17,7 +17,6 @@ namespace ImageEvaluatorLib.ReadImage
         protected int _bitNumber;
         protected Image<Gray, float> _img1;
         protected Image<Gray, float> _img2;
-        private bool _initialized;
         protected ILogger _logger;
         protected bool _showImages;
         protected Rectangle _fullROI;
@@ -26,14 +25,16 @@ namespace ImageEvaluatorLib.ReadImage
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="logger"></param>
         /// <param name="width"></param>
+        /// <param name="showImages"></param>
         protected DoubleLightImageReader_Base(ILogger logger, int width, bool showImages)
         {
             _logger = logger;
             _showImages = showImages;
 
-            this._width = width;
-            this._height = width;
+            _width = width;
+            _height = width;
         }
 
 
@@ -42,12 +43,12 @@ namespace ImageEvaluatorLib.ReadImage
         /// </summary>
         /// <param name="inputfileName"></param>
         /// <param name="img1"></param>
-        /// <param name="immg2"></param>
+        /// <param name="img2"></param>
         public bool GetImage(string inputfileName, ref Image<Gray, float> img1, ref Image<Gray, float> img2)
         {
-            if (!_initialized)
+            if (!IsInitialized)
             {
-                _logger.Trace("DoubleLightImageReader is not initialized yet.");
+                _logger?.Trace("DoubleLightImageReader is not initialized yet.");
                 return false;
             }
 
@@ -57,20 +58,20 @@ namespace ImageEvaluatorLib.ReadImage
 
             if (!CheckFileName(inputfileName))
             {
-                _logger?.Error($"The file name is invalid. It does not exists or the width, height are invalid.");
+                _logger?.Error("The file name is invalid. It does not exists or the width, height are invalid.");
                 return false;
             }
 
             try
             {
-                InitEmguImages();
+                ResetImageROI();
 
                 img1 = _img1;
                 img2 = _img2;
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Error during emgu image allocation. {ex.Message}");
+                _logger?.Error($"Error during emgu image allocation: {ex}");
                 return false;
             }
 
@@ -111,13 +112,14 @@ namespace ImageEvaluatorLib.ReadImage
         /// <returns></returns>
         public virtual bool Init()
         {
-            _initialized = (CheckWidthData() && InitEmguImages());
+            IsInitialized = (CheckWidthData() && InitEmguImages());
 
-            _logger?.Info("DoubleLightImageReaderBase " + (_initialized ? string.Empty : "NOT") + " initialized.");
+            _logger?.Info("DoubleLightImageReaderBase " + (IsInitialized ? string.Empty : "NOT") + " initialized.");
 
-            return _initialized;
+            return IsInitialized;
         }
 
+        public bool IsInitialized { get; protected set; }
 
 
         private bool CheckWidthData()
@@ -145,7 +147,7 @@ namespace ImageEvaluatorLib.ReadImage
                     return false;
 
                 FileInfo fi = new FileInfo(inputfileName);
-                if (fi.Length != (_width * _height * 2 * _bitNumber))
+                if (fi.Length != (_width*_height*2*_bitNumber))
                     return false;
             }
             catch (Exception ex)
@@ -163,14 +165,8 @@ namespace ImageEvaluatorLib.ReadImage
         /// </summary>
         private bool InitEmguImages()
         {
-            if (_initialized)
+            if (IsInitialized)
             {
-                if (_img1.IsROISet)
-                    _img1.ROI = _fullROI;
-
-                if (_img2.IsROISet)
-                    _img2.ROI = _fullROI;
-
                 return true;
             }
 
@@ -190,8 +186,26 @@ namespace ImageEvaluatorLib.ReadImage
 
         }
 
+        private bool ResetImageROI()
+        {
+            if (IsInitialized)
+            {
+                if (_img1.IsROISet)
+                    _img1.ROI = _fullROI;
 
-        /// <summary>
+                if (_img2.IsROISet)
+                    _img2.ROI = _fullROI;
+
+                _logger.Info("Image ROIs were reseted.");
+                return true;
+            }
+
+            _logger.Info("Image ROIs could be reseted because Reader is not initialized yet");
+            return false;
+        }
+
+
+    /// <summary>
         /// 
         /// </summary>
         private bool ClearEmguImages()

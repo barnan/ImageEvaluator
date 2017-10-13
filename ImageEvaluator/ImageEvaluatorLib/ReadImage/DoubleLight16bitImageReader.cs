@@ -6,15 +6,15 @@ using ImageEvaluatorInterfaces;
 
 namespace ImageEvaluatorLib.ReadImage
 {
-    class DoubleLight16bitImageReader : DoubleLightImageReader_Base
+    class DoubleLight16BitImageReader : DoubleLightImageReader_Base
     {
-
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="logger"></param>
         /// <param name="width"></param>
-        /// <param name="bitnumber"></param>
-        internal DoubleLight16bitImageReader(ILogger logger, int width, bool showImages)
+        /// <param name="showImages"></param>
+        internal DoubleLight16BitImageReader(ILogger logger, int width, bool showImages)
             : base(logger, width, showImages)
         {
             _bitNumber = 2;
@@ -46,8 +46,8 @@ namespace ImageEvaluatorLib.ReadImage
                 // make separate emgu images:
 
                 // to speed up:
-                float[,,] emguImage1_Array = _img1.Data;
-                float[,,] emguImage2_Array = _img2.Data;
+                float[,,] emguImage1Array = _img1.Data;
+                float[,,] emguImage2Array = _img2.Data;
 
                 for (int i = 0; i < _height; i++)
                 {
@@ -56,8 +56,8 @@ namespace ImageEvaluatorLib.ReadImage
 
                     for (int j = 0; j < _width; j++)
                     {
-                        emguImage1_Array[i, j, 0] = dataRow1[2 * j] + (dataRow1[2 * j + 1] << 8);
-                        emguImage2_Array[i, j, 0] = dataRow2[2 * j] + (dataRow2[2 * j + 1] << 8);
+                        emguImage1Array[i, j, 0] = dataRow1[2 * j] + (dataRow1[2 * j + 1] << 8);
+                        emguImage2Array[i, j, 0] = dataRow2[2 * j] + (dataRow2[2 * j + 1] << 8);
                     }
                 }
 
@@ -84,7 +84,7 @@ namespace ImageEvaluatorLib.ReadImage
         public IDoubleLightImageReader Factory(ILogger logger, int width, bool showImages)
         {
             logger?.Info($"{typeof(Factory_DoubleLight16bitImageReader).ToString()} factory called.");
-            return new DoubleLight16bitImageReader(logger, width, showImages);
+            return new DoubleLight16BitImageReader(logger, width, showImages);
         }
     }
 

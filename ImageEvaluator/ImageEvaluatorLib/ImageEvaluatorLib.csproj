@@ -83,6 +83,10 @@
     <Compile Include="ReadImage\DoubleLight8bitImageReader.cs" />
     <Compile Include="ReadImage\DoubleLight8bitImageReader_ver2.cs" />
     <Compile Include="ReadImage\DoubleLightImageReader_Base.cs" />
+    <Compile Include="ThresholdCalculator\HistogramThresholdCalculatorBase.cs" />
+    <Compile Include="ThresholdCalculator\HistogramThresholdCalculatorCSharp1.cs" />
+    <Compile Include="ThresholdCalculator\HistogramThresholdCalculatorEmgu2.cs" />
+    <Compile Include="ThresholdCalculator\HistogramThresholdCalculatorEmgu1.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="NLog.config">

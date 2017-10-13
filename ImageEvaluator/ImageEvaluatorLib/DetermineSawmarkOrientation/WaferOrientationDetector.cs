@@ -24,7 +24,7 @@ namespace ImageEvaluatorLib.DetermineSawmarkOrientation
         private int _sectionWidthInPixel = 10;
         private int _lowerFreqLimitIn1PerN = 60;
         private int _upperFreqLimitIn1PerN = 800;
-        private bool _initialized;
+        protected bool _isInitialized;
 
         // emgu images:
         private Image<Gray, float> _inputSectionVertical;
@@ -62,8 +62,7 @@ namespace ImageEvaluatorLib.DetermineSawmarkOrientation
         private Matrix<float> _powerSpectrumHorizontal;
 
         private Image<Gray, byte> _freqRangeMask;
-
-
+        
 
         #region properties
 
@@ -151,7 +150,7 @@ namespace ImageEvaluatorLib.DetermineSawmarkOrientation
             }
         }
 
-
+        public bool IsInitialized => _isInitialized;
 
         #endregion
 
@@ -171,12 +170,14 @@ namespace ImageEvaluatorLib.DetermineSawmarkOrientation
 
         public bool Init()
         {
-            _initialized = CreateEmguImages();
+            _isInitialized = CreateEmguImages();
 
-            _logger?.Info("WaferOrientationDetector " + (_initialized ? string.Empty : "NOT") + " Initialized.");
+            _logger?.Info("WaferOrientationDetector " + (IsInitialized ? string.Empty : "NOT") + " Initialized.");
 
-            return _initialized;
+            return IsInitialized;
         }
+
+        
 
 
         private bool CreateEmguImages()
@@ -228,14 +229,14 @@ namespace ImageEvaluatorLib.DetermineSawmarkOrientation
             catch (Exception ex)
             {
                 _logger?.Error($"Exception in WaferOrientationDetector-CreateEmguImages: {ex}.");
-                return _initialized = false;
+                return _isInitialized = false;
             }
             finally
             {
                 Monitor.Exit(_detectorLock);
             }
 
-            return _initialized = true;
+            return _isInitialized = true;
         }
 
 
@@ -276,7 +277,7 @@ namespace ImageEvaluatorLib.DetermineSawmarkOrientation
 
                 _freqRangeMask?.Dispose();
 
-                _initialized = false;
+                _isInitialized = false;
 
                 _logger?.Info("WaferOrientationDetector - emgu images destroyed.");
 
@@ -316,7 +317,7 @@ namespace ImageEvaluatorLib.DetermineSawmarkOrientation
                 swatch.Start();
 
                 // Variable initlization (and check):  ---------------------------------------------------------------------------------------------
-                if (!_initialized)
+                if (!IsInitialized)
                     return null;
 
                 _logger?.Info("WaferOrientationDetection started.");

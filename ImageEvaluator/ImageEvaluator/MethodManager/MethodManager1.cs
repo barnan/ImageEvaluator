@@ -5,19 +5,20 @@ using ImageEvaluatorLib.DataSaver;
 using ImageEvaluatorLib.ReadImage;
 using ImageEvaluatorLib.ReadDirectory;
 using ImageEvaluatorLib.PreProcessor;
-using ImageEvaluatorLib.SearchContourPoints;
 using ImageEvaluatorLib.CalculateStatisticalData;
 using System.Collections.Generic;
 using System.Drawing;
 using ImageEvaluatorLib.FindEdgeLines;
 using ImageEvaluatorLib.FitEdgeLines;
 using ImageEvaluator.EvaluationProcessor;
+using ImageEvaluatorLib.BorderSearch;
+using ImageEvaluatorLib.ThresholdCalculator;
 using NLog;
 
 namespace ImageEvaluator.MethodManager
 {
 
-    public class MethodManager1 : MethodManagerBase
+    internal class MethodManager1 : MethodManagerBase
     {
 
         public MethodManager1(string[] paths)
@@ -41,11 +42,14 @@ namespace ImageEvaluator.MethodManager
 
                 IDirectoryReader dirReader = new Factory_DirectoryReader().Factory(_logger, _inputPaths[_pathIndex], "raw", imageReader);
 
-                IImagePreProcessor preProcessor = new Factory_ImagePreProcessor().Factory(_logger, 4096, width, height, show);
+                int histogramRange = 4096;
+                IHistogramThresholdCalculator histcalculator = new FactoryHistogramThresholdCalculatorEmgu1().Factory(_logger, histogramRange);
 
-                IBorderSearcher borderSearcher = new Factory_BorderSearcher_Emgu1().Factory(_logger, 10, height, show);
+                IImagePreProcessor preProcessor = new FactoryImagePreProcessor().Factory(_logger, histogramRange, width, height, histcalculator, show);
 
-                IColumnDataCalculator columnDataCalculator = new Factory_CalculateColumnData_Emgu1().Factory(_logger, width, height);
+                IBorderSearcher borderSearcher = new FactoryBorderSearcherEmgu1().Factory(_logger, 10, height, show);
+
+                IColumnDataCalculator columnDataCalculator = new FactoryCalculateColumnDataEmgu1().Factory(_logger, width, height);
 
                 string outputFolder = Path.Combine(_inputPaths[_pathIndex], "output");
                 IResultSaver saver = new Factory_CsvResultSaver().Factory(outputFolder, "StatCalc", _logger);

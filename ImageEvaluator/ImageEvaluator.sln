@@ -4,6 +4,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageEvaluator", "ImageEvaluator\ImageEvaluator.csproj", "{E897A626-5BD5-4DC1-9D95-2FFBCE20E6A5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1F20BE2B-7B75-4B22-A259-20F3379A66ED} = {1F20BE2B-7B75-4B22-A259-20F3379A66ED}
+		{D1BC58D7-7881-45BF-A21C-E16DA4DEC2B0} = {D1BC58D7-7881-45BF-A21C-E16DA4DEC2B0}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageEvaluatorLib", "ImageEvaluatorLib\ImageEvaluatorLib.csproj", "{1F20BE2B-7B75-4B22-A259-20F3379A66ED}"
 EndProject

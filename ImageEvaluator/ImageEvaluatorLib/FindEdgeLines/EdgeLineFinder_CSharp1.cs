@@ -171,7 +171,7 @@ namespace ImageEvaluatorLib.FindEdgeLines
     {
         public IEdgeLineFinder Factory(ILogger logger, Dictionary<SearchOrientations, Rectangle> calcAreas)
         {
-            logger?.Info($"{typeof(Factory_EdgeLineFinder_CSharp1).ToString()} factory called.");
+            logger?.Info($"{typeof(Factory_EdgeLineFinder_CSharp1)} factory called.");
             return new EdgeLineFinder_CSharp1(logger, calcAreas);
         }
     }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Drawing;
-using System.IO;
-using System.Threading;
+﻿using System.Threading;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using ImageEvaluatorInterfaces;
@@ -13,6 +9,7 @@ namespace ImageEvaluatorLib.DetermineSawmarkOrientation
     public class DetermineSawmarkOrientation : ISawmarkDeterminer
     {
         private IWaferOrientationDetector det;
+        private bool _isInitialized;
 
         public DetermineSawmarkOrientation(IWaferOrientationDetector det)
         {
@@ -20,26 +17,24 @@ namespace ImageEvaluatorLib.DetermineSawmarkOrientation
         }
 
 
-
         public bool Init()
         {
-            return det.Init();
+            det.Init();
+            return _isInitialized = det.IsInitialized;
         }
 
+
+        public bool IsInitialized => _isInitialized;
 
 
         public void Run(Image<Gray, float> image, string name)
         {
-
             byte[] input = image.Bytes; //ReadDoubleLightImage(name);
 
             CancellationToken token = new CancellationToken();
 
             det.Run(input, token, 1.3, 10, 4, 50);
-
         }
-
-
     }
 
 

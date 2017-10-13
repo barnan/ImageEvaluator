@@ -3,7 +3,7 @@ using NLog;
 
 namespace ImageEvaluatorLib.CalculateStatisticalData
 {
-    abstract class CalculateColumnDataBase_Emgu : CalculateColumnDataBase
+    abstract class CalculateColumnDataBaseEmgu : CalculateColumnDataBase
     {
 
         protected int _imageWidth;
@@ -15,7 +15,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         /// <param name="logger"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        protected CalculateColumnDataBase_Emgu(ILogger logger, int width, int height)
+        protected CalculateColumnDataBaseEmgu(ILogger logger, int width, int height)
             : base(logger, width, height)
         {
         }

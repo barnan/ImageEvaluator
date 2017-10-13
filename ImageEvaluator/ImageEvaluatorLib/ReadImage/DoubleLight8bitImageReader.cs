@@ -6,15 +6,15 @@ using ImageEvaluatorInterfaces;
 
 namespace ImageEvaluatorLib.ReadImage
 {
-    class DoubleLight8bitImageReader : DoubleLightImageReader_Base
+    class DoubleLight8BitImageReader : DoubleLightImageReader_Base
     {
-
         /// <summary>
         /// 
         /// </summary>
         /// <param name="width"></param>
-        /// <param name="bitdepth"></param>
-        internal DoubleLight8bitImageReader(ILogger logger, int width, bool showImages)
+        /// <param name="showImages"></param>
+        /// <param name="logger"></param>
+        internal DoubleLight8BitImageReader(ILogger logger, int width, bool showImages)
             : base(logger, width, showImages)
         {
             _bitNumber = 1;
@@ -27,9 +27,6 @@ namespace ImageEvaluatorLib.ReadImage
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="inputFileName"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
         protected override bool ReadDoubleLightImage()
         {
             Stopwatch sw = new Stopwatch();
@@ -48,8 +45,8 @@ namespace ImageEvaluatorLib.ReadImage
 
                 // make separate emgu images:
 
-                float[,,] emguImage1_Array = _img1.Data;
-                float[,,] emguImage2_Array = _img2.Data;
+                float[,,] emguImage1Array = _img1.Data;
+                float[,,] emguImage2Array = _img2.Data;
 
                 for (int i = 0; i < _height; i++)
                 {
@@ -58,8 +55,8 @@ namespace ImageEvaluatorLib.ReadImage
 
                     for (int j = 0; j < _width; j++)
                     {
-                        emguImage1_Array[i, j, 0] = dataRow1[j];
-                        emguImage2_Array[i, j, 0] = dataRow2[j];
+                        emguImage1Array[i, j, 0] = dataRow1[j];
+                        emguImage2Array[i, j, 0] = dataRow2[j];
                     }
 
                 }
@@ -86,7 +83,7 @@ namespace ImageEvaluatorLib.ReadImage
     {
         public IDoubleLightImageReader Factory(ILogger logger, int width, bool showImages)
         {
-            return new DoubleLight8bitImageReader(logger, width, showImages);
+            return new DoubleLight8BitImageReader(logger, width, showImages);
         }
     }
 

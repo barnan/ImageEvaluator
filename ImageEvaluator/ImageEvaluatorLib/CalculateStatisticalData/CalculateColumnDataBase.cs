@@ -7,10 +7,8 @@ using NLog;
 
 namespace ImageEvaluatorLib.CalculateStatisticalData
 {
-    abstract class CalculateColumnDataBase : IColumnDataCalculator
+    internal abstract class CalculateColumnDataBase : IColumnDataCalculator
     {
-
-        protected bool _initialized;
         protected int _width;
         protected int _height;
         protected Image<Gray, float> _meanVector;
@@ -36,12 +34,14 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
         public bool Init()
         {
-            _initialized = InitEmguImages();
+            IsInitialized = InitEmguImages();
 
-            _logger?.Info("CalculateColumnData_Base " + (_initialized ? string.Empty : "NOT") + " Initialized.");
+            _logger?.Info("CalculateColumnData_Base " + (IsInitialized ? string.Empty : "NOT") + " Initialized.");
 
-            return _initialized;
+            return IsInitialized;
         }
+
+        public bool IsInitialized { get; protected set; }
 
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         /// <returns></returns>
         protected virtual bool InitEmguImages()
         {
-            if (_initialized)
+            if (IsInitialized)
                 return true;
 
             try
@@ -122,7 +122,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             _meanVector?.Dispose();
             _stdVector?.Dispose();
 
-            _initialized = false;
+            IsInitialized = false;
 
             return true;
         }

@@ -5,13 +5,12 @@ using NLog;
 
 namespace ImageEvaluatorLib.FitEdgeLines
 {
-    abstract class EdgeLineFitterBase : IEdgeLineFitter
+    internal abstract class EdgeLineFitterBase : IEdgeLineFitter
     {
         protected ILogger _logger;
 
 
-
-        public EdgeLineFitterBase(ILogger logger)
+        protected EdgeLineFitterBase(ILogger logger)
         {
             _logger = logger;
         }
@@ -20,8 +19,11 @@ namespace ImageEvaluatorLib.FitEdgeLines
 
         public bool Init()
         {
-            return true;
+            return IsInitialized = true;
         }
+
+        public bool IsInitialized { get; protected set; }
+
 
         public bool Run(IWaferEdgeFindData edgeFindData, ref IWaferFittingData edgeFitData)
         {

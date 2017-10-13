@@ -1,19 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ImageEvaluatorInterfaces;
-using ImageEvaluatorLib.ReadImage;
 using NLog;
 
 namespace ImageEvaluatorLib.ReadImage
 {
-    class DoubleLight8bitImageReader_ver2 : DoubleLightImageReader_Base
+    class DoubleLight8BitImageReaderVer2 : DoubleLightImageReader_Base
     {
-        public DoubleLight8bitImageReader_ver2(ILogger logger, int width, bool showImages)
+        public DoubleLight8BitImageReaderVer2(ILogger logger, int width, bool showImages)
             : base(logger, width, showImages)
         {
             _bitNumber = 1;
@@ -69,7 +64,7 @@ namespace ImageEvaluatorLib.ReadImage
     {
         public IDoubleLightImageReader Factory(ILogger logger, int width, bool showImages)
         {
-            return new DoubleLight8bitImageReader_ver2(logger, width, showImages);
+            return new DoubleLight8BitImageReaderVer2(logger, width, showImages);
         }
     }
 

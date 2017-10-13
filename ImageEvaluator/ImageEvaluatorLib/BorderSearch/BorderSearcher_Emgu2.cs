@@ -6,18 +6,17 @@ using Emgu.CV.Structure;
 using Emgu.CV.Util;
 using ImageEvaluatorInterfaces;
 using NLog;
-using System.Threading;
 using Emgu.CV.UI;
 
-namespace ImageEvaluatorLib.SearchContourPoints
+namespace ImageEvaluatorLib.BorderSearch
 {
 
     /// <summary>
     /// it is using ChainApproxNone-t hence the line fitting can be eliminated
     /// </summary>
-    class BorderSearcher_Emgu2 : BorderSearcherBase
+    class BorderSearcherEmgu2 : BorderSearcherBase
     {
-        public BorderSearcher_Emgu2(ILogger logger, int border, bool show, int imageHeight)
+        public BorderSearcherEmgu2(ILogger logger, int border, bool show, int imageHeight)
             : base(logger, imageHeight, border)
         {
             _showImages = show;
@@ -82,11 +81,11 @@ namespace ImageEvaluatorLib.SearchContourPoints
     }
 
 
-    public class Factory_BorderSearcher_Emgu2 : IBorderSeracher_Creator
+    public class FactoryBorderSearcherEmgu2 : IBorderSeracher_Creator
     {
         public IBorderSearcher Factory(ILogger logger, int border, int imageHeight, bool showImages)
         {
-            return new BorderSearcher_Emgu2(logger, border, showImages, imageHeight);
+            return new BorderSearcherEmgu2(logger, border, showImages, imageHeight);
         }
     }
 

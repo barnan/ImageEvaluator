@@ -5,14 +5,20 @@ using System.Diagnostics;
 
 namespace ImageEvaluator.EvaluationProcessor
 {
-    abstract class EvaluationProcessorBase : IEvaluationProcessor
+    internal abstract class EvaluationProcessorBase : IEvaluationProcessor
     {
         protected readonly ILogger _logger;
         protected Stopwatch _watch1;
+        private bool _isInitialized;
 
 
         public abstract bool Run();
         public abstract bool Init();
+
+        public bool IsInitialized
+        {
+            get { return _isInitialized; }
+        }
 
 
         protected EvaluationProcessorBase(ILogger logger)

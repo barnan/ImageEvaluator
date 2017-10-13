@@ -5,9 +5,8 @@ using System.IO;
 
 namespace ImageEvaluator.MethodManager
 {
-    public abstract class MethodManagerBase : IMethodManager
+    internal abstract class MethodManagerBase : IMethodManager
     {
-        protected bool _initialized;
         protected Logger _logger;
         protected IEvaluationProcessor _evaluationProcessor;
         protected string[] _inputPaths;
@@ -34,7 +33,7 @@ namespace ImageEvaluator.MethodManager
                 }
             }
 
-            _logger?.Trace($"InputDirectory array did not contain valid directory path.");
+            _logger?.Trace("InputDirectory array did not contain valid directory path.");
             return null;
         }
 
@@ -49,18 +48,20 @@ namespace ImageEvaluator.MethodManager
             }
             else
             {
-                return _initialized = false;
+                return IsInitialized = false;
             }
 
-            return _initialized = true;
+            return IsInitialized = true;
         }
+
+        public bool IsInitialized { get; protected set; }
 
 
         public bool Run()
         {
-            if (!_initialized)
+            if (!IsInitialized)
             {
-                _logger?.Info($"Methodmanager is not initialized properly!!!");
+                _logger?.Info("Methodmanager is not initialized properly!!!");
                 return false;
             }
 

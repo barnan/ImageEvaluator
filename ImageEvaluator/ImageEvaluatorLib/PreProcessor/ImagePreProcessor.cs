@@ -4,15 +4,16 @@ using Emgu.CV.Structure;
 using NLog;
 using Emgu.CV.UI;
 using ImageEvaluatorInterfaces;
+using ImageEvaluatorLib.ThresholdCalculator;
 
 namespace ImageEvaluatorLib.PreProcessor
 {
     class ImagePreProcessor : IImagePreProcessor
     {
+        private IHistogramThresholdCalculator _thresholdcalculator;
         private DenseHistogram _hist;
         private int _intensityRange;
         Image<Gray, float> _thresholdedImage;
-        private bool _initialized;
         protected bool _showImages;
         private int _width;
         private int _height;
@@ -25,13 +26,15 @@ namespace ImageEvaluatorLib.PreProcessor
         /// <param name="intensityRange"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        internal ImagePreProcessor(ILogger logger, int intensityRange, int width, int height, bool showImages)
+        /// <param name="showImages"></param>
+        internal ImagePreProcessor(ILogger logger, int intensityRange, int width, int height, IHistogramThresholdCalculator histcalculator, bool showImages)
         {
             _intensityRange = intensityRange;
             _showImages = showImages;
             _width = width;
             _height = height;
             _logger = logger;
+            _thresholdcalculator = histcalculator;
         }
 
 
@@ -41,16 +44,18 @@ namespace ImageEvaluatorLib.PreProcessor
         /// <returns></returns>
         public virtual bool Init()
         {
-            _initialized = (CheckWidthData() && InitEmguImages());
+            IsInitialized = (CheckWidthData() && InitEmguImages());
 
-            _logger?.Info("ImagePreProcessor " + (_initialized ? string.Empty : "NOT") + " initialized.");
+            _logger?.Info("ImagePreProcessor " + (IsInitialized ? string.Empty : "NOT") + " initialized.");
 
-            return _initialized;
+            return IsInitialized;
         }
+
+        public bool IsInitialized { get; protected set; }
 
 
         /// <summary>
-        /// 
+        /// Makes image transpose and creates mask image
         /// </summary>
         /// <param name="inputImage"></param>
         /// <param name="maskImage"></param>
@@ -64,7 +69,8 @@ namespace ImageEvaluatorLib.PreProcessor
                 // calculate historamm for binarythreshold
                 _hist.Calculate<float>(new[] { inputImage }, false, null);
 
-                float thresh = CalculateThresholdRegardingMoment(_hist);
+                float thresh;
+                _thresholdcalculator.Run(_hist, out thresh);
 
                 // create mask image:
                 double maskValue = 255.0;
@@ -101,13 +107,10 @@ namespace ImageEvaluatorLib.PreProcessor
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="intensityRange"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
         /// <returns></returns>
         private bool InitEmguImages()
         {
-            if (_initialized)
+            if (IsInitialized)
                 return true;
 
             try
@@ -133,71 +136,19 @@ namespace ImageEvaluatorLib.PreProcessor
         {
             _thresholdedImage?.Dispose();
 
-            _initialized = false;
+            IsInitialized = false;
 
             return true;
         }
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="inputHistogram"></param>
-        /// <returns></returns>
-        private float CalculateThresholdRegardingMoment(DenseHistogram inputHistogram)
-        {
-            float[] Hist;
-            Hist = inputHistogram.GetBinValues();
-
-            float[,] mean = new float[4096, 2];
-            float[,] deviation = new float[4096, 2];
-            float[,] num = new float[256, 2];
-            float min = 100000;
-            float minpos = 0;
-            for (int nt = 5; nt < 256 - 5; nt++)
-            {
-                for (int n = 0; n < 256; n++)
-                {
-                    if (n < nt)
-                    {
-                        num[nt, 0] += Hist[n];
-                        mean[nt, 0] += n * Hist[n];
-                        deviation[nt, 0] += n * n * Hist[n];
-                    }
-                    else
-                    {
-                        num[nt, 1] += Hist[n];
-                        mean[nt, 1] += n * Hist[n];
-                        deviation[nt, 1] += n * n * Hist[n];
-                    }
-                }
-                mean[nt, 0] = mean[nt, 0] / num[nt, 0];
-                deviation[nt, 0] = (float)Math.Sqrt(deviation[nt, 0] / num[nt, 0] - mean[nt, 0] * mean[nt, 0]);
-                mean[nt, 1] = mean[nt, 1] / num[nt, 1];
-                deviation[nt, 1] = (float)Math.Sqrt(deviation[nt, 1] / num[nt, 1] - mean[nt, 1] * mean[nt, 1]);
-
-                if (min > deviation[nt, 0] + deviation[nt, 1])
-                {
-                    min = deviation[nt, 0] + deviation[nt, 1];
-                    minpos = nt;
-                }
-            }
-
-            return minpos;
-        }
-
-
     }
 
 
-
-
-    public class Factory_ImagePreProcessor : IImagePreProcessor_Creator
+    public class FactoryImagePreProcessor : IImagePreProcessorCreator
     {
-        public IImagePreProcessor Factory(ILogger logger, int intensityRange, int width, int height, bool showImages)
+        public IImagePreProcessor Factory(ILogger logger, int intensityRange, int width, int height, IHistogramThresholdCalculator histcalculator, bool showImages)
         {
-            logger?.Info($"{typeof(Factory_ImagePreProcessor).ToString()} factory called.");
-            return new ImagePreProcessor(logger, intensityRange, width, height, showImages);
+            logger?.Info($"{typeof(FactoryImagePreProcessor)} factory called.");
+            return new ImagePreProcessor(logger, intensityRange, width, height, histcalculator, showImages);
         }
     }
 

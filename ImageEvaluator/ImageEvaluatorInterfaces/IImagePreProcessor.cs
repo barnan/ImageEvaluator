@@ -10,9 +10,9 @@ namespace ImageEvaluatorInterfaces
     }
 
 
-    public interface IImagePreProcessor_Creator
+    public interface IImagePreProcessorCreator
     {
-        IImagePreProcessor Factory(ILogger logger, int bitDepth, int width, int height, bool showImages);
+        IImagePreProcessor Factory(ILogger logger, int bitDepth, int width, int height, IHistogramThresholdCalculator histcalculator, bool showImages);
     }
 
 }

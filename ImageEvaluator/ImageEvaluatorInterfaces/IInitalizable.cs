@@ -5,5 +5,7 @@ namespace ImageEvaluatorInterfaces
     {
         bool Init();
 
+        bool IsInitialized { get; }
+
     }
 }

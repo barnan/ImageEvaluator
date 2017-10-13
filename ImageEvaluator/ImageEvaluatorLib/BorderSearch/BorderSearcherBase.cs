@@ -4,21 +4,20 @@ using Emgu.CV.Structure;
 using ImageEvaluatorInterfaces;
 using NLog;
 
-namespace ImageEvaluatorLib.SearchContourPoints
+namespace ImageEvaluatorLib.BorderSearch
 {
-    abstract class BorderSearcherBase : IBorderSearcher
+    internal abstract class BorderSearcherBase : IBorderSearcher
     {
 
         protected int[,] _borderPoints;
         protected int _borderSkipSize;
         protected bool _showImages;
-        private bool _initialized;
         private int _imageHeight;
         private Image<Gray, byte> _maskImage;
         protected ILogger _logger;
 
 
-        public BorderSearcherBase(ILogger logger, int imageHeight, int border)
+        protected BorderSearcherBase(ILogger logger, int imageHeight, int border)
         {
             _imageHeight = imageHeight;
             _logger = logger;
@@ -32,10 +31,12 @@ namespace ImageEvaluatorLib.SearchContourPoints
         /// <returns></returns>
         public bool Init()
         {
-            _initialized = InitArrays();
-            _logger?.Info("BorderSearcher_Base " + (_initialized ? string.Empty : "NOT") + " initialized.");
-            return _initialized;
+            IsInitialized = InitArrays();
+            _logger?.Info($"{typeof(BorderSearcherBase)}" + (IsInitialized ? string.Empty : " NOT") + " initialized.");
+            return IsInitialized;
         }
+
+        public bool IsInitialized { get; protected set; }
 
 
         /// <summary>
@@ -46,7 +47,7 @@ namespace ImageEvaluatorLib.SearchContourPoints
         /// <returns></returns>
         public bool Run(Image<Gray, byte> maskImage, ref int[,] pointList)
         {
-            if (!_initialized)
+            if (!IsInitialized)
             {
                 _logger?.Error("BorderSearch is not initialized yet.");
                 return false;
@@ -82,12 +83,11 @@ namespace ImageEvaluatorLib.SearchContourPoints
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="height"></param>
         /// <returns></returns>
         protected bool InitArrays()
         {
-            if (_initialized)
-                return _initialized;
+            if (IsInitialized)
+                return IsInitialized;
 
             _borderPoints = new int[_imageHeight, 2];
 
@@ -98,7 +98,7 @@ namespace ImageEvaluatorLib.SearchContourPoints
 
         protected bool ResetPointList()
         {
-            if (!_initialized)
+            if (!IsInitialized)
                 return false;
 
             for (int i = 0; i < _borderPoints.Length / 2; i++)

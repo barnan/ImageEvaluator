@@ -8,11 +8,11 @@ using System.Drawing;
 using ImageEvaluatorInterfaces;
 using Emgu.CV.UI;
 
-namespace ImageEvaluatorLib.SearchContourPoints
+namespace ImageEvaluatorLib.BorderSearch
 {
-    class BorderSearcher_Emgu1 : BorderSearcherBase
+    class BorderSearcherEmgu1 : BorderSearcherBase
     {
-        internal BorderSearcher_Emgu1(ILogger logger, int border, bool show, int imageHeight)
+        internal BorderSearcherEmgu1(ILogger logger, int border, bool show, int imageHeight)
             : base(logger, imageHeight, border)
         {
             _showImages = show;
@@ -137,12 +137,12 @@ namespace ImageEvaluatorLib.SearchContourPoints
     /// <summary>
     /// 
     /// </summary>
-    public class Factory_BorderSearcher_Emgu1 : IBorderSeracher_Creator
+    public class FactoryBorderSearcherEmgu1 : IBorderSeracher_Creator
     {
         public IBorderSearcher Factory(ILogger logger, int border, int imageHeight, bool showImages)
         {
-            logger?.Info($"{typeof(Factory_BorderSearcher_Emgu1).ToString()} factory called.");
-            return new BorderSearcher_Emgu1(logger, border, showImages, imageHeight);
+            logger?.Info($"{typeof(FactoryBorderSearcherEmgu1)} factory called.");
+            return new BorderSearcherEmgu1(logger, border, showImages, imageHeight);
         }
     }
 

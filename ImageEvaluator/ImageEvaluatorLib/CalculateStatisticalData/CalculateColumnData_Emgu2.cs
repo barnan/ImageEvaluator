@@ -9,7 +9,7 @@ using NLog;
 
 namespace ImageEvaluatorLib.CalculateStatisticalData
 {
-    class CalculateColumnData_Emgu2 : CalculateColumnDataBase_Emgu
+    class CalculateColumnDataEmgu2 : CalculateColumnDataBaseEmgu
     {
 
         Image<Gray, byte> _complementaryMask;
@@ -23,13 +23,13 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         Image<Gray, float> _sqrt;
 
 
-
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="logger"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        internal CalculateColumnData_Emgu2(ILogger logger, int width, int height)
+        internal CalculateColumnDataEmgu2(ILogger logger, int width, int height)
             : base(logger, width, height)
         {
             _logger?.Info("CalculateColumnData_Emgu2 instantiated.");
@@ -41,11 +41,12 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         /// </summary>
         /// <param name="inputImage"></param>
         /// <param name="maskImage"></param>
+        /// <param name="pointArray"></param>
         /// <param name="meanVector"></param>
         /// <param name="stdVector"></param>
         public override bool Run(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector)
         {
-            if (!_initialized)
+            if (!IsInitialized)
             {
                 _logger.Error("CalculateColumnData_CSharp2 is not initialized.");
                 return false;
@@ -124,8 +125,8 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
         protected override bool InitEmguImages()
         {
-            if (_initialized)
-                return _initialized;
+            if (IsInitialized)
+                return true;
 
             try
             {
@@ -143,10 +144,10 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             catch (Exception ex)
             {
                 Console.WriteLine($"Error during InitEmguImages: {ex}");
-                return _initialized = false;
+                return IsInitialized = false;
             }
 
-            return _initialized = true;
+            return IsInitialized = true;
         }
 
 
@@ -162,7 +163,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             _resu?.Dispose();
             _sqrt?.Dispose();
 
-            return _initialized = false;
+            return IsInitialized = false;
         }
 
     }
@@ -172,11 +173,11 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
     /// <summary>
     /// 
     /// </summary>
-    public class Factory_CalculateColumnData_Emgu2 : IColumnDataCalculator_Creator
+    public class FactoryCalculateColumnDataEmgu2 : IColumnDataCalculator_Creator
     {
         public IColumnDataCalculator Factory(ILogger logger, int width, int height)
         {
-            return new CalculateColumnData_Emgu2(logger, width, height);
+            return new CalculateColumnDataEmgu2(logger, width, height);
         }
     }
 

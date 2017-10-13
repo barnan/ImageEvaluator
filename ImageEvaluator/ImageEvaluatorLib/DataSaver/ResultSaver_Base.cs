@@ -5,14 +5,11 @@ using NLog;
 
 namespace ImageEvaluatorLib.DataSaver
 {
-    abstract class ResultSaver_Base : IResultSaver
+    internal abstract class ResultSaver_Base : IResultSaver
     {
-
         protected readonly string _outputFolder;
         protected readonly string _prefix;
-        protected bool _initialized;
         protected ILogger _logger;
-
 
 
         protected ResultSaver_Base(string outputFolder, string prefix, ILogger logger)
@@ -28,10 +25,12 @@ namespace ImageEvaluatorLib.DataSaver
         /// <returns></returns>
         public bool Init()
         {
-            _initialized = CheckDir();
-            _logger?.Info("ResultSaver is " + (_initialized ? string.Empty : "NOT") + " initialized.");
-            return _initialized;
+            IsInitialized = CheckDir();
+            _logger?.Info("ResultSaver is " + (IsInitialized ? string.Empty : "NOT") + " initialized.");
+            return IsInitialized;
         }
+
+        public bool IsInitialized { get; protected set; }
 
 
         /// <summary>
@@ -51,12 +50,12 @@ namespace ImageEvaluatorLib.DataSaver
                 catch (Exception ex)
                 {
                     _logger?.Error($"Exception during ResultSaver-CheckDir: {ex}");
-                    return _initialized = false;
+                    return IsInitialized = false;
                 }
 
             }
 
-            return _initialized = true;
+            return IsInitialized = true;
         }
 
 

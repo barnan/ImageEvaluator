@@ -66,6 +66,7 @@
     <Compile Include="IMethodManager.cs" />
     <Compile Include="IResultSaver.cs" />
     <Compile Include="ISawmarkDeterminer.cs" />
+    <Compile Include="IHistogramThresholdCalculator.cs" />
     <Compile Include="IWaferEdgeFindData.cs" />
     <Compile Include="IWaferFittingData.cs" />
     <Compile Include="IWaferOrientationDetector.cs" />

@@ -7,32 +7,32 @@ using ImageEvaluatorInterfaces;
 
 namespace ImageEvaluatorLib.CalculateStatisticalData
 {
-    class CalculateColumnData_CSharp1 : CalculateColumnDataBase
+    class CalculateColumnDataCSharp1 : CalculateColumnDataBase
     {
-
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="logger"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        internal CalculateColumnData_CSharp1(ILogger logger, int width, int height)
+        internal CalculateColumnDataCSharp1(ILogger logger, int width, int height)
             : base(logger, width, height)
         {
             _logger?.Info("CalculateColumnData_CSharp1 instantiated.");
         }
 
 
-
         /// <summary>
         /// 
         /// </summary>
         /// <param name="inputImage"></param>
+        /// <param name="maskImage"></param>
         /// <param name="pointArray"></param>
         /// <param name="meanVector"></param>
         /// <param name="stdVector"></param>
         public override bool Run(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector)
         {
-            if (!_initialized)
+            if (!IsInitialized)
             {
                 _logger.Error("CalculateColumnData_CSharp2 is not initialized.");
                 return false;
@@ -89,6 +89,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         /// <param name="inputImage"></param>
         /// <param name="maskImage"></param>
         /// <param name="pointArray"></param>
+        /// <param name="meanVector"></param>
         /// <returns></returns>
         protected override bool CheckInputData(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, float> meanVector, Image<Gray, float> stdVector)
         {
@@ -110,11 +111,11 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
     /// <summary>
     /// 
     /// </summary>
-    public class Factory_CalculateColumnData_CSharp1 : IColumnDataCalculator_Creator
+    public class FactoryCalculateColumnDataCSharp1 : IColumnDataCalculator_Creator
     {
         public IColumnDataCalculator Factory(ILogger logger, int width, int height)
         {
-            return new CalculateColumnData_CSharp1(logger, width, height);
+            return new CalculateColumnDataCSharp1(logger, width, height);
         }
     }
 

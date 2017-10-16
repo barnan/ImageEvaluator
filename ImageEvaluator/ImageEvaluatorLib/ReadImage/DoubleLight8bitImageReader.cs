@@ -6,7 +6,7 @@ using ImageEvaluatorInterfaces;
 
 namespace ImageEvaluatorLib.ReadImage
 {
-    class DoubleLight8BitImageReader : DoubleLightImageReader_Base
+    internal class DoubleLight8BitImageReader : DoubleLightImageReader_Base
     {
         /// <summary>
         /// 
@@ -27,7 +27,7 @@ namespace ImageEvaluatorLib.ReadImage
         /// <summary>
         /// 
         /// </summary>
-        protected override bool ReadDoubleLightImage()
+        protected override bool ReadImage()
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -45,8 +45,8 @@ namespace ImageEvaluatorLib.ReadImage
 
                 // make separate emgu images:
 
-                float[,,] emguImage1Array = _img1.Data;
-                float[,,] emguImage2Array = _img2.Data;
+                ushort[,,] emguImage1Array = _img1.Data;
+                ushort[,,] emguImage2Array = _img2.Data;
 
                 for (int i = 0; i < _height; i++)
                 {
@@ -61,7 +61,7 @@ namespace ImageEvaluatorLib.ReadImage
 
                 }
 
-                Console.WriteLine($"       DoubleLight8bitImageReader - Image convertsion time to emgu-image: {sw.ElapsedMilliseconds}ms.");
+                Console.WriteLine($"       DoubleLight8bitImageReader - Image conversion time to emgu-image: {sw.ElapsedMilliseconds}ms.");
             }
             catch (Exception ex)
             {
@@ -79,10 +79,11 @@ namespace ImageEvaluatorLib.ReadImage
     /// <summary>
     /// 
     /// </summary>
-    public class Factory_DoubleLight8bitImageReader : IDoubleLightImageReader_Creator
+    public class FactoryDoubleLight8BitImageReader : IDoubleLightImageReader_Creator
     {
-        public IDoubleLightImageReader Factory(ILogger logger, int width, bool showImages)
+        public IImageReader Factory(ILogger logger, int width, bool showImages)
         {
+            logger?.Info($"{typeof(FactoryDoubleLight8BitImageReader)} factory called.");
             return new DoubleLight8BitImageReader(logger, width, showImages);
         }
     }

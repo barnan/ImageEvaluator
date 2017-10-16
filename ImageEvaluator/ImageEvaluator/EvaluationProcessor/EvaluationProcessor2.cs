@@ -14,8 +14,8 @@ namespace ImageEvaluator.EvaluationProcessor
         private readonly ISawmarkDeterminer _sawmarkDet;
         bool _initialized;
 
-        Image<Gray, float> _image1;
-        Image<Gray, float> _image2;
+        Image<Gray, ushort> _image1;
+        Image<Gray, ushort> _image2;
 
 
         public EvaluationProcessor2(ILogger logger, IDirectoryReader dirReader, ISawmarkDeterminer sawmarkDet)
@@ -24,7 +24,7 @@ namespace ImageEvaluator.EvaluationProcessor
             _dirReader = dirReader;
             _sawmarkDet = sawmarkDet;
 
-            _logger?.Info("MethodManager 2 instantiated.");
+            _logger?.Info("EvaluationProcessor2 instantiated.");
 
             Init();
         }
@@ -38,7 +38,7 @@ namespace ImageEvaluator.EvaluationProcessor
             resu = resu & _sawmarkDet.Init();
             CheckInit(resu, nameof(_sawmarkDet));
 
-            _logger?.Info("MethodManager 2 " + (_initialized ? string.Empty : "NOT") + " initialized.");
+            _logger?.Info("EvaluationProcessor2 " + (_initialized ? string.Empty : "NOT") + " initialized.");
 
             return _initialized = resu;
         }
@@ -47,12 +47,11 @@ namespace ImageEvaluator.EvaluationProcessor
         {
             if (!_initialized)
             {
-                _logger?.Error("MethodManager 2 Run is not initialized yet.");
+                _logger?.Error("EvaluationProcessor2 Run is not initialized yet.");
                 return false;
             }
 
-            _logger?.Info("MethodManager 2 Run started.");
-            Console.WriteLine("MethodManager 2 Run started.");
+            _logger?.Info("EvaluationProcessor2 Run started.");
 
             while (!_dirReader.EndOfDirectory())
             {
@@ -71,7 +70,7 @@ namespace ImageEvaluator.EvaluationProcessor
                 Console.WriteLine();
             }
 
-            _logger?.Info("MethodManager 2 Run ended.");
+            _logger?.Info("EvaluationProcessor2 Run ended.");
 
             return true;
         }

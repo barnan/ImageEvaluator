@@ -11,16 +11,18 @@ namespace ImageEvaluator
         {
             string[] inputDirs = new string[]
             {
-                @"f:\Quantify_Image_Quality\homogenity test wins13\"
+                @"d:\_SW_Projects\Quantify_Image_Quality\WSI_170214004\",
+                @"d:\_SW_Projects\Quantify_Image_Quality\homogenity test wins13\",
             };
 
-            IMethodManager mm1 = new MethodManager1(inputDirs);
-            IMethodManager mm2 = new MethodManager2(inputDirs);
+            //IMethodManager mm1 = new MethodManager1(inputDirs);
+            //IMethodManager mm2 = new MethodManager2(inputDirs);
 
-
-            mm1.Init();
-
-
+            IMethodManager mm3 = new MethodManager3(inputDirs);
+            
+            mm3.Init();
+            mm3.Run();
+            
 
             Console.ReadKey();
 

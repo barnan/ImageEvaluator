@@ -8,7 +8,7 @@ namespace ImageEvaluatorInterfaces
 {
     public interface IEdgeLineFinder : IInitalizable
     {
-        bool Run(Image<Gray, float> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData);
+        bool Run(Image<Gray, ushort> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData);
     }
 
 

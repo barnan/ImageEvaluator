@@ -24,7 +24,7 @@ namespace ImageEvaluatorLib.DataSaver
         /// <param name="result"></param>
         /// <param name="inputFileName"></param>
         /// <returns></returns>
-        public override bool SaveResult(IMeasurementResult result, string inputFileName)
+        public override bool SaveResult(IColumnMeasurementResult result, string inputFileName)
         {
             try
             {
@@ -63,14 +63,23 @@ namespace ImageEvaluatorLib.DataSaver
             return true;
         }
 
+        public override bool SaveResult(IColumnStatisticalMeasurementResult result, string inputfilename)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool SaveResult(IRegionStatisticalMeasurementResult result, string inputfilename)
+        {
+            throw new NotImplementedException();
+        }
     }
 
 
-    public class Factory_CsvResultSaver : IResultSaver_Creator
+    public class FactoryCsvResultSaver : IResultSaver_Creator
     {
         public IResultSaver Factory(string outputFolder, string prefix, ILogger logger)
         {
-            logger?.Info($"{typeof(Factory_CsvResultSaver).ToString()} factory called.");
+            logger?.Info($"{typeof(FactoryCsvResultSaver).ToString()} factory called.");
             return new CsvResultSaver(outputFolder, prefix, logger);
 
         }

@@ -9,12 +9,12 @@ using NLog;
 
 namespace ImageEvaluatorLib.FindEdgeLines
 {
-    internal class EdgeLineFinder_CSharp1 : EdgeLineFinderBase
+    internal class EdgeLineFinderCSharp1 : EdgeLineFinderBase
     {
-        public EdgeLineFinder_CSharp1(ILogger logger, Dictionary<SearchOrientations, Rectangle> calcareas)
+        public EdgeLineFinderCSharp1(ILogger logger, Dictionary<SearchOrientations, Rectangle> calcareas)
             : base(logger, calcareas)
         {
-            _logger?.Info($"{typeof(EdgeLineFinder_CSharp1)} instantiated.");
+            _logger?.Info($"{typeof(EdgeLineFinderCSharp1)} instantiated.");
         }
 
 
@@ -25,7 +25,7 @@ namespace ImageEvaluatorLib.FindEdgeLines
         /// <param name="maskImage"></param>
         /// <param name="edgeFindData"></param>
         /// <returns></returns>
-        public override bool Run(Image<Gray, float> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData)
+        public override bool Run(Image<Gray, ushort> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData)
         {
             if (!CheckInputData(originalImage, maskImage, _calcAreas))
             {
@@ -167,12 +167,12 @@ namespace ImageEvaluatorLib.FindEdgeLines
     /// <summary>
     /// 
     /// </summary>
-    public class Factory_EdgeLineFinder_CSharp1 : IEdgeLineFinder_Creator
+    public class FactoryEdgeLineFinderCSharp1 : IEdgeLineFinder_Creator
     {
-        public IEdgeLineFinder Factory(ILogger logger, Dictionary<SearchOrientations, Rectangle> calcAreas)
+        public IEdgeLineFinder Factory(ILogger logger, Dictionary<SearchOrientations, Rectangle> calcAreas = null)
         {
-            logger?.Info($"{typeof(Factory_EdgeLineFinder_CSharp1)} factory called.");
-            return new EdgeLineFinder_CSharp1(logger, calcAreas);
+            logger?.Info($"{typeof(FactoryEdgeLineFinderCSharp1)} factory called.");
+            return new EdgeLineFinderCSharp1(logger, calcAreas);
         }
     }
 

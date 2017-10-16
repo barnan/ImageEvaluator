@@ -6,7 +6,7 @@ namespace ImageEvaluatorInterfaces
 {
     public interface IImagePreProcessor : IInitalizable
     {
-        bool Run(Image<Gray, float> inputImage, ref Image<Gray, byte> maskImage);
+        bool Run(Image<Gray, ushort> inputImage, ref Image<Gray, byte> maskImage, string name);
     }
 
 

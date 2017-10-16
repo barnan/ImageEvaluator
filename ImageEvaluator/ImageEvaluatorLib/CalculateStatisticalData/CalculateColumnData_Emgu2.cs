@@ -44,7 +44,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         /// <param name="pointArray"></param>
         /// <param name="meanVector"></param>
         /// <param name="stdVector"></param>
-        public override bool Run(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector)
+        public override bool Run(Image<Gray, ushort> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector)
         {
             if (!IsInitialized)
             {
@@ -63,35 +63,38 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             _complementaryMask = maskImage.Not();
             inputImage.SetValue(zero, _complementaryMask);
 
-            //calculate square image
-            _squareImage = inputImage.Pow(2);
+            using (Image<Gray, float> tempImage = inputImage.Convert<Gray, float>())
+            {
+                //calculate square image
+                _squareImage = tempImage.Pow(2);
 
-            // reduce the sum2 (sum)
-            _squaremean = new Image<Gray, float>(new Size(1, inputImage.Height));
-            CvInvoke.Reduce(_squareImage, _squaremean, ReduceDimension.Auto, ReduceType.ReduceSum);
+                // reduce the sum2 (sum)
+                _squaremean = new Image<Gray, float>(new Size(1, inputImage.Height));
+                CvInvoke.Reduce(_squareImage, _squaremean, ReduceDimension.Auto, ReduceType.ReduceSum);
 
-            // reduce the sum image (sum)
-            _mean = new Image<Gray, float>(new Size(1, inputImage.Height));
-            CvInvoke.Reduce(inputImage, _mean, ReduceDimension.Auto, ReduceType.ReduceSum);
+                // reduce the sum image (sum)
+                _mean = new Image<Gray, float>(new Size(1, inputImage.Height));
+                CvInvoke.Reduce(inputImage, _mean, ReduceDimension.Auto, ReduceType.ReduceSum);
 
-            // reduce the sum image (sum)
-            _counter = new Image<Gray, float>(new Size(1, inputImage.Height));
-            _convertedMask = maskImage.Convert<Gray, float>();
-            CvInvoke.Reduce(_convertedMask, _counter, ReduceDimension.Auto, ReduceType.ReduceSum);
+                // reduce the sum image (sum)
+                _counter = new Image<Gray, float>(new Size(1, inputImage.Height));
+                _convertedMask = maskImage.Convert<Gray, float>();
+                CvInvoke.Reduce(_convertedMask, _counter, ReduceDimension.Auto, ReduceType.ReduceSum);
 
-            //Image<Gray, float> counterReciprok = counter.Pow(-1);
+                //Image<Gray, float> counterReciprok = counter.Pow(-1);
 
-            CvInvoke.Divide(_squaremean, _counter, _squaremean);
-            CvInvoke.Divide(_mean, _counter, _mean);
+                CvInvoke.Divide(_squaremean, _counter, _squaremean);
+                CvInvoke.Divide(_mean, _counter, _mean);
 
-            //squaremean._Mul(counterReciprok);
-            //mean._Mul(counterReciprok);
+                //squaremean._Mul(counterReciprok);
+                //mean._Mul(counterReciprok);
 
-            // calculate   Math.Sqrt(sum2 / (counter-1) - (sum * sum / Math.Pow(counter-1,2)));
-            _sq = _mean.Pow(2);
-            _resu = _squaremean - _sq;
-            _sqrt = _resu.Pow(0.5);
+                // calculate   Math.Sqrt(sum2 / (counter-1) - (sum * sum / Math.Pow(counter-1,2)));
+                _sq = _mean.Pow(2);
+                _resu = _squaremean - _sq;
+                _sqrt = _resu.Pow(0.5);
 
+            }
 
             float[,,] meanData = _mean.Data;
             float[,,] resuData = _sqrt.Data;
@@ -106,7 +109,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         }
 
 
-        protected override bool CheckInputData(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, float> meanVector, Image<Gray, float> stdVector)
+        protected override bool CheckInputData(Image<Gray, ushort> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, float> meanVector, Image<Gray, float> stdVector)
         {
             base.CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector);
 

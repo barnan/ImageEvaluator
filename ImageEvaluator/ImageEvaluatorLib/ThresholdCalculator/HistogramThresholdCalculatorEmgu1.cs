@@ -7,7 +7,6 @@ namespace ImageEvaluatorLib.ThresholdCalculator
 {
     class HistogramThresholdCalculatorEmgu1 : HistogramThresholdCalculatorBase
     {
-
         public HistogramThresholdCalculatorEmgu1(ILogger logger, int histogramSize, int param = 0)
             : base(logger, histogramSize)
         {
@@ -66,6 +65,7 @@ namespace ImageEvaluatorLib.ThresholdCalculator
                         minPos = nt;
                     }
                 }
+
 
                 return true;
             }

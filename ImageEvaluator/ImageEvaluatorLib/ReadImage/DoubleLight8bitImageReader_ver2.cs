@@ -6,7 +6,7 @@ using NLog;
 
 namespace ImageEvaluatorLib.ReadImage
 {
-    class DoubleLight8BitImageReaderVer2 : DoubleLightImageReader_Base
+    internal class DoubleLight8BitImageReaderVer2 : DoubleLightImageReader_Base
     {
         public DoubleLight8BitImageReaderVer2(ILogger logger, int width, bool showImages)
             : base(logger, width, showImages)
@@ -16,7 +16,7 @@ namespace ImageEvaluatorLib.ReadImage
         }
 
 
-        protected override bool ReadDoubleLightImage()
+        protected override bool ReadImage()
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -43,7 +43,7 @@ namespace ImageEvaluatorLib.ReadImage
                 _img1.Bytes = image1;
                 _img2.Bytes = image2;
 
-                Console.WriteLine($"       DoubleLight8bitImageReader_ver2 - Image convertsion time to emgu-image: {sw.ElapsedMilliseconds}ms.");
+                Console.WriteLine($"       DoubleLight8bitImageReader_ver2 - Image conversion time to emgu-image: {sw.ElapsedMilliseconds}ms.");
 
             }
             catch (Exception ex)
@@ -60,10 +60,11 @@ namespace ImageEvaluatorLib.ReadImage
     /// <summary>
     /// 
     /// </summary>
-    public class Factory_DoubleLight8bitImageReader_ver2 : IDoubleLightImageReader_Creator
+    public class FactoryDoubleLight8BitImageReaderVer2 : IDoubleLightImageReader_Creator
     {
-        public IDoubleLightImageReader Factory(ILogger logger, int width, bool showImages)
+        public IImageReader Factory(ILogger logger, int width, bool showImages)
         {
+            logger?.Info($"{typeof(FactoryDoubleLight8BitImageReaderVer2)} factory called.");
             return new DoubleLight8BitImageReaderVer2(logger, width, showImages);
         }
     }

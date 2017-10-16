@@ -6,7 +6,7 @@ namespace ImageEvaluatorInterfaces
 {
     public interface IDirectoryReader : IInitalizable
     {
-        bool GetNextImage(ref Image<Gray, float> img1, ref Image<Gray, float> img2, ref string name);
+        bool GetNextImage(ref Image<Gray, ushort> img1, ref Image<Gray, ushort> img2, ref string name);
 
         bool Restart();
 
@@ -19,7 +19,7 @@ namespace ImageEvaluatorInterfaces
     /// </summary>
     public interface IDirectoryReader_Creator
     {
-        IDirectoryReader Factory(ILogger logger, string directoryName, string extension, IDoubleLightImageReader reader);
+        IDirectoryReader Factory(ILogger logger, string directoryName, string extension, IImageReader reader);
     }
 
 

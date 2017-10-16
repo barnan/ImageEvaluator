@@ -59,7 +59,9 @@ namespace ImageEvaluatorLib.DataSaver
         }
 
 
-        public abstract bool SaveResult(IMeasurementResult result, string inputfilename);
+        public abstract bool SaveResult(IColumnMeasurementResult result, string inputfilename);
+        public abstract bool SaveResult(IColumnStatisticalMeasurementResult result, string inputfilename);
+        public abstract bool SaveResult(IRegionStatisticalMeasurementResult result, string inputfilename);
 
 
 

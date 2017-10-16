@@ -30,7 +30,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         /// <param name="pointArray"></param>
         /// <param name="meanVector"></param>
         /// <param name="stdVector"></param>
-        public override bool Run(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector)
+        public override bool Run(Image<Gray, ushort> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector)
         {
             if (!IsInitialized)
             {
@@ -41,7 +41,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             if (!CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector))
                 return false;
 
-            float[,,] imgData = inputImage.Data;
+            ushort[,,] imgData = inputImage.Data;
 
 
             meanVector = _meanVector;
@@ -91,7 +91,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         /// <param name="pointArray"></param>
         /// <param name="meanVector"></param>
         /// <returns></returns>
-        protected override bool CheckInputData(Image<Gray, float> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, float> meanVector, Image<Gray, float> stdVector)
+        protected override bool CheckInputData(Image<Gray, ushort> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, float> meanVector, Image<Gray, float> stdVector)
         {
             bool partResu = base.CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector);
 

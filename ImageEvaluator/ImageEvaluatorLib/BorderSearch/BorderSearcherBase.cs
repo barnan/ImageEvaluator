@@ -12,13 +12,15 @@ namespace ImageEvaluatorLib.BorderSearch
         protected int[,] _borderPoints;
         protected int _borderSkipSize;
         protected bool _showImages;
-        private int _imageHeight;
-        private Image<Gray, byte> _maskImage;
+        protected int _imageHeight;
+        protected int _imageWidth;
+        //private Image<Gray, byte> _maskImage;
         protected ILogger _logger;
 
 
-        protected BorderSearcherBase(ILogger logger, int imageHeight, int border)
+        protected BorderSearcherBase(ILogger logger, int imageWidth, int imageHeight, int border)
         {
+            _imageWidth = imageWidth;
             _imageHeight = imageHeight;
             _logger = logger;
             _borderSkipSize = border;
@@ -104,7 +106,7 @@ namespace ImageEvaluatorLib.BorderSearch
             for (int i = 0; i < _borderPoints.Length / 2; i++)
             {
                 _borderPoints[i, 0] = 0;
-                _borderPoints[i, 1] = 4096;
+                _borderPoints[i, 1] = _imageWidth;
             }
 
             return true;

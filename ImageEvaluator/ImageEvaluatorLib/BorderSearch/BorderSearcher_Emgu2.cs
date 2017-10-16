@@ -16,8 +16,8 @@ namespace ImageEvaluatorLib.BorderSearch
     /// </summary>
     class BorderSearcherEmgu2 : BorderSearcherBase
     {
-        public BorderSearcherEmgu2(ILogger logger, int border, bool show, int imageHeight)
-            : base(logger, imageHeight, border)
+        public BorderSearcherEmgu2(ILogger logger, int border, bool show, int imageWidth, int imageHeight)
+            : base(logger, imageWidth, imageHeight, border)
         {
             _showImages = show;
         }
@@ -37,34 +37,38 @@ namespace ImageEvaluatorLib.BorderSearch
                     {
                         Point[] coordinateList = contour[i].ToArray();
 
-                        if (_showImages)
+                        if (coordinateList.Length > 100)
                         {
-                            maskImage.SetValue(new Gray(100.0), maskImage);
 
-                            maskImage.Draw(coordinateList, new Gray(200.0), 2);
-                            ImageViewer.Show(maskImage, "BorderSearcher_Emgu2 - contour points");
-                        }
-
-                        for (int j = 0; j < contour[i].Size - 1; j++)
-                        {
-                            if ((coordinateList[j].Y != coordinateList[j + 1].Y) && (Math.Abs(coordinateList[j].Y - coordinateList[j + 1].Y) < magicNumber1))
+                            if (_showImages)
                             {
-                                if (coordinateList[j].X < verticalCenterLine)
+                                maskImage.SetValue(new Gray(100.0), maskImage);
+
+                                maskImage.Draw(coordinateList, new Gray(200.0), 2);
+                                ImageViewer.Show(maskImage, "BorderSearcher_Emgu2 - contour points");
+                            }
+
+                            for (int j = 0; j < contour[i].Size - 1; j++)
+                            {
+                                if ((coordinateList[j].Y != coordinateList[j + 1].Y) && (Math.Abs(coordinateList[j].Y - coordinateList[j + 1].Y) < magicNumber1))
                                 {
-                                    if (_borderPoints[coordinateList[j].Y, 0] < coordinateList[j].X)
+                                    if (coordinateList[j].X < verticalCenterLine)
                                     {
-                                        _borderPoints[coordinateList[j].Y, 0] = coordinateList[j].X;
+                                        if (_borderPoints[coordinateList[j].Y, 0] < coordinateList[j].X)
+                                        {
+                                            _borderPoints[coordinateList[j].Y, 0] = coordinateList[j].X;
+                                        }
                                     }
-                                }
-                                else
-                                {
-                                    if (_borderPoints[coordinateList[j].Y, 1] > coordinateList[j].X)
+                                    else
                                     {
-                                        _borderPoints[coordinateList[j].Y, 1] = coordinateList[j].X;
+                                        if (_borderPoints[coordinateList[j].Y, 1] > coordinateList[j].X)
+                                        {
+                                            _borderPoints[coordinateList[j].Y, 1] = coordinateList[j].X;
+                                        }
                                     }
-                                }
 
 
+                                }
                             }
                         }
 
@@ -83,9 +87,9 @@ namespace ImageEvaluatorLib.BorderSearch
 
     public class FactoryBorderSearcherEmgu2 : IBorderSeracher_Creator
     {
-        public IBorderSearcher Factory(ILogger logger, int border, int imageHeight, bool showImages)
+        public IBorderSearcher Factory(ILogger logger, int border, int imageWidth, int imageHeight, bool showImages)
         {
-            return new BorderSearcherEmgu2(logger, border, showImages, imageHeight);
+            return new BorderSearcherEmgu2(logger, border, showImages, imageWidth, imageHeight);
         }
     }
 

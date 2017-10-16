@@ -72,6 +72,7 @@
     <Compile Include="FindCorners\CornerFinder.cs" />
     <Compile Include="FindEdgeLines\EdgeLineFinderBase.cs" />
     <Compile Include="FindEdgeLines\EdgeLineFinder_CSharp1.cs" />
+    <Compile Include="FindEdgeLines\EdgeLineFinder_Emgu1.cs" />
     <Compile Include="FindEdgeLines\WaferEdgeFindData.cs" />
     <Compile Include="FitEdgeLines\EdgeLineFitter_Emgu1.cs" />
     <Compile Include="FitEdgeLines\WaferEdgeLineFitterBase.cs" />
@@ -83,6 +84,9 @@
     <Compile Include="ReadImage\DoubleLight8bitImageReader.cs" />
     <Compile Include="ReadImage\DoubleLight8bitImageReader_ver2.cs" />
     <Compile Include="ReadImage\DoubleLightImageReader_Base.cs" />
+    <Compile Include="ReadImage\ImageReaderBase.cs" />
+    <Compile Include="ReadImage\SimpleLight8bitImageReader.cs" />
+    <Compile Include="ReadImage\SimpleLightImageReader_Base.cs" />
     <Compile Include="ThresholdCalculator\HistogramThresholdCalculatorBase.cs" />
     <Compile Include="ThresholdCalculator\HistogramThresholdCalculatorCSharp1.cs" />
     <Compile Include="ThresholdCalculator\HistogramThresholdCalculatorEmgu2.cs" />

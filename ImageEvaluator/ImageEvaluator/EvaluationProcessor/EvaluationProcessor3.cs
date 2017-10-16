@@ -1,22 +1,22 @@
-﻿using Emgu.CV;
+﻿using System;
+using System.IO;
+using Emgu.CV;
 using Emgu.CV.Structure;
 using ImageEvaluatorInterfaces;
 using ImageEvaluatorLib.DataSaver;
 using NLog;
-using System;
-using System.IO;
 
 namespace ImageEvaluator.EvaluationProcessor
 {
-    class EvaluationProcessor1 : EvaluationProcessorBase
+    class EvaluationProcessor3 : EvaluationProcessorBase
     {
+
         readonly IDirectoryReader _dirReader;
         readonly IImagePreProcessor _preProc;
         readonly IBorderSearcher _borderSearcher;
         readonly IColumnDataCalculator _columnDataCalculator;
         readonly IResultSaver _saver;
         private readonly IEdgeLineFinder _edgeFinder;
-        private readonly IEdgeLineFitter _edgeFitter;
         bool _initialized;
 
 
@@ -32,34 +32,21 @@ namespace ImageEvaluator.EvaluationProcessor
         Image<Gray, float> _stdVector2;
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="logger"></param>
-        /// <param name="dirReader"></param>
-        /// <param name="preProc"></param>
-        /// <param name="borderSearcher"></param>
-        /// <param name="colummnCalculator"></param>
-        /// <param name="saver"></param>
-        /// <param name="edgeFinder"></param>
-        /// <param name="edgeFitter"></param>
-        public EvaluationProcessor1(ILogger logger, IDirectoryReader dirReader, IImagePreProcessor preProc, IBorderSearcher borderSearcher, IColumnDataCalculator colummnCalculator, IResultSaver saver, IEdgeLineFinder edgeFinder, IEdgeLineFitter edgeFitter)
+        public EvaluationProcessor3(ILogger logger, IDirectoryReader dirReader, IImagePreProcessor preProc, IBorderSearcher borderSearcher, IColumnDataCalculator colummnCalculator, IResultSaver saver, IEdgeLineFinder edgeFinder)
             : base(logger)
         {
             _dirReader = dirReader;
             _preProc = preProc;
             _borderSearcher = borderSearcher;
             _columnDataCalculator = colummnCalculator;
-            _saver = saver;
             _edgeFinder = edgeFinder;
-            _edgeFitter = edgeFitter;
+            _saver = saver;
 
-            _logger?.Info("EvaluationProcessor1 instantiated.");
+            _logger?.Info("EvaluationProcessor3 instantiated.");
 
             Init();
 
-            _logger?.Info("EvaluationProcessor1 " + (_initialized ? string.Empty : "NOT") + " initialized.");
-
+            _logger?.Info("EvaluationProcessor3 " + (_initialized ? string.Empty : "NOT") + " initialized.");
         }
 
 
@@ -80,31 +67,23 @@ namespace ImageEvaluator.EvaluationProcessor
             resu = resu && _saver.Init();
             CheckInit(resu, nameof(_saver));
 
-            resu = resu && _edgeFinder.Init();
-            CheckInit(resu, nameof(_edgeFinder));
-
-            resu = resu && _edgeFitter.Init();
-            CheckInit(resu, nameof(_edgeFitter));
+            //resu = resu && _edgeFinder.Init();
+            //CheckInit(resu, nameof(_edgeFinder));
 
             return _initialized = resu;
         }
 
 
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         public override bool Run()
         {
+
             if (!_initialized)
             {
-                _logger?.Error("EvaluationProcessor1 Run is not initialized yet.");
+                _logger?.Error("EvaluationProcessor3 Run is not initialized yet.");
                 return false;
             }
 
-            _logger?.Info("EvaluationProcessor1 Run started.");
-            Console.WriteLine("EvaluationProcessor1 Run started.");
+            _logger?.Info("EvaluationProcessor3 Run started.");
 
             while (!_dirReader.EndOfDirectory())
             {
@@ -116,51 +95,37 @@ namespace ImageEvaluator.EvaluationProcessor
                 LogElapsedTime(_watch1, $"Image reading: {Path.GetFileName(name)}");
 
                 _preProc.Run(_image1, ref _mask1, name);
-                _preProc.Run(_image2, ref _mask2, name);
 
                 LogElapsedTime(_watch1, $"Image pre-processing: {Path.GetFileName(name)}");
 
                 _borderSearcher.Run(_mask1, ref _borderPoints1);
-                _borderSearcher.Run(_mask2, ref _borderPoints2);
 
                 LogElapsedTime(_watch1, $"Border search: {Path.GetFileName(name)}");
 
                 _columnDataCalculator.Run(_image1, _mask1, _borderPoints1, ref _meanVector1, ref _stdVector1);
-                _columnDataCalculator.Run(_image2, _mask2, _borderPoints2, ref _meanVector2, ref _stdVector2);
 
                 LogElapsedTime(_watch1, $"Column data, statistical calculation: {Path.GetFileName(name)}");
 
-                IColumnMeasurementResult result1 = new ColumnMeasurementResult { Name = "img1", ColumnMeanVector = _meanVector1, ColumnStdVector = _stdVector1 };
-                IColumnMeasurementResult result2 = new ColumnMeasurementResult { Name = "img2", ColumnMeanVector = _meanVector2, ColumnStdVector = _stdVector2 };
+                IColumnMeasurementResult result1 = new ColumnMeasurementResult {Name = "img1", ColumnMeanVector = _meanVector1, ColumnStdVector = _stdVector1};
 
                 _saver.SaveResult(result1, name);
-                _saver.SaveResult(result2, name);
 
                 LogElapsedTime(_watch1, $"Result saving: {Path.GetFileName(name)}");
 
                 IWaferEdgeFindData waferEdgeFindData1 = null;
-                IWaferEdgeFindData waferEdgeFindData2 = null;
 
                 _edgeFinder.Run(_image1, _mask1, ref waferEdgeFindData1);
-                _edgeFinder.Run(_image2, _mask2, ref waferEdgeFindData2);
 
                 LogElapsedTime(_watch1, "Edge finder");
-
-                IWaferFittingData waferEdgeFittingData1 = null;
-                IWaferFittingData waferEdgeFittingData2 = null;
-
-                _edgeFitter.Run(waferEdgeFindData1, ref waferEdgeFittingData1);
-                _edgeFitter.Run(waferEdgeFindData2, ref waferEdgeFittingData2);
-
-                LogElapsedTime(_watch1, "Edge fitter");
-
-                Console.WriteLine();
             }
 
-            _logger?.Info("EvaluationProcessor1 Run ended.");
+            _logger?.Info("EvaluationProcessor3 Run ended.");
 
             return true;
+
         }
+
+
 
     }
 }

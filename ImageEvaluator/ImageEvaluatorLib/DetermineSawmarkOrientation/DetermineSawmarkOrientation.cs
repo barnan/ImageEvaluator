@@ -27,7 +27,7 @@ namespace ImageEvaluatorLib.DetermineSawmarkOrientation
         public bool IsInitialized => _isInitialized;
 
 
-        public void Run(Image<Gray, float> image, string name)
+        public void Run(Image<Gray, ushort> image, string name)
         {
             byte[] input = image.Bytes; //ReadDoubleLightImage(name);
 

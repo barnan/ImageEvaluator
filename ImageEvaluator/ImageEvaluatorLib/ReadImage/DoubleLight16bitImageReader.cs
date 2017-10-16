@@ -6,7 +6,7 @@ using ImageEvaluatorInterfaces;
 
 namespace ImageEvaluatorLib.ReadImage
 {
-    class DoubleLight16BitImageReader : DoubleLightImageReader_Base
+    internal class DoubleLight16BitImageReader : DoubleLightImageReader_Base
     {
         /// <summary>
         /// 
@@ -27,7 +27,7 @@ namespace ImageEvaluatorLib.ReadImage
         /// 
         /// </summary>
         /// <returns></returns>
-        protected override bool ReadDoubleLightImage()
+        protected override bool ReadImage()
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -46,8 +46,8 @@ namespace ImageEvaluatorLib.ReadImage
                 // make separate emgu images:
 
                 // to speed up:
-                float[,,] emguImage1Array = _img1.Data;
-                float[,,] emguImage2Array = _img2.Data;
+                ushort[,,] emguImage1Array = _img1.Data;
+                ushort[,,] emguImage2Array = _img2.Data;
 
                 for (int i = 0; i < _height; i++)
                 {
@@ -56,12 +56,12 @@ namespace ImageEvaluatorLib.ReadImage
 
                     for (int j = 0; j < _width; j++)
                     {
-                        emguImage1Array[i, j, 0] = dataRow1[2 * j] + (dataRow1[2 * j + 1] << 8);
-                        emguImage2Array[i, j, 0] = dataRow2[2 * j] + (dataRow2[2 * j + 1] << 8);
+                        emguImage1Array[i, j, 0] = (ushort)(dataRow1[2 * j] + (dataRow1[2 * j + 1] << 8));
+                        emguImage2Array[i, j, 0] = (ushort)(dataRow2[2 * j] + (dataRow2[2 * j + 1] << 8));
                     }
                 }
 
-                Console.WriteLine($"       DoubleLight16bitImageReader - Image convertsion time to emgu-image: {sw.ElapsedMilliseconds}ms.");
+                Console.WriteLine($"       DoubleLight16bitImageReader - Image conversion time to emgu-image: {sw.ElapsedMilliseconds}ms.");
             }
             catch (Exception ex)
             {
@@ -81,9 +81,9 @@ namespace ImageEvaluatorLib.ReadImage
     /// </summary>
     public class Factory_DoubleLight16bitImageReader : IDoubleLightImageReader_Creator
     {
-        public IDoubleLightImageReader Factory(ILogger logger, int width, bool showImages)
+        public IImageReader Factory(ILogger logger, int width, bool showImages)
         {
-            logger?.Info($"{typeof(Factory_DoubleLight16bitImageReader).ToString()} factory called.");
+            logger?.Info($"{typeof(Factory_DoubleLight16bitImageReader)} factory called.");
             return new DoubleLight16BitImageReader(logger, width, showImages);
         }
     }

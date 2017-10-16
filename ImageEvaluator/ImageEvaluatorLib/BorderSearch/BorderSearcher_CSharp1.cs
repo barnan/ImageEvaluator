@@ -9,8 +9,8 @@ namespace ImageEvaluatorLib.BorderSearch
     class BorderSearcherCSharp1 : BorderSearcherBase
     {
 
-        internal BorderSearcherCSharp1(ILogger logger, int border, int imageHeight)
-            : base(logger, imageHeight, border)
+        internal BorderSearcherCSharp1(ILogger logger, int border, int imageWidth, int imageHeight)
+            : base(logger, imageWidth, imageHeight, border)
         {
             _logger?.Info("BorderSearcher_CSharp1 instantiated.");
         }
@@ -63,9 +63,9 @@ namespace ImageEvaluatorLib.BorderSearch
     /// </summary>
     public class FactoryBorderSearcherCSharp1 : IBorderSeracher_Creator
     {
-        public IBorderSearcher Factory(ILogger logger, int border, int imageHeight, bool showImages)
+        public IBorderSearcher Factory(ILogger logger, int border, int imageWidth, int imageHeight, bool showImages)
         {
-            return new BorderSearcherCSharp1(logger, border, imageHeight);
+            return new BorderSearcherCSharp1(logger, border, imageWidth, imageHeight);
         }
     }
 }

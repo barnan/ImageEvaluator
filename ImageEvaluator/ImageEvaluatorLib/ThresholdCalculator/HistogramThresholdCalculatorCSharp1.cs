@@ -20,6 +20,10 @@ namespace ImageEvaluatorLib.ThresholdCalculator
                 {
                     _param = HistogramSize - 1;
                 }
+                else
+                {
+                    _param = value;
+                }
 
             }
         }
@@ -27,23 +31,20 @@ namespace ImageEvaluatorLib.ThresholdCalculator
         public HistogramThresholdCalculatorCSharp1(ILogger logger, int histogramSize, int param) 
             : base(logger, histogramSize)
         {
-            _param = 0;
+            Param = param;
         }
         
 
         public override bool Run(DenseHistogram hist, out float minPos)
         {
-            minPos = _param;
+            minPos = Param;
 
             return true;
         }
     }
 
 
-
-
-
-    class FactoryHistogramThresholdCalculatorCSharp1 : IHistogramThresholdCalculator_Creator
+    public class FactoryHistogramThresholdCalculatorCSharp1 : IHistogramThresholdCalculator_Creator
     {
         public IHistogramThresholdCalculator Factory(ILogger logger, int range, int param = 0)
         {

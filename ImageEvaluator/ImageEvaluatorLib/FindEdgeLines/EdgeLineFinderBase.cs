@@ -20,7 +20,7 @@ namespace ImageEvaluatorLib.FindEdgeLines
         }
 
 
-        public abstract bool Run(Image<Gray, float> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData);
+        public abstract bool Run(Image<Gray, ushort> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData);
 
 
         public bool Init()
@@ -31,7 +31,7 @@ namespace ImageEvaluatorLib.FindEdgeLines
         public bool IsInitialized { get; protected set; }
 
 
-        protected bool CheckInputData(Image<Gray, float> originalImage, Image<Gray, byte> maskImage, Dictionary<SearchOrientations, Rectangle> calcAreas)
+        protected virtual bool CheckInputData(Image<Gray, ushort> originalImage, Image<Gray, byte> maskImage, Dictionary<SearchOrientations, Rectangle> calcAreas)
         {
             if (originalImage == null || maskImage == null || calcAreas == null)
             {

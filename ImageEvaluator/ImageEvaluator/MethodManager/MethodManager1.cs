@@ -28,17 +28,17 @@ namespace ImageEvaluator.MethodManager
 
         public override bool Instantiate()
         {
+            int height = 4096;
             try
             {
-                int width = 4096;
-                int height = 4096;
+                const int width = 4096;
 
                 _logger = LogManager.GetCurrentClassLogger();
                 _logger?.Info("--------------------------------------------------------------------------------------------------------------------------------------");
 
                 bool show = false;
 
-                IDoubleLightImageReader imageReader = new Factory_DoubleLight16bitImageReader().Factory(_logger, width, show);
+                IImageReader imageReader = new Factory_DoubleLight16bitImageReader().Factory(_logger, width, show);
 
                 IDirectoryReader dirReader = new Factory_DirectoryReader().Factory(_logger, _inputPaths[_pathIndex], "raw", imageReader);
 
@@ -47,12 +47,12 @@ namespace ImageEvaluator.MethodManager
 
                 IImagePreProcessor preProcessor = new FactoryImagePreProcessor().Factory(_logger, histogramRange, width, height, histcalculator, show);
 
-                IBorderSearcher borderSearcher = new FactoryBorderSearcherEmgu1().Factory(_logger, 10, height, show);
+                IBorderSearcher borderSearcher = new FactoryBorderSearcherEmgu1().Factory(_logger, 10, width, height, show);
 
                 IColumnDataCalculator columnDataCalculator = new FactoryCalculateColumnDataEmgu1().Factory(_logger, width, height);
 
                 string outputFolder = Path.Combine(_inputPaths[_pathIndex], "output");
-                IResultSaver saver = new Factory_CsvResultSaver().Factory(outputFolder, "StatCalc", _logger);
+                IResultSaver saver = new FactoryCsvResultSaver().Factory(outputFolder, "StatCalc", _logger);
 
 
                 Dictionary<SearchOrientations, Rectangle> calcareas = new Dictionary<SearchOrientations, Rectangle>();
@@ -60,7 +60,7 @@ namespace ImageEvaluator.MethodManager
                 calcareas.Add(SearchOrientations.LeftToRight, new Rectangle(50, 1000, 450, 2000));
                 calcareas.Add(SearchOrientations.BottomToTop, new Rectangle(1000, height - 501, 2000, 500));
                 calcareas.Add(SearchOrientations.RightToLeft, new Rectangle(width - 501, 1000, 500, 2000));
-                IEdgeLineFinder finder = new Factory_EdgeLineFinder_CSharp1().Factory(_logger, calcareas);
+                IEdgeLineFinder finder = new FactoryEdgeLineFinderCSharp1().Factory(_logger, calcareas);
 
                 IEdgeLineFitter fitter = new Factory_EdgeLineFitter_Emgu1().Factory(_logger);
 

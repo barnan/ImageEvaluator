@@ -4,18 +4,22 @@ using NLog;
 
 namespace ImageEvaluatorInterfaces
 {
-    public interface IDoubleLightImageReader : IInitalizable
+    public interface IImageReader : IInitalizable
     {
-        bool GetImage(string fileName, ref Image<Gray, float> img1, ref Image<Gray, float> img2);
+        bool GetImage(string fileName, ref Image<Gray, ushort> img1, ref Image<Gray, ushort> img2);
     }
-
 
 
     public interface IDoubleLightImageReader_Creator
     {
-        IDoubleLightImageReader Factory(ILogger logger, int width, bool showImages);
+        IImageReader Factory(ILogger logger, int width, bool showImages);
     }
 
+
+    public interface ISimpleLightImageReader_Creator
+    {
+        IImageReader Factory(ILogger logger, int width, bool showImages);
+    }
 
 
 }

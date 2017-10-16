@@ -12,8 +12,8 @@ namespace ImageEvaluatorLib.BorderSearch
 {
     class BorderSearcherEmgu1 : BorderSearcherBase
     {
-        internal BorderSearcherEmgu1(ILogger logger, int border, bool show, int imageHeight)
-            : base(logger, imageHeight, border)
+        internal BorderSearcherEmgu1(ILogger logger, int border, bool show, int imageWidth, int imageHeight)
+            : base(logger, imageWidth, imageHeight, border)
         {
             _showImages = show;
 
@@ -42,48 +42,52 @@ namespace ImageEvaluatorLib.BorderSearch
                         {
                             Point[] coordinateList = contour[i].ToArray();
 
-                            if (_showImages)
+                            if (coordinateList.Length > 100)
                             {
-                                maskImage.SetValue(new Gray(100.0), maskImage);
-
-                                maskImage.Draw(coordinateList, new Gray(200.0), 2);
-                                ImageViewer.Show(maskImage, "BorderSearcher_Emgu2 - contour points");
-                            }
-
-                            for (int j = 0; j < contour[i].Size - 1; j++)
-                            {
-                                if ((coordinateList[j].Y != coordinateList[j + 1].Y) && (Math.Abs(coordinateList[j].Y - coordinateList[j + 1].Y) < magicNumber1))
+                                if (_showImages)
                                 {
-                                    LineSegment2D contourLineSegment = new LineSegment2D(new Point(coordinateList[j].X, coordinateList[j].Y), new Point(coordinateList[j + 1].X, coordinateList[j + 1].Y));
+                                    maskImage.SetValue(new Gray(100.0), maskImage);
 
-                                    LineSegment2D horizontalLine;
-                                    for (int k = 0; k < Math.Abs(coordinateList[j + 1].Y - coordinateList[j].Y); k++)
-                                    {
-                                        int difference = coordinateList[j + 1].Y - coordinateList[j].Y;
-                                        int yCoord = coordinateList[j].Y + k * (difference / Math.Abs(difference));
-
-                                        horizontalLine = new LineSegment2D(new Point(0, yCoord), new Point(4095, yCoord));
-
-                                        var resu = GetIntersection(horizontalLine, contourLineSegment);
-
-                                        if (resu.X < verticalCenterLine)
-                                        {
-                                            if (_borderPoints[yCoord, 0] < resu.X)
-                                            {
-                                                _borderPoints[yCoord, 0] = resu.X;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (_borderPoints[yCoord, 1] > resu.X)
-                                            {
-                                                _borderPoints[yCoord, 1] = resu.X;
-                                            }
-                                        }
-
-                                    }
+                                    maskImage.Draw(coordinateList, new Gray(200.0), 2);
+                                    ImageViewer.Show(maskImage, "BorderSearcher_Emgu1 - contour points");
                                 }
 
+                                for (int j = 0; j < contour[i].Size - 1; j++)
+                                {
+                                    if ((coordinateList[j].Y != coordinateList[j + 1].Y) && (Math.Abs(coordinateList[j].Y - coordinateList[j + 1].Y) < magicNumber1))
+                                    {
+                                        LineSegment2D contourLineSegment = new LineSegment2D(new Point(coordinateList[j].X, coordinateList[j].Y),
+                                            new Point(coordinateList[j + 1].X, coordinateList[j + 1].Y));
+
+                                        LineSegment2D horizontalLine;
+                                        for (int k = 0; k < Math.Abs(coordinateList[j + 1].Y - coordinateList[j].Y); k++)
+                                        {
+                                            int difference = coordinateList[j + 1].Y - coordinateList[j].Y;
+                                            int yCoord = coordinateList[j].Y + k*(difference/Math.Abs(difference));
+
+                                            horizontalLine = new LineSegment2D(new Point(0, yCoord), new Point(4095, yCoord));
+
+                                            var resu = GetIntersection(horizontalLine, contourLineSegment);
+
+                                            if (resu.X < verticalCenterLine)
+                                            {
+                                                if (_borderPoints[yCoord, 0] < resu.X)
+                                                {
+                                                    _borderPoints[yCoord, 0] = resu.X;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (_borderPoints[yCoord, 1] > resu.X)
+                                                {
+                                                    _borderPoints[yCoord, 1] = resu.X;
+                                                }
+                                            }
+
+                                        }
+                                    }
+
+                                }
                             }
                         }
 
@@ -139,10 +143,10 @@ namespace ImageEvaluatorLib.BorderSearch
     /// </summary>
     public class FactoryBorderSearcherEmgu1 : IBorderSeracher_Creator
     {
-        public IBorderSearcher Factory(ILogger logger, int border, int imageHeight, bool showImages)
+        public IBorderSearcher Factory(ILogger logger, int border, int imageWidth, int imageHeight, bool showImages)
         {
             logger?.Info($"{typeof(FactoryBorderSearcherEmgu1)} factory called.");
-            return new BorderSearcherEmgu1(logger, border, showImages, imageHeight);
+            return new BorderSearcherEmgu1(logger, border, showImages, imageWidth, imageHeight);
         }
     }
 

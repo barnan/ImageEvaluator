@@ -8,7 +8,7 @@ using ImageEvaluatorInterfaces;
 
 namespace ImageEvaluatorLib.DataSaver
 {
-    class PngResultSaver : ResultSaver_Base
+    class PngResultSaver : ResultSaverBase
     {
         private Image<Gray, byte> _tempImage1;
 
@@ -26,7 +26,7 @@ namespace ImageEvaluatorLib.DataSaver
         /// <param name="result"></param>
         /// <param name="inputFileName"></param>
         /// <returns></returns>
-        public override bool SaveResult(IColumnMeasurementResult result, string inputFileName)
+        public override bool SaveResult(IMeasurementResult result, string inputFileName)
         {
             try
             {
@@ -44,7 +44,7 @@ namespace ImageEvaluatorLib.DataSaver
                         continue;
 
                     string fileNameBase = Path.GetFileNameWithoutExtension(inputFileName);
-                    string finalOutputName = Path.Combine(_outputFolder, $"{fileNameBase}_{_prefix}_{prop.Name}.png");
+                    string finalOutputName = Path.Combine(OutputFolder, $"{fileNameBase}_{_prefix}_{prop.Name}.png");
 
                     _tempImage1 = (obj as Image<Gray, float>).Convert<Gray, byte>();
                     _tempImage1?.Save(finalOutputName);
@@ -65,15 +65,6 @@ namespace ImageEvaluatorLib.DataSaver
             return true;
         }
 
-        public override bool SaveResult(IColumnStatisticalMeasurementResult result, string inputfilename)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override bool SaveResult(IRegionStatisticalMeasurementResult result, string inputfilename)
-        {
-            throw new NotImplementedException();
-        }
     }
 
 
@@ -81,8 +72,8 @@ namespace ImageEvaluatorLib.DataSaver
     {
         public IResultSaver Factory(string outputFolder, string prefix, ILogger logger)
         {
+            logger?.Info($"{typeof(FactoryPngResultSaver)} factory called.");
             return new PngResultSaver(outputFolder, prefix, logger);
-
         }
     }
 

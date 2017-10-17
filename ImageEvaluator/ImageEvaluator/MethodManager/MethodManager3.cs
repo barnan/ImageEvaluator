@@ -49,14 +49,15 @@ namespace ImageEvaluator.MethodManager
                 IColumnDataCalculator columnDataCalculator = new FactoryCalculateColumnDataEmgu1().Factory(_logger, width, height);
 
                 string outputFolder = Path.Combine(_inputPaths[_pathIndex], "output");
-                IResultSaver saver = new FactoryCsvResultSaver().Factory(outputFolder, "StatCalc", _logger);
+                IResultSaver saver1 = new FactoryCsvColumnStatisticalResultSaver().Factory(outputFolder, "StatCalc", _logger);
+                IResultSaver saver2 = new FactoryCsvColumnResultSaver().Factory(outputFolder, "StatCalc", _logger);
 
 
-                IEdgeLineFinder finder = new FactoryEdgeLineFinderEmgu1().Factory(_logger);
+                IEdgeLineFinder finder = new FactoryEdgeLineFinderEmgu1().Factory(_logger, width, height);
 
                 IEdgeLineFitter fitter = new Factory_EdgeLineFitter_Emgu1().Factory(_logger);
 
-                _evaluationProcessor = new EvaluationProcessor3(_logger, dirReader, preProcessor, borderSearcher, columnDataCalculator, saver, finder);
+                _evaluationProcessor = new EvaluationProcessor3(_logger, dirReader, preProcessor, borderSearcher, columnDataCalculator, saver1, saver2, finder);
             }
             catch (Exception ex)
             {

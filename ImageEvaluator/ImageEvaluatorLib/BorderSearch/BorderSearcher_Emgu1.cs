@@ -5,6 +5,7 @@ using Emgu.CV.Util;
 using NLog;
 using System;
 using System.Drawing;
+using System.IO;
 using ImageEvaluatorInterfaces;
 using Emgu.CV.UI;
 
@@ -25,7 +26,7 @@ namespace ImageEvaluatorLib.BorderSearch
         /// 
         /// </summary>
         /// <param name="maskImage"></param>
-        protected override void CalculatePoints(Image<Gray, byte> maskImage)
+        protected override void CalculatePoints(Image<Gray, byte> maskImage, string name)
         {
             using (Mat hierarchy = new Mat())
             {
@@ -50,6 +51,8 @@ namespace ImageEvaluatorLib.BorderSearch
 
                                     maskImage.Draw(coordinateList, new Gray(200.0), 2);
                                     ImageViewer.Show(maskImage, "BorderSearcher_Emgu1 - contour points");
+
+                                    SaveMaskImage(name, maskImage);
                                 }
 
                                 for (int j = 0; j < contour[i].Size - 1; j++)
@@ -65,7 +68,7 @@ namespace ImageEvaluatorLib.BorderSearch
                                             int difference = coordinateList[j + 1].Y - coordinateList[j].Y;
                                             int yCoord = coordinateList[j].Y + k*(difference/Math.Abs(difference));
 
-                                            horizontalLine = new LineSegment2D(new Point(0, yCoord), new Point(4095, yCoord));
+                                            horizontalLine = new LineSegment2D(new Point(0, yCoord), new Point(_imageWidth - 1, yCoord));
 
                                             var resu = GetIntersection(horizontalLine, contourLineSegment);
 
@@ -88,7 +91,13 @@ namespace ImageEvaluatorLib.BorderSearch
                                     }
 
                                 }
+
                             }
+                        }
+
+                        if (_showImages)
+                        {
+                            SavePointList(name);
                         }
 
                     }
@@ -133,6 +142,7 @@ namespace ImageEvaluatorLib.BorderSearch
             return new Point((int)(x + 0.5), (int)(y + 0.5));
 
         }
+
 
     }
 

@@ -16,7 +16,7 @@ namespace ImageEvaluatorLib.BorderSearch
         }
 
 
-        protected override void CalculatePoints(Image<Gray, byte> maskImage)
+        protected override void CalculatePoints(Image<Gray, byte> maskImage, string name)
         {
             try
             {
@@ -46,6 +46,10 @@ namespace ImageEvaluatorLib.BorderSearch
                     }
                 }
 
+                if (_showImages)
+                {
+                    SavePointList(name);
+                }
             }
             catch (Exception ex)
             {

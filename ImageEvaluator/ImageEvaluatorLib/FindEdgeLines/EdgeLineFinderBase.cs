@@ -10,11 +10,15 @@ namespace ImageEvaluatorLib.FindEdgeLines
     abstract class EdgeLineFinderBase : IEdgeLineFinder
     {
         protected readonly ILogger _logger;
+        protected int _width;
+        protected int _height;
         protected readonly Dictionary<SearchOrientations, Rectangle> _calcAreas;
 
 
-        protected EdgeLineFinderBase(ILogger logger, Dictionary<SearchOrientations, Rectangle> calcareas)
+        protected EdgeLineFinderBase(ILogger logger, int width, int height, Dictionary<SearchOrientations, Rectangle> calcareas)
         {
+            _width = width;
+            _height = height;
             _logger = logger;
             _calcAreas = calcareas;
         }
@@ -23,7 +27,7 @@ namespace ImageEvaluatorLib.FindEdgeLines
         public abstract bool Run(Image<Gray, ushort> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData);
 
 
-        public bool Init()
+        public virtual bool Init()
         {
             return IsInitialized = true;
         }

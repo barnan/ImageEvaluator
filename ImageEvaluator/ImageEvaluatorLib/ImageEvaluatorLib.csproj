@@ -63,7 +63,9 @@
     <Compile Include="CalculateStatisticalData\CalculateColumnData_CSharp2.cs" />
     <Compile Include="CalculateStatisticalData\CalculateColumnData_Emgu1.cs" />
     <Compile Include="CalculateStatisticalData\CalculateColumnData_Emgu2.cs" />
-    <Compile Include="DataSaver\CsvResultSaver.cs" />
+    <Compile Include="CalculateStatisticalData\CalculateColumnData_Emgu3.cs" />
+    <Compile Include="DataSaver\CsvColumnResultSaver.cs" />
+    <Compile Include="DataSaver\CsvColumnStatisticalResultSaver.cs" />
     <Compile Include="DataSaver\MeasurementResult.cs" />
     <Compile Include="DataSaver\PngResultSaver.cs" />
     <Compile Include="DataSaver\ResultSaver_Base.cs" />

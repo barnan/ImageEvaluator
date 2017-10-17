@@ -11,8 +11,8 @@ namespace ImageEvaluatorLib.FindEdgeLines
 {
     internal class EdgeLineFinderCSharp1 : EdgeLineFinderBase
     {
-        public EdgeLineFinderCSharp1(ILogger logger, Dictionary<SearchOrientations, Rectangle> calcareas)
-            : base(logger, calcareas)
+        public EdgeLineFinderCSharp1(ILogger logger, int width, int height, Dictionary<SearchOrientations, Rectangle> calcareas)
+            : base(logger, width, height, calcareas)
         {
             _logger?.Info($"{typeof(EdgeLineFinderCSharp1)} instantiated.");
         }
@@ -169,10 +169,10 @@ namespace ImageEvaluatorLib.FindEdgeLines
     /// </summary>
     public class FactoryEdgeLineFinderCSharp1 : IEdgeLineFinder_Creator
     {
-        public IEdgeLineFinder Factory(ILogger logger, Dictionary<SearchOrientations, Rectangle> calcAreas = null)
+        public IEdgeLineFinder Factory(ILogger logger, int width, int height, Dictionary<SearchOrientations, Rectangle> calcAreas = null)
         {
             logger?.Info($"{typeof(FactoryEdgeLineFinderCSharp1)} factory called.");
-            return new EdgeLineFinderCSharp1(logger, calcAreas);
+            return new EdgeLineFinderCSharp1(logger, width, height, calcAreas);
         }
     }
 

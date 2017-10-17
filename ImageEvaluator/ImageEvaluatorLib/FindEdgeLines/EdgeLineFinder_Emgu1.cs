@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
@@ -13,10 +10,12 @@ using NLog;
 
 namespace ImageEvaluatorLib.FindEdgeLines
 {
-    class EdgeLineFinder_Emgu1 : EdgeLineFinderBase
+    class EdgeLineFinderEmgu1 : EdgeLineFinderBase
     {
-        public EdgeLineFinder_Emgu1(ILogger logger, Dictionary<SearchOrientations, Rectangle> calcareas) 
-            : base(logger, calcareas)
+        private byte[] _pixelbytes;
+
+        public EdgeLineFinderEmgu1(ILogger logger, int width, int height, Dictionary<SearchOrientations, Rectangle> calcareas) 
+            : base(logger, width, height, calcareas)
         {
         }
 
@@ -28,29 +27,19 @@ namespace ImageEvaluatorLib.FindEdgeLines
                 return false;
             }
 
-            //Point[] topPoints = FindPoints(maskImage, _calcAreas[SearchOrientations.TopToBottom], SearchOrientations.TopToBottom);
-            //Point[] bottomPoints = FindPoints(maskImage, _calcAreas[SearchOrientations.BottomToTop], SearchOrientations.BottomToTop);
-            //Point[] leftPoints = FindPoints(maskImage, _calcAreas[SearchOrientations.LeftToRight], SearchOrientations.LeftToRight);
-            //Point[] rightPoints = FindPoints(maskImage, _calcAreas[SearchOrientations.RightToLeft], SearchOrientations.RightToLeft);
 
-            //if (topPoints?.Length < 1 || bottomPoints?.Length < 1 || leftPoints?.Length < 1 || rightPoints?.Length < 1)
-            //{
-            //    _logger?.Trace("The found edge segments are not proper in EdgeLineFinder_CSharp1");
-            //    return false;
-            //}
+            using (Image<Gray, float> tempImage = originalImage.Convert<Gray, float>())
+            {
+                VectorOfFloat leftLineData;
+                VectorOfFloat rightLineData;
+                VectorOfFloat topLineData;
+                VectorOfFloat bottomLineData;
 
-            //WaferEdgeFindData result = new WaferEdgeFindData
-            //{
-            //    TopSide = new VectorOfPoint(topPoints),
-            //    BottomSide = new VectorOfPoint(bottomPoints),
-            //    LeftSide = new VectorOfPoint(leftPoints),
-            //    RightSide = new VectorOfPoint(rightPoints)
-            //};
 
-            //edgeFindData = result;
+                TestMethod(tempImage, out leftLineData, out rightLineData, out topLineData, out bottomLineData);
+            }
 
             return true;
-
         }
 
 
@@ -67,21 +56,28 @@ namespace ImageEvaluatorLib.FindEdgeLines
         }
 
 
+        public override bool Init()
+        {
+            int stride = _width * 8;
+
+            _pixelbytes = new byte[_height * stride];
+
+            return true;
+        }
 
 
-
-        public void TestMethod(Image<Gray, float> inputImage)
+        public void TestMethod(Image<Gray, float> inputImage, out VectorOfFloat leftLineData, out VectorOfFloat rightLineData, out VectorOfFloat topLineData, out VectorOfFloat bottomLineData)
         {
             Image<Gray, byte> workImage = inputImage.Convert<Gray, byte>();
             Image<Gray, byte> sampleMask = new Image<Gray, byte>(workImage.Size);
 
             int darkLimit = 40;
-            Gray _white = new Gray(1);
+            Gray white = new Gray(1);
             float CONTOUR_AREA_LIMIT_RATIO = 0.01f;
             int width = workImage.Width;
             int height = workImage.Height;
 
-            var maskImage = workImage.ThresholdBinary(new Gray(darkLimit), _white);
+            var maskImage = workImage.ThresholdBinary(new Gray(darkLimit), white);
             var finalWaferContour = new VectorOfVectorOfPoint();
 
             using (Mat hierachy = new Mat())
@@ -137,10 +133,10 @@ namespace ImageEvaluatorLib.FindEdgeLines
             float rightSlope, rightIntercept, rightLineSpread;
             float topSlope, topIntercept, topLineSpread;
             float bottomSlope, bottomIntercept, bottomLineSpread;
-            VectorOfFloat leftLineData = FitEdge(gx, height / 4, 3 * height / 4, 0, width / 8, gradLimit, out leftSlope, out leftIntercept, out leftLineSpread);
-            VectorOfFloat rightLineData = FitEdge(gx, height / 4, 3 * height / 4, 7 * width / 8, width, gradLimit, out rightSlope, out rightIntercept, out rightLineSpread);
-            VectorOfFloat topLineData = FitEdge(gy, width / 4, 3 * width / 4, 0, height / 8, gradLimit, out topSlope, out topIntercept, out topLineSpread);
-            VectorOfFloat bottomLineData = FitEdge(gy, width / 4, 3 * width / 4, 7 * height / 8, height, gradLimit, out bottomSlope, out bottomIntercept, out bottomLineSpread);
+            leftLineData = FitEdge(gx, height / 4, 3 * height / 4, 0, width / 8, gradLimit, out leftSlope, out leftIntercept, out leftLineSpread);
+            rightLineData = FitEdge(gx, height / 4, 3 * height / 4, 7 * width / 8, width, gradLimit, out rightSlope, out rightIntercept, out rightLineSpread);
+            topLineData = FitEdge(gy, width / 4, 3 * width / 4, 0, height / 8, gradLimit, out topSlope, out topIntercept, out topLineSpread);
+            bottomLineData = FitEdge(gy, width / 4, 3 * width / 4, 7 * height / 8, height, gradLimit, out bottomSlope, out bottomIntercept, out bottomLineSpread);
 
             for (int c = 0; c < width; c++)
             {
@@ -261,7 +257,7 @@ namespace ImageEvaluatorLib.FindEdgeLines
             int width = pixels.GetLength(1);
             int height = pixels.GetLength(0);
             int stride = width * 8;
-            byte[] pixelbytes = new byte[height * stride];
+            
             string headerCard;
             System.Text.UTF8Encoding enc = new System.Text.UTF8Encoding();
             int cardCounter = 0;
@@ -276,7 +272,7 @@ namespace ImageEvaluatorLib.FindEdgeLines
                     {
                         fpixels[x] = pixels[y, x, 0];
                     }
-                    Buffer.BlockCopy(fpixels, 0, pixelbytes, y * stride, stride);
+                    Buffer.BlockCopy(fpixels, 0, _pixelbytes, y * stride, stride);
                 }
             }
             else
@@ -288,14 +284,14 @@ namespace ImageEvaluatorLib.FindEdgeLines
                     {
                         byte[] bytes = BitConverter.GetBytes(pixels[y, x, 0]);
 
-                        pixelbytes[cnt++] = bytes[7];
-                        pixelbytes[cnt++] = bytes[6];
-                        pixelbytes[cnt++] = bytes[5];
-                        pixelbytes[cnt++] = bytes[4];
-                        pixelbytes[cnt++] = bytes[3];
-                        pixelbytes[cnt++] = bytes[2];
-                        pixelbytes[cnt++] = bytes[1];
-                        pixelbytes[cnt++] = bytes[0];
+                        _pixelbytes[cnt++] = bytes[7];
+                        _pixelbytes[cnt++] = bytes[6];
+                        _pixelbytes[cnt++] = bytes[5];
+                        _pixelbytes[cnt++] = bytes[4];
+                        _pixelbytes[cnt++] = bytes[3];
+                        _pixelbytes[cnt++] = bytes[2];
+                        _pixelbytes[cnt++] = bytes[1];
+                        _pixelbytes[cnt++] = bytes[0];
                     }
                 }
             }
@@ -359,7 +355,7 @@ namespace ImageEvaluatorLib.FindEdgeLines
                 cardCounter++;
             }
 
-            stream.Write(pixelbytes, 0, height * width * 8);
+            stream.Write(_pixelbytes, 0, height * width * 8);
 
             stream.Close();
         }
@@ -373,10 +369,10 @@ namespace ImageEvaluatorLib.FindEdgeLines
 
     public class FactoryEdgeLineFinderEmgu1 : IEdgeLineFinder_Creator
     {
-        public IEdgeLineFinder Factory(ILogger logger, Dictionary<SearchOrientations, Rectangle> calcAreas = null)
+        public IEdgeLineFinder Factory(ILogger logger, int width, int height, Dictionary<SearchOrientations, Rectangle> calcAreas = null)
         {
             logger?.Info($"{typeof(FactoryEdgeLineFinderEmgu1)} factory called.");
-            return new EdgeLineFinder_Emgu1(logger, calcAreas);
+            return new EdgeLineFinderEmgu1(logger, width, height, calcAreas);
         }
     }
 

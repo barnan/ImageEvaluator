@@ -26,10 +26,10 @@ namespace ImageEvaluator.EvaluationProcessor
         Image<Gray, byte> _mask2;
         int[,] _borderPoints1;
         int[,] _borderPoints2;
-        Image<Gray, float> _meanVector1;
-        Image<Gray, float> _stdVector1;
-        Image<Gray, float> _meanVector2;
-        Image<Gray, float> _stdVector2;
+        Image<Gray, double> _meanVector1;
+        Image<Gray, double> _stdVector1;
+        Image<Gray, double> _meanVector2;
+        Image<Gray, double> _stdVector2;
 
 
         /// <summary>
@@ -120,13 +120,18 @@ namespace ImageEvaluator.EvaluationProcessor
 
                 LogElapsedTime(_watch1, $"Image pre-processing: {Path.GetFileName(name)}");
 
-                _borderSearcher.Run(_mask1, ref _borderPoints1);
-                _borderSearcher.Run(_mask2, ref _borderPoints2);
+                _borderSearcher.Run(_mask1, ref _borderPoints1, name);
+                _borderSearcher.Run(_mask2, ref _borderPoints2, name);
 
                 LogElapsedTime(_watch1, $"Border search: {Path.GetFileName(name)}");
 
-                _columnDataCalculator.Run(_image1, _mask1, _borderPoints1, ref _meanVector1, ref _stdVector1);
-                _columnDataCalculator.Run(_image2, _mask2, _borderPoints2, ref _meanVector2, ref _stdVector2);
+
+                double resu1;
+                double resu2;
+                double resu3;
+                double resu4;
+                _columnDataCalculator.Run(_image1, _mask1, _borderPoints1, ref _meanVector1, ref _stdVector1, out resu1, out resu2, out resu3, out resu4);
+                _columnDataCalculator.Run(_image2, _mask2, _borderPoints2, ref _meanVector2, ref _stdVector2, out resu1, out resu2, out resu3, out resu4);
 
                 LogElapsedTime(_watch1, $"Column data, statistical calculation: {Path.GetFileName(name)}");
 

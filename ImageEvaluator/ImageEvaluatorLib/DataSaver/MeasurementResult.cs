@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using ImageEvaluatorInterfaces;
@@ -13,9 +12,9 @@ namespace ImageEvaluatorLib.DataSaver
     {
         public string Name { get; set; }
 
-        public List<float> RegionMeanVector { get; set; }
+        public List<double> RegionMeanVector { get; set; }
 
-        public List<float> RegionStdVector { get; set; }
+        public List<double> RegionStdVector { get; set; }
     }
 
 
@@ -24,17 +23,24 @@ namespace ImageEvaluatorLib.DataSaver
     {
         public string Name { get; set; }
 
-        public float ColumnMeanMeanVector { get; set; }
+        public double ColumnMeanMean { get; set; }
 
-        public float ColumnMeanStdVector { get; set; }
+        public double ColumnMeanStd { get; set; }
 
-        public float ColumnStdMeanVector { get; set; }
+        public double ColumnStdMean { get; set; }
 
-        public float ColumnStdStdVector { get; set; }
+        public double ColumnStdStd { get; set; }
 
-        public float RegionNoiseMeanVector { get; set; }
+        //public Image<Gray, double> ColumnMeanVector { get; set; }
+        //public Image<Gray, double> ColumnStdVector { get; set; }
 
-        public float RegionNoiseStdVector { get; set; }
+        public List<double> RegionMeanVector { get; set; }
+
+        public List<double> RegionStdVector { get; set; }
+
+        public List<double> RegionNoiseMeanVector { get; set; }
+
+        public List<double> RegionNoiseStdVector { get; set; }
     }
 
 
@@ -42,7 +48,7 @@ namespace ImageEvaluatorLib.DataSaver
     {
         public string Name { get; set; }
 
-        public Image<Gray, float> ColumnMeanVector { get; set; }
-        public Image<Gray, float> ColumnStdVector { get; set; }
+        public Image<Gray, double> ColumnMeanVector { get; set; }
+        public Image<Gray, double> ColumnStdVector { get; set; }
     }
 }

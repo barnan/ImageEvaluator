@@ -5,16 +5,16 @@ using NLog;
 
 namespace ImageEvaluatorLib.DataSaver
 {
-    internal abstract class ResultSaver_Base : IResultSaver
+    internal abstract class ResultSaverBase : IResultSaver
     {
-        protected readonly string _outputFolder;
         protected readonly string _prefix;
         protected ILogger _logger;
+        private string _outputFoler;
 
 
-        protected ResultSaver_Base(string outputFolder, string prefix, ILogger logger)
+        protected ResultSaverBase(string outputFolder, string prefix, ILogger logger)
         {
-            _outputFolder = outputFolder;
+            OutputFolder = outputFolder;
             _prefix = prefix;
             _logger = logger;
         }
@@ -32,6 +32,8 @@ namespace ImageEvaluatorLib.DataSaver
 
         public bool IsInitialized { get; protected set; }
 
+        
+        public string OutputFolder { get; set; }
 
         /// <summary>
         /// 
@@ -39,13 +41,13 @@ namespace ImageEvaluatorLib.DataSaver
         /// <returns></returns>
         private bool CheckDir()
         {
-            if (!Directory.Exists(_outputFolder))
+            if (!Directory.Exists(OutputFolder))
             {
-                _logger?.Trace($"Directory {_outputFolder} doesn't exist -> it will be created.");
+                _logger?.Trace($"Directory {OutputFolder} doesn't exist -> it will be created.");
 
                 try
                 {
-                    Directory.CreateDirectory(_outputFolder);
+                    Directory.CreateDirectory(OutputFolder);
                 }
                 catch (Exception ex)
                 {
@@ -59,10 +61,7 @@ namespace ImageEvaluatorLib.DataSaver
         }
 
 
-        public abstract bool SaveResult(IColumnMeasurementResult result, string inputfilename);
-        public abstract bool SaveResult(IColumnStatisticalMeasurementResult result, string inputfilename);
-        public abstract bool SaveResult(IRegionStatisticalMeasurementResult result, string inputfilename);
-
+        public abstract bool SaveResult(IMeasurementResult result, string inputfilename);
 
 
     }

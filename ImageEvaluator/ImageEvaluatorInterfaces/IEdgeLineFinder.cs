@@ -22,7 +22,7 @@ namespace ImageEvaluatorInterfaces
 
     public interface IEdgeLineFinder_Creator
     {
-        IEdgeLineFinder Factory(ILogger logger, Dictionary<SearchOrientations, Rectangle> calcAreas);
+        IEdgeLineFinder Factory(ILogger logger, int width, int height, Dictionary<SearchOrientations, Rectangle> calcAreas);
     }
 
 

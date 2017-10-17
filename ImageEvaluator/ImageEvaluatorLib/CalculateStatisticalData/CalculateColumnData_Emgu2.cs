@@ -4,6 +4,7 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using System.Drawing;
 using System;
+using System.CodeDom;
 using ImageEvaluatorInterfaces;
 using NLog;
 
@@ -44,8 +45,18 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         /// <param name="pointArray"></param>
         /// <param name="meanVector"></param>
         /// <param name="stdVector"></param>
-        public override bool Run(Image<Gray, ushort> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector)
+        /// <param name="resu1"></param>
+        /// <param name="resu2"></param>
+        /// <param name="resu3"></param>
+        /// <param name="resu4"></param>
+        public override bool Run(Image<Gray, ushort> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector,
+                                out double resu1, out double resu2, out double resu3, out double resu4)
         {
+            resu1 = 0;
+            resu2 = 0;
+            resu3 = 0;
+            resu4 = 0;
+
             if (!IsInitialized)
             {
                 _logger.Error("CalculateColumnData_CSharp2 is not initialized.");
@@ -60,40 +71,50 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
             // mask the outer area to zero
             Gray zero = new Gray(0.0);
-            _complementaryMask = maskImage.Not();
-            inputImage.SetValue(zero, _complementaryMask);
-
-            using (Image<Gray, float> tempImage = inputImage.Convert<Gray, float>())
+            using (_complementaryMask = maskImage.Not())
             {
-                //calculate square image
-                _squareImage = tempImage.Pow(2);
+                inputImage.SetValue(zero, _complementaryMask);
+            }
 
-                // reduce the sum2 (sum)
-                _squaremean = new Image<Gray, float>(new Size(1, inputImage.Height));
-                CvInvoke.Reduce(_squareImage, _squaremean, ReduceDimension.Auto, ReduceType.ReduceSum);
+            using (Image<Gray, ushort> tempImage = inputImage.Convert<Gray, ushort>())
+            {
+                using (_convertedMask = maskImage.Convert<Gray, float>())
+                {
+                    //calculate square image
+                    //_squareImage = tempImage.Pow(2);
+                    CvInvoke.Pow(tempImage, 2, _squareImage);
 
-                // reduce the sum image (sum)
-                _mean = new Image<Gray, float>(new Size(1, inputImage.Height));
-                CvInvoke.Reduce(inputImage, _mean, ReduceDimension.Auto, ReduceType.ReduceSum);
+                    // reduce the sum2 (sum)
+                    //_squaremean = new Image<Gray, float>(new Size(1, inputImage.Height));
+                    CvInvoke.Reduce(_squareImage, _squaremean, ReduceDimension.Auto, ReduceType.ReduceSum);
 
-                // reduce the sum image (sum)
-                _counter = new Image<Gray, float>(new Size(1, inputImage.Height));
-                _convertedMask = maskImage.Convert<Gray, float>();
-                CvInvoke.Reduce(_convertedMask, _counter, ReduceDimension.Auto, ReduceType.ReduceSum);
+                    // reduce the sum image (sum)
+                    //_mean = new Image<Gray, float>(new Size(1, inputImage.Height));
+                    CvInvoke.Reduce(inputImage, _mean, ReduceDimension.Auto, ReduceType.ReduceSum);
 
-                //Image<Gray, float> counterReciprok = counter.Pow(-1);
+                    // reduce the sum image (sum)
+                    //_counter = new Image<Gray, float>(new Size(1, inputImage.Height));
 
-                CvInvoke.Divide(_squaremean, _counter, _squaremean);
-                CvInvoke.Divide(_mean, _counter, _mean);
+                    CvInvoke.Reduce(_convertedMask, _counter, ReduceDimension.Auto, ReduceType.ReduceSum);
 
-                //squaremean._Mul(counterReciprok);
-                //mean._Mul(counterReciprok);
+                    //Image<Gray, float> counterReciprok = counter.Pow(-1);
 
-                // calculate   Math.Sqrt(sum2 / (counter-1) - (sum * sum / Math.Pow(counter-1,2)));
-                _sq = _mean.Pow(2);
-                _resu = _squaremean - _sq;
-                _sqrt = _resu.Pow(0.5);
+                    CvInvoke.Divide(_squaremean, _counter, _squaremean);
+                    CvInvoke.Divide(_mean, _counter, _mean);
 
+                    //squaremean._Mul(counterReciprok);
+                    //mean._Mul(counterReciprok);
+
+                    // calculate   Math.Sqrt(sum2 / (counter-1) - (sum * sum / Math.Pow(counter-1,2)));
+                    CvInvoke.Pow(_mean, 2, _sq);
+                    CvInvoke.Subtract(_squaremean, _sq, _resu);
+                    CvInvoke.Pow(_resu, 0.5, _sqrt);
+                    //_sq = _mean.Pow(2);
+                    //_resu = _squaremean - _sq;
+                    //_sqrt = _resu.Pow(0.5);
+
+                    //ClearEmguImages();
+                }
             }
 
             float[,,] meanData = _mean.Data;
@@ -101,15 +122,15 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
             for (int i = 0; i < _mean.Height; i++)
             {
-                _resultVector1[i, 0, 0] = meanData[i, 0, 0];
-                _resultVector2[i, 0, 0] = resuData[i, 0, 0];
+                _resultVector1[0, i, 0] = meanData[i, 0, 0];
+                _resultVector2[0, i, 0] = resuData[i, 0, 0];
             }
 
             return true;
         }
 
 
-        protected override bool CheckInputData(Image<Gray, ushort> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, float> meanVector, Image<Gray, float> stdVector)
+        protected override bool CheckInputData(Image<Gray, ushort> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, double> meanVector, Image<Gray, double> stdVector)
         {
             base.CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector);
 
@@ -133,12 +154,12 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
             try
             {
-                _complementaryMask = new Image<Gray, byte>(_width, _height);
+                //_complementaryMask = new Image<Gray, byte>(_width, _height);
                 _squareImage = new Image<Gray, float>(_width, _height);
-                _squaremean = new Image<Gray, float>(_width, _height);
-                _mean = new Image<Gray, float>(_width, _height);
-                _counter = new Image<Gray, float>(_width, _height);
-                _convertedMask = new Image<Gray, float>(_width, _height);
+                _squaremean = new Image<Gray, float>(1, _height);
+                _mean = new Image<Gray, float>(1, _height);
+                _counter = new Image<Gray, float>(1, _height);
+                //_convertedMask = new Image<Gray, float>(_width, _height);
                 _sq = new Image<Gray, float>(_width, _height);
                 _resu = new Image<Gray, float>(_width, _height);
                 _sqrt = new Image<Gray, float>(_width, _height);

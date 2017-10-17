@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using ImageEvaluatorInterfaces;
@@ -47,7 +48,7 @@ namespace ImageEvaluatorLib.BorderSearch
         /// <param name="maskImage"></param>
         /// <param name="pointList"></param>
         /// <returns></returns>
-        public bool Run(Image<Gray, byte> maskImage, ref int[,] pointList)
+        public bool Run(Image<Gray, byte> maskImage, ref int[,] pointList, string name)
         {
             if (!IsInitialized)
             {
@@ -66,7 +67,7 @@ namespace ImageEvaluatorLib.BorderSearch
                 ResetPointList();
                 pointList = _borderPoints;
 
-                CalculatePoints(maskImage);
+                CalculatePoints(maskImage, name);
             }
             catch (Exception ex)
             {
@@ -79,7 +80,7 @@ namespace ImageEvaluatorLib.BorderSearch
 
 
 
-        protected abstract void CalculatePoints(Image<Gray, byte> maskImage);
+        protected abstract void CalculatePoints(Image<Gray, byte> maskImage, string name);
 
 
         /// <summary>
@@ -125,6 +126,45 @@ namespace ImageEvaluatorLib.BorderSearch
                 return false;
             }
             return true;
+        }
+
+
+        protected void SaveMaskImage(string name, Image<Gray, byte> maskImage)
+        {
+            string fileNameBase = Path.GetFileNameWithoutExtension(name);
+            string path = Path.GetDirectoryName(name);
+            string finalOutputName = Path.Combine(path ?? string.Empty, "MaskImage_BorderSearch", $"{fileNameBase}.png");
+
+            string directory = Path.GetDirectoryName(finalOutputName);
+            if (directory != null && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            maskImage.Save(finalOutputName);
+        }
+
+
+
+        protected void SavePointList(string name)
+        {
+            string fileNameBase = Path.GetFileNameWithoutExtension(name);
+            string path = Path.GetDirectoryName(name);
+            string finalOutputName = Path.Combine(path ?? string.Empty, "PointList", $"{fileNameBase}.csv");
+
+            string directory = Path.GetDirectoryName(finalOutputName);
+            if (directory != null && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            using (StreamWriter sw = new StreamWriter(finalOutputName))
+            {
+                for (int i = 0; i < _borderPoints.Length / 2; i++)
+                {
+                    sw.WriteLine($"{i},{_borderPoints[i, 0]},{_borderPoints[i, 1]}");
+                }
+            }
         }
 
 

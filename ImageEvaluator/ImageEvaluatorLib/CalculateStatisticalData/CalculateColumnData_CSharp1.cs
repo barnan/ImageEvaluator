@@ -30,8 +30,19 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         /// <param name="pointArray"></param>
         /// <param name="meanVector"></param>
         /// <param name="stdVector"></param>
-        public override bool Run(Image<Gray, ushort> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, float> meanVector, ref Image<Gray, float> stdVector)
+        /// <param name="resu3"></param>
+        /// <param name="resu4"></param>
+        /// <param name="resu1"></param>
+        /// <param name="resu2"></param>
+        public override bool Run(Image<Gray, ushort> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector,
+                                out double resu1, out double resu2, out double resu3, out double resu4)
         {
+
+            resu1 = 0;
+            resu2 = 0;
+            resu3 = 0;
+            resu4 = 0;
+
             if (!IsInitialized)
             {
                 _logger.Error("CalculateColumnData_CSharp2 is not initialized.");
@@ -61,12 +72,12 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                         counter++;
                     }
 
-                    _resultVector1[i, 0, 0] = (float)(sum / counter);
+                    _resultVector1[0, i, 0] = (float)(sum / counter);
                     counter = 0;
 
                     for (int j = 0; j < (pointArray[i, 1] - pointArray[i, 0]); j++)
                     {
-                        sum2 += Math.Pow(imgData[i, pointArray[i, 0] + j, 0] - _resultVector1[i, 0, 0], 2);
+                        sum2 += Math.Pow(imgData[i, pointArray[i, 0] + j, 0] - _resultVector1[0, i, 0], 2);
                         counter++;
                     }
 
@@ -91,7 +102,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         /// <param name="pointArray"></param>
         /// <param name="meanVector"></param>
         /// <returns></returns>
-        protected override bool CheckInputData(Image<Gray, ushort> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, float> meanVector, Image<Gray, float> stdVector)
+        protected override bool CheckInputData(Image<Gray, ushort> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, double> meanVector, Image<Gray, double> stdVector)
         {
             bool partResu = base.CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector);
 

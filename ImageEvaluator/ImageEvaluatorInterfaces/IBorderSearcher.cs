@@ -6,7 +6,7 @@ namespace ImageEvaluatorInterfaces
 {
     public interface IBorderSearcher : IInitalizable
     {
-        bool Run(Image<Gray, byte> maskImage, ref int[,] pointList);
+        bool Run(Image<Gray, byte> maskImage, ref int[,] pointList, string name);
 
     }
 

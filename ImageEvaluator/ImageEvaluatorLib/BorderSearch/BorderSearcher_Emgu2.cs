@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using Emgu.CV;
 using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
@@ -22,7 +23,7 @@ namespace ImageEvaluatorLib.BorderSearch
             _showImages = show;
         }
 
-        protected override void CalculatePoints(Image<Gray, byte> maskImage)
+        protected override void CalculatePoints(Image<Gray, byte> maskImage, string name)
         {
             using (VectorOfVectorOfPoint contour = new VectorOfVectorOfPoint())
             {
@@ -39,13 +40,14 @@ namespace ImageEvaluatorLib.BorderSearch
 
                         if (coordinateList.Length > 100)
                         {
-
                             if (_showImages)
                             {
                                 maskImage.SetValue(new Gray(100.0), maskImage);
 
                                 maskImage.Draw(coordinateList, new Gray(200.0), 2);
                                 ImageViewer.Show(maskImage, "BorderSearcher_Emgu2 - contour points");
+
+                                SaveMaskImage(name, maskImage);
                             }
 
                             for (int j = 0; j < contour[i].Size - 1; j++)
@@ -73,6 +75,11 @@ namespace ImageEvaluatorLib.BorderSearch
                         }
 
                     }
+
+                    if (_showImages)
+                    {
+                        SavePointList(name);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -82,6 +89,11 @@ namespace ImageEvaluatorLib.BorderSearch
             }
 
         }
+
+
+        
+
+
     }
 
 

@@ -8,14 +8,15 @@ using NLog;
 
 namespace ImageEvaluatorLib.DataSaver
 {
-    class CsvResultSaver : ResultSaver_Base
+    class CsvColumnResultSaver : ResultSaverBase
     {
 
-        public CsvResultSaver(string outputFolder, string prefix, ILogger logger)
+        public CsvColumnResultSaver(string outputFolder, string prefix, ILogger logger)
             : base(outputFolder, prefix, logger)
         {
-            _logger?.Info($"{typeof(CsvResultSaver)} instantiated.");
+            _logger?.Info($"{typeof(CsvColumnResultSaver)} instantiated.");
         }
+
 
 
         /// <summary>
@@ -24,7 +25,7 @@ namespace ImageEvaluatorLib.DataSaver
         /// <param name="result"></param>
         /// <param name="inputFileName"></param>
         /// <returns></returns>
-        public override bool SaveResult(IColumnMeasurementResult result, string inputFileName)
+        public override bool SaveResult(IMeasurementResult result, string inputFileName)
         {
             try
             {
@@ -35,20 +36,20 @@ namespace ImageEvaluatorLib.DataSaver
                 {
                     object obj = prop.GetValue(result);
 
-                    if (!(obj is Image<Gray, float>))
+                    if (!(obj is Image<Gray, double>))
                         continue;
 
                     string fileNameBase = Path.GetFileNameWithoutExtension(inputFileName);
-                    string finalOutputName = Path.Combine(_outputFolder, $"{fileNameBase}_{_prefix}_{prop.Name}.csv");
+                    string finalOutputName = Path.Combine(OutputFolder, $"{fileNameBase}_{_prefix}_{prop.Name}.csv");
 
 
                     using (StreamWriter sw = new StreamWriter(finalOutputName))
                     {
-                        float[,,] data = (obj as Image<Gray, float>)?.Data;
+                        double[,,] data = (obj as Image<Gray, double>).Data;
 
                         for (int i = 0; i < data?.Length; i++)
                         {
-                            sw.WriteLine(data[i, 0, 0]);
+                            sw.WriteLine(data[0, i, 0]);
                         }
                     }
                     _logger?.Trace("Image " + finalOutputName + " saved.");
@@ -63,24 +64,15 @@ namespace ImageEvaluatorLib.DataSaver
             return true;
         }
 
-        public override bool SaveResult(IColumnStatisticalMeasurementResult result, string inputfilename)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override bool SaveResult(IRegionStatisticalMeasurementResult result, string inputfilename)
-        {
-            throw new NotImplementedException();
-        }
     }
 
 
-    public class FactoryCsvResultSaver : IResultSaver_Creator
+    public class FactoryCsvColumnResultSaver : IResultSaver_Creator
     {
         public IResultSaver Factory(string outputFolder, string prefix, ILogger logger)
         {
-            logger?.Info($"{typeof(FactoryCsvResultSaver).ToString()} factory called.");
-            return new CsvResultSaver(outputFolder, prefix, logger);
+            logger?.Info($"{typeof(FactoryCsvColumnResultSaver)} factory called.");
+            return new CsvColumnResultSaver(outputFolder, prefix, logger);
 
         }
 

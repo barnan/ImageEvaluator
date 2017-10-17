@@ -4,7 +4,10 @@ namespace ImageEvaluatorInterfaces
 {
     public interface IResultSaver : IInitalizable
     {
-        bool SaveResult(IColumnMeasurementResult result, string inputfilename);
+        bool SaveResult(IMeasurementResult result, string inputfilename);
+
+        string OutputFolder { get; set; }
+
     }
 
 

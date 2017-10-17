@@ -52,7 +52,7 @@ namespace ImageEvaluator.MethodManager
                 IColumnDataCalculator columnDataCalculator = new FactoryCalculateColumnDataEmgu1().Factory(_logger, width, height);
 
                 string outputFolder = Path.Combine(_inputPaths[_pathIndex], "output");
-                IResultSaver saver = new FactoryCsvResultSaver().Factory(outputFolder, "StatCalc", _logger);
+                IResultSaver saver = new FactoryCsvColumnResultSaver().Factory(outputFolder, "StatCalc", _logger);
 
 
                 Dictionary<SearchOrientations, Rectangle> calcareas = new Dictionary<SearchOrientations, Rectangle>();

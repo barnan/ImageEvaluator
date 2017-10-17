@@ -67,6 +67,7 @@ namespace ImageEvaluatorLib.PreProcessor
         /// </summary>
         /// <param name="inputImage"></param>
         /// <param name="maskImage"></param>
+        /// <param name="name"></param>
         /// <returns></returns>
         public bool Run(Image<Gray, ushort> inputImage, ref Image<Gray, byte> maskImage, string name)
         {
@@ -87,15 +88,13 @@ namespace ImageEvaluatorLib.PreProcessor
 
                 // create mask image:
                 double maskValue = 255.0;
+                using (Image<Gray, byte> tempImage1 = inputImage.Convert<Gray, float>().Convert<Gray, byte>())
+                {
+                    CvInvoke.Threshold(tempImage1, _thresholdedImage, thresh, maskValue, ThresholdType.Binary);
+                }
 
-                //_thresholdedImage = inputImage.ThresholdBinary(new Gray(thresh), new Gray(maskValue));
-
-                Image<Gray, byte> tempImage1 = inputImage.Convert<Gray, float>().Convert<Gray, byte>();
-
-                CvInvoke.Threshold(tempImage1, _thresholdedImage, thresh, maskValue, ThresholdType.Binary);
-
-                CvInvoke.Dilate(_thresholdedImage, _dilatedImage, null, new Point(-1, -1), 1, BorderType.Default, new MCvScalar(0));
-                CvInvoke.Erode(_dilatedImage, _thresholdedImage, null, new Point(-1, -1), 1, BorderType.Default, new MCvScalar(0));
+                CvInvoke.Dilate(_thresholdedImage, _dilatedImage, null, new Point(-1, -1), 10, BorderType.Default, new MCvScalar(0));
+                CvInvoke.Erode(_dilatedImage, _thresholdedImage, null, new Point(-1, -1), 10, BorderType.Default, new MCvScalar(0));
 
                 maskImage = _thresholdedImage;
 
@@ -104,7 +103,7 @@ namespace ImageEvaluatorLib.PreProcessor
                     ImageViewer.Show(inputImage, "ImagePreProcessor - transposed image");
                     ImageViewer.Show(maskImage, "ImagePreProcessor - maskImage");
 
-                    maskImage.Save("Maskimage.png");
+                    SaveMaskImage(name, maskImage);
                 }
 
                 return true;
@@ -119,7 +118,8 @@ namespace ImageEvaluatorLib.PreProcessor
         private void SaveHistogram(string name)
         {
             string fileNameBase = Path.GetFileNameWithoutExtension(name);
-            string finalOutputName = Path.Combine("Histogram", $"{fileNameBase}.csv");
+            string path = Path.GetDirectoryName(name);
+            string finalOutputName = Path.Combine(path ?? string.Empty, "Histogram", $"{fileNameBase}.csv");
 
             string directory = Path.GetDirectoryName(finalOutputName);
             if (directory != null && !Directory.Exists(directory))
@@ -136,6 +136,23 @@ namespace ImageEvaluatorLib.PreProcessor
                 }
             }
         }
+
+
+        private void SaveMaskImage(string name, Image<Gray, byte> maskImage)
+        {
+            string fileNameBase = Path.GetFileNameWithoutExtension(name);
+            string path = Path.GetDirectoryName(name);
+            string finalOutputName = Path.Combine(path ?? string.Empty, "MaskImage_PreProcessor", $"{fileNameBase}.png");
+
+            string directory = Path.GetDirectoryName(finalOutputName);
+            if (directory != null && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+            
+            maskImage.Save(finalOutputName);
+        }
+
 
 
         private bool CheckWidthData()

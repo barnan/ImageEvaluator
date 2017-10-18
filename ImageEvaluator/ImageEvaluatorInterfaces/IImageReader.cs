@@ -6,7 +6,7 @@ namespace ImageEvaluatorInterfaces
 {
     public interface IImageReader : IInitalizable
     {
-        bool GetImage(string fileName, ref Image<Gray, ushort> img1, ref Image<Gray, ushort> img2);
+        bool GetImage(string fileName, ref Image<Gray, byte> img1, ref Image<Gray, byte> img2);
     }
 
 

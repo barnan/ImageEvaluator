@@ -35,7 +35,7 @@ namespace ImageEvaluatorLib.ReadImage
 
                 //byte[] dataRow1 = new byte[stride];
 
-                ushort[,,] emguImage1Array = _img1.Data;
+                byte[,,] emguImage1Array = _img1.Data;
 
                 for (int i = 0; i < _height; i++)
                 {

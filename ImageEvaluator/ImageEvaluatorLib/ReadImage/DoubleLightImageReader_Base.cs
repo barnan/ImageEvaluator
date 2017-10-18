@@ -12,8 +12,8 @@ namespace ImageEvaluatorLib.ReadImage
     internal abstract class DoubleLightImageReader_Base : ImageReaderBase
     {
         protected string _fileName;
-        protected Image<Gray, ushort> _img1;
-        protected Image<Gray, ushort> _img2;
+        protected Image<Gray, byte> _img1;
+        protected Image<Gray, byte> _img2;
         protected Rectangle _fullROI;
 
 
@@ -35,7 +35,7 @@ namespace ImageEvaluatorLib.ReadImage
         /// <param name="inputfileName"></param>
         /// <param name="img1"></param>
         /// <param name="img2"></param>
-        public override bool GetImage(string inputfileName, ref Image<Gray, ushort> img1, ref Image<Gray, ushort> img2)
+        public override bool GetImage(string inputfileName, ref Image<Gray, byte> img1, ref Image<Gray, byte> img2)
         {
             if (!IsInitialized)
             {
@@ -130,8 +130,8 @@ namespace ImageEvaluatorLib.ReadImage
 
             try
             {
-                _img1 = new Image<Gray, ushort>(_width, _height);
-                _img2 = new Image<Gray, ushort>(_width, _height);
+                _img1 = new Image<Gray, byte>(_width, _height);
+                _img2 = new Image<Gray, byte>(_width, _height);
                 _fullROI = new Rectangle(0, 0, _width, _height);
 
                 return true;

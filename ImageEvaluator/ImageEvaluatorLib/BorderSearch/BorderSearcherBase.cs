@@ -48,7 +48,7 @@ namespace ImageEvaluatorLib.BorderSearch
         /// <param name="maskImage"></param>
         /// <param name="pointList"></param>
         /// <returns></returns>
-        public bool Run(Image<Gray, byte> maskImage, ref int[,] pointList, string name)
+        public bool Run(Image<Gray, byte> origImage, Image<Gray, byte> maskImage, ref int[,] pointList, string name)
         {
             if (!IsInitialized)
             {
@@ -67,7 +67,7 @@ namespace ImageEvaluatorLib.BorderSearch
                 ResetPointList();
                 pointList = _borderPoints;
 
-                CalculatePoints(maskImage, name);
+                CalculatePoints(origImage, maskImage, name);
             }
             catch (Exception ex)
             {
@@ -80,7 +80,7 @@ namespace ImageEvaluatorLib.BorderSearch
 
 
 
-        protected abstract void CalculatePoints(Image<Gray, byte> maskImage, string name);
+        protected abstract void CalculatePoints(Image<Gray, byte> origImage, Image<Gray, byte> maskImage, string name);
 
 
         /// <summary>
@@ -129,11 +129,11 @@ namespace ImageEvaluatorLib.BorderSearch
         }
 
 
-        protected void SaveMaskImage(string name, Image<Gray, byte> maskImage)
+        protected void SaveMaskImage(string name, Image<Gray, byte> maskImage, string ext)
         {
             string fileNameBase = Path.GetFileNameWithoutExtension(name);
             string path = Path.GetDirectoryName(name);
-            string finalOutputName = Path.Combine(path ?? string.Empty, "MaskImage_BorderSearch", $"{fileNameBase}.png");
+            string finalOutputName = Path.Combine(path ?? string.Empty, ext + "_BorderSearch", $"{fileNameBase}.png");
 
             string directory = Path.GetDirectoryName(finalOutputName);
             if (directory != null && !Directory.Exists(directory))

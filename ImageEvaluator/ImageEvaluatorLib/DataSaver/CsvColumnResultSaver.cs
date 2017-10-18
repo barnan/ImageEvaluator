@@ -18,14 +18,14 @@ namespace ImageEvaluatorLib.DataSaver
         }
 
 
-
         /// <summary>
         /// 
         /// </summary>
         /// <param name="result"></param>
         /// <param name="inputFileName"></param>
+        /// <param name="ext"></param>
         /// <returns></returns>
-        public override bool SaveResult(IMeasurementResult result, string inputFileName)
+        public override bool SaveResult(IMeasurementResult result, string inputFileName, string ext)
         {
             try
             {
@@ -40,8 +40,12 @@ namespace ImageEvaluatorLib.DataSaver
                         continue;
 
                     string fileNameBase = Path.GetFileNameWithoutExtension(inputFileName);
-                    string finalOutputName = Path.Combine(OutputFolder, $"{fileNameBase}_{_prefix}_{prop.Name}.csv");
+                    string finalOutputName = Path.Combine(OutputFolder, "LineScans", $"{fileNameBase}_{_prefix}_{ext}_{prop.Name}.csv");
 
+                    if (!Directory.Exists(Path.GetDirectoryName(finalOutputName)))
+                    {
+                        Directory.CreateDirectory(Path.GetDirectoryName(finalOutputName));
+                    }
 
                     using (StreamWriter sw = new StreamWriter(finalOutputName))
                     {

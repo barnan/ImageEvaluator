@@ -20,8 +20,8 @@ namespace ImageEvaluator.EvaluationProcessor
         bool _initialized;
 
 
-        Image<Gray, ushort> _image1;
-        Image<Gray, ushort> _image2;
+        Image<Gray, byte> _image1;
+        Image<Gray, byte> _image2;
         Image<Gray, byte> _mask1;
         Image<Gray, byte> _mask2;
         int[,] _borderPoints1;
@@ -59,7 +59,6 @@ namespace ImageEvaluator.EvaluationProcessor
             Init();
 
             _logger?.Info("EvaluationProcessor1 " + (_initialized ? string.Empty : "NOT") + " initialized.");
-
         }
 
 
@@ -88,7 +87,6 @@ namespace ImageEvaluator.EvaluationProcessor
 
             return _initialized = resu;
         }
-
 
 
         /// <summary>
@@ -120,8 +118,8 @@ namespace ImageEvaluator.EvaluationProcessor
 
                 LogElapsedTime(_watch1, $"Image pre-processing: {Path.GetFileName(name)}");
 
-                _borderSearcher.Run(_mask1, ref _borderPoints1, name);
-                _borderSearcher.Run(_mask2, ref _borderPoints2, name);
+                _borderSearcher.Run(_image1, _mask1, ref _borderPoints1, name);
+                _borderSearcher.Run(_image2, _mask2, ref _borderPoints2, name);
 
                 LogElapsedTime(_watch1, $"Border search: {Path.GetFileName(name)}");
 
@@ -130,16 +128,18 @@ namespace ImageEvaluator.EvaluationProcessor
                 double resu2;
                 double resu3;
                 double resu4;
-                _columnDataCalculator.Run(_image1, _mask1, _borderPoints1, ref _meanVector1, ref _stdVector1, out resu1, out resu2, out resu3, out resu4);
-                _columnDataCalculator.Run(_image2, _mask2, _borderPoints2, ref _meanVector2, ref _stdVector2, out resu1, out resu2, out resu3, out resu4);
+                double resu5;
+                double resu6;
+                _columnDataCalculator.Run(_image1, _mask1, _borderPoints1, ref _meanVector1, ref _stdVector1, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6);
+                _columnDataCalculator.Run(_image2, _mask2, _borderPoints2, ref _meanVector2, ref _stdVector2, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6);
 
                 LogElapsedTime(_watch1, $"Column data, statistical calculation: {Path.GetFileName(name)}");
 
                 IColumnMeasurementResult result1 = new ColumnMeasurementResult { Name = "img1", ColumnMeanVector = _meanVector1, ColumnStdVector = _stdVector1 };
                 IColumnMeasurementResult result2 = new ColumnMeasurementResult { Name = "img2", ColumnMeanVector = _meanVector2, ColumnStdVector = _stdVector2 };
 
-                _saver.SaveResult(result1, name);
-                _saver.SaveResult(result2, name);
+                _saver.SaveResult(result1, name, "");
+                _saver.SaveResult(result2, name, "");
 
                 LogElapsedTime(_watch1, $"Result saving: {Path.GetFileName(name)}");
 

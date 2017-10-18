@@ -26,7 +26,7 @@ namespace ImageEvaluatorLib.DataSaver
         /// <param name="result"></param>
         /// <param name="inputFileName"></param>
         /// <returns></returns>
-        public override bool SaveResult(IMeasurementResult result, string inputFileName)
+        public override bool SaveResult(IMeasurementResult result, string inputFileName, string ext)
         {
             try
             {

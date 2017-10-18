@@ -6,7 +6,7 @@ namespace ImageEvaluatorInterfaces
 {
     public interface ISawmarkDeterminer : IInitalizable
     {
-        void Run(Image<Gray, ushort> image, string name);
+        void Run(Image<Gray, byte> image, string name);
     }
 
 

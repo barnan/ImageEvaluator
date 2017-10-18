@@ -25,7 +25,7 @@ namespace ImageEvaluatorLib.FindEdgeLines
         /// <param name="maskImage"></param>
         /// <param name="edgeFindData"></param>
         /// <returns></returns>
-        public override bool Run(Image<Gray, ushort> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData)
+        public override bool Run(Image<Gray, byte> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData)
         {
             if (!CheckInputData(originalImage, maskImage, _calcAreas))
             {
@@ -43,15 +43,15 @@ namespace ImageEvaluatorLib.FindEdgeLines
                 return false;
             }
 
-            WaferEdgeFindData result = new WaferEdgeFindData
-            {
-                TopSide = new VectorOfPoint(topPoints),
-                BottomSide = new VectorOfPoint(bottomPoints),
-                LeftSide = new VectorOfPoint(leftPoints),
-                RightSide = new VectorOfPoint(rightPoints)
-            };
+            //WaferEdgeFindData result = new WaferEdgeFindData
+            //{
+            //    TopSide = new VectorOfPoint(topPoints),
+            //    BottomSide = new VectorOfPoint(bottomPoints),
+            //    LeftSide = new VectorOfPoint(leftPoints),
+            //    RightSide = new VectorOfPoint(rightPoints)
+            //};
 
-            edgeFindData = result;
+            //edgeFindData = result;
 
             return true;
         }

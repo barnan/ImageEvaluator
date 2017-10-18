@@ -14,15 +14,16 @@ namespace ImageEvaluator.EvaluationProcessor
         readonly IDirectoryReader _dirReader;
         readonly IImagePreProcessor _preProc;
         readonly IBorderSearcher _borderSearcher;
-        readonly IColumnDataCalculator _columnDataCalculator;
+        readonly IColumnDataCalculator _columnDataCalculator1;
+        readonly IColumnDataCalculator _columnDataCalculator2;
         readonly IResultSaver _saver1;
         readonly IResultSaver _saver2;
         private readonly IEdgeLineFinder _edgeFinder;
         bool _initialized;
 
 
-        Image<Gray, ushort> _image1;
-        Image<Gray, ushort> _image2;
+        Image<Gray, byte> _image1;
+        Image<Gray, byte> _image2;
         Image<Gray, byte> _mask1;
         //Image<Gray, byte> _mask2;
         int[,] _borderPoints1;
@@ -33,13 +34,14 @@ namespace ImageEvaluator.EvaluationProcessor
         //Image<Gray, double> _stdVector2;
 
 
-        public EvaluationProcessor3(ILogger logger, IDirectoryReader dirReader, IImagePreProcessor preProc, IBorderSearcher borderSearcher, IColumnDataCalculator colummnCalculator, IResultSaver saver1, IResultSaver saver2, IEdgeLineFinder edgeFinder)
+        public EvaluationProcessor3(ILogger logger, IDirectoryReader dirReader, IImagePreProcessor preProc, IBorderSearcher borderSearcher, IColumnDataCalculator colummnCalculator1, IColumnDataCalculator colummnCalculator2, IResultSaver saver1, IResultSaver saver2, IEdgeLineFinder edgeFinder)
             : base(logger)
         {
             _dirReader = dirReader;
             _preProc = preProc;
             _borderSearcher = borderSearcher;
-            _columnDataCalculator = colummnCalculator;
+            _columnDataCalculator1 = colummnCalculator1;
+            _columnDataCalculator2 = colummnCalculator2;
             _edgeFinder = edgeFinder;
             _saver1 = saver1;
             _saver2 = saver2;
@@ -63,8 +65,11 @@ namespace ImageEvaluator.EvaluationProcessor
             resu = resu && _borderSearcher.Init();
             CheckInit(resu, nameof(_borderSearcher));
 
-            resu = resu && _columnDataCalculator.Init();
-            CheckInit(resu, nameof(_columnDataCalculator));
+            resu = resu && _columnDataCalculator1.Init();
+            CheckInit(resu, nameof(_columnDataCalculator1));
+
+            resu = resu && _columnDataCalculator2.Init();
+            CheckInit(resu, nameof(_columnDataCalculator2));
 
             resu = resu && _saver1.Init();
             CheckInit(resu, nameof(_saver1));
@@ -105,7 +110,7 @@ namespace ImageEvaluator.EvaluationProcessor
 
                 LogElapsedTime(_watch1, $"Image pre-processing: {Path.GetFileName(name)}");
 
-                _borderSearcher.Run(_mask1, ref _borderPoints1, path);
+                _borderSearcher.Run(_image1, _mask1, ref _borderPoints1, path);
 
                 LogElapsedTime(_watch1, $"Border search: {Path.GetFileName(name)}");
 
@@ -113,9 +118,9 @@ namespace ImageEvaluator.EvaluationProcessor
                 double resu2;
                 double resu3;
                 double resu4;
-                _columnDataCalculator.Run(_image1, _mask1, _borderPoints1, ref _meanVector1, ref _stdVector1, out resu1, out resu2, out resu3, out resu4);
-
-                LogElapsedTime(_watch1, $"Column data, statistical calculation: {Path.GetFileName(name)}");
+                double resu5;
+                double resu6;
+                _columnDataCalculator1.Run(_image1, _mask1, _borderPoints1, ref _meanVector1, ref _stdVector1, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6);
 
                 IColumnStatisticalMeasurementResult result1 = new ColumnStatisticalMeasurementResult
                 {
@@ -123,7 +128,9 @@ namespace ImageEvaluator.EvaluationProcessor
                     ColumnMeanMean = resu1,
                     ColumnStdMean = resu2,
                     ColumnMeanStd = resu3,
-                    ColumnStdStd = resu4
+                    ColumnStdStd = resu4,
+                    ColumnHomogenity1 = resu5,
+                    ColumnHomogenity2 = resu6
                 };
 
                 IColumnMeasurementResult result2 = new ColumnMeasurementResult
@@ -132,17 +139,41 @@ namespace ImageEvaluator.EvaluationProcessor
                     ColumnMeanVector = _meanVector1,
                     ColumnStdVector = _stdVector1
                 };
+                _saver2.SaveResult(result2 as IMeasurementResult, name, "MeanAndStd");
 
-                _saver1.SaveResult(result1 as IMeasurementResult, name);
-                _saver2.SaveResult(result2 as IMeasurementResult, name);
 
-                LogElapsedTime(_watch1, $"Result saving: {Path.GetFileName(name)}");
+                LogElapsedTime(_watch1, $"Column data, statistical calculation 1: {Path.GetFileName(name)}");
 
+                _columnDataCalculator2.Run(_image1, _mask1, _borderPoints1, ref _meanVector1, ref _stdVector1, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6);
+                result1.MeanOfNoise = resu1;
+                result1.StdOfNoise = resu2;
+                result1.MeanOfNoiseStd = resu3;
+                result1.StdOfNoiseStd = resu4;
+
+                IColumnMeasurementResult result3 = new ColumnMeasurementResult
+                {
+                    Name = name,
+                    ColumnMeanVector = _meanVector1,
+                    ColumnStdVector = _stdVector1
+                };
+                _saver2.SaveResult(result3 as IMeasurementResult, name, "Noise");
+
+
+                LogElapsedTime(_watch1, $"Column data, statistical calculation 2: {Path.GetFileName(name)}");
+                
                 IWaferEdgeFindData waferEdgeFindData1 = null;
 
                 _edgeFinder.Run(_image1, _mask1, ref waferEdgeFindData1);
+                result1.LeftLineSpread = waferEdgeFindData1.LeftLineSpread;
+                result1.RightLineSpread = waferEdgeFindData1.RightLineSpread;
+                result1.TopLineSpread = waferEdgeFindData1.TopLineSpread;
+                result1.BottomLineSpread = waferEdgeFindData1.BottomLineSpread;
 
                 LogElapsedTime(_watch1, "Edge finder");
+
+                _saver1.SaveResult(result1 as IMeasurementResult, name, "");
+
+                LogElapsedTime(_watch1, $"Result saving: {Path.GetFileName(name)}");
             }
 
             _logger?.Info("EvaluationProcessor3 Run ended.");

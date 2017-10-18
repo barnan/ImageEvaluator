@@ -24,6 +24,18 @@ namespace ImageEvaluatorInterfaces
         double ColumnMeanStd { get; set; }
         double ColumnStdMean { get; set; }
         double ColumnStdStd { get; set; }
+        double ColumnHomogenity1 { get; set; }
+        double ColumnHomogenity2 { get; set; }
+        double MeanOfNoise { get; set; }
+        double StdOfNoise { get; set; }
+        double MeanOfNoiseStd { get; set; }
+        double StdOfNoiseStd { get; set; }
+        double LeftLineSpread { get; set; }
+        double TopLineSpread { get; set; }
+        double RightLineSpread { get; set; }
+        double BottomLineSpread { get; set; }
+
+
         List<double> RegionMeanVector { get; set; }
         List<double> RegionStdVector { get; set; }
         List<double> RegionNoiseMeanVector { get; set; }

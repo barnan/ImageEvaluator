@@ -18,10 +18,12 @@ namespace ImageEvaluatorLib.PreProcessor
         private int _intensityRange;
         Image<Gray, byte> _thresholdedImage;
         Image<Gray, byte> _dilatedImage;
+        private Matrix<byte> _reducedMask;
         protected bool _showImages;
         private int _width;
         private int _height;
         private ILogger _logger;
+        private BeltCoordinates _beltCoordinates;
 
 
         /// <summary>
@@ -33,7 +35,17 @@ namespace ImageEvaluatorLib.PreProcessor
         /// <param name="height"></param>
         /// <param name="histcalculator"></param>
         /// <param name="showImages"></param>
-        internal ImagePreProcessor(ILogger logger, int intensityRange, int width, int height, IHistogramThresholdCalculator histcalculator, bool showImages)
+        /// <param name="beltLeftStart"></param>
+        /// <param name="beltLeftEnd"></param>
+        /// <param name="beltRightStart"></param>
+        /// <param name="beltRightEnd"></param>
+        internal ImagePreProcessor(ILogger logger, int intensityRange, int width, int height, 
+                                    IHistogramThresholdCalculator histcalculator, 
+                                    bool showImages, 
+                                    int beltLeftStart,
+                                    int beltLeftEnd,
+                                    int beltRightStart,
+                                    int beltRightEnd)
         {
             _intensityRange = intensityRange;
             _showImages = showImages;
@@ -41,6 +53,13 @@ namespace ImageEvaluatorLib.PreProcessor
             _height = height;
             _logger = logger;
             _thresholdcalculator = histcalculator;
+            _beltCoordinates = new BeltCoordinates
+            {
+                LeftStart = beltLeftStart,
+                LeftEnd = beltLeftEnd,
+                RightStart = beltRightStart,
+                RightEnd = beltRightEnd
+            };
         }
 
 
@@ -69,14 +88,14 @@ namespace ImageEvaluatorLib.PreProcessor
         /// <param name="maskImage"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public bool Run(Image<Gray, ushort> inputImage, ref Image<Gray, byte> maskImage, string name)
+        public bool Run(Image<Gray, byte> inputImage, ref Image<Gray, byte> maskImage, string name)
         {
             try
             {
                 CvInvoke.Transpose(inputImage, inputImage);
 
                 // calculate historamm for binarythreshold
-                _hist.Calculate<ushort>(new[] {inputImage}, false, null);
+                _hist.Calculate<byte>(new[] {inputImage}, false, null);
 
                 float thresh;
                 _thresholdcalculator.Run(_hist, out thresh);
@@ -88,15 +107,40 @@ namespace ImageEvaluatorLib.PreProcessor
 
                 // create mask image:
                 double maskValue = 255.0;
-                using (Image<Gray, byte> tempImage1 = inputImage.Convert<Gray, float>().Convert<Gray, byte>())
-                {
-                    CvInvoke.Threshold(tempImage1, _thresholdedImage, thresh, maskValue, ThresholdType.Binary);
-                }
+                CvInvoke.Threshold(inputImage, _thresholdedImage, thresh, maskValue, ThresholdType.Binary);
 
-                CvInvoke.Dilate(_thresholdedImage, _dilatedImage, null, new Point(-1, -1), 10, BorderType.Default, new MCvScalar(0));
-                CvInvoke.Erode(_dilatedImage, _thresholdedImage, null, new Point(-1, -1), 10, BorderType.Default, new MCvScalar(0));
+                CvInvoke.Erode(_thresholdedImage, _dilatedImage, null, new Point(-1, -1), 3, BorderType.Default, new MCvScalar(0));
+                CvInvoke.Dilate(_dilatedImage, _thresholdedImage, null, new Point(-1, -1), 4, BorderType.Default, new MCvScalar(0));
 
                 maskImage = _thresholdedImage;
+
+                maskImage.Reduce(_reducedMask, ReduceDimension.SingleCol, ReduceType.ReduceAvg);
+
+                int count = 0;
+                double MagicThreshold1 = 0.4;   // 40%
+                double MagicThreshold2 = 0.18;   // 15%
+                for (int i = 0; i < _reducedMask.Height; i++)
+                {
+                    if (_reducedMask[i, 0] > (1 - MagicThreshold1) * maskValue)
+                    {
+                        count++;
+                    }
+                }
+                if (count < maskImage.Height * (1- MagicThreshold2))
+                {
+                    Rectangle fullRoi = new Rectangle(0, 0, maskImage.Width, maskImage.Height);
+                    Rectangle rectLeft = new Rectangle(0, _beltCoordinates.LeftStart, maskImage.Width, _beltCoordinates.LeftEnd- _beltCoordinates.LeftStart);
+                    Rectangle rectRight = new Rectangle(0, _beltCoordinates.RightStart, maskImage.Width, _beltCoordinates.RightEnd - _beltCoordinates.RightStart);
+
+                    maskImage.ROI = rectLeft;
+                    maskImage.SetValue(0.0);
+
+                    maskImage.ROI = rectRight;
+                    maskImage.SetValue(0.0);
+
+                    maskImage.ROI = fullRoi; // new Rectangle(0, 0, maskImage.Width, maskImage.Height);
+                }
+
 
                 if (_showImages)
                 {
@@ -179,6 +223,7 @@ namespace ImageEvaluatorLib.PreProcessor
             {
                 _thresholdedImage = new Image<Gray, byte>(_width, _height);
                 _dilatedImage = new Image<Gray, byte>(_width, _height);
+                _reducedMask = new Matrix<byte>(_height, 1);
                 _hist = new DenseHistogram(_intensityRange, new RangeF(0, _intensityRange - 1));
 
                 return true;
@@ -199,6 +244,7 @@ namespace ImageEvaluatorLib.PreProcessor
         {
             _thresholdedImage?.Dispose();
             _dilatedImage?.Dispose();
+            _reducedMask?.Dispose();
 
             IsInitialized = false;
 
@@ -207,12 +253,26 @@ namespace ImageEvaluatorLib.PreProcessor
     }
 
 
+    internal class BeltCoordinates
+    {
+        public int LeftStart { get; set; }
+        public int LeftEnd { get; set; }
+        public int RightStart { get; set; }
+        public int RightEnd { get; set; }
+    }
+
     public class FactoryImagePreProcessor : IImagePreProcessorCreator
     {
-        public IImagePreProcessor Factory(ILogger logger, int intensityRange, int width, int height, IHistogramThresholdCalculator histcalculator, bool showImages)
+        public IImagePreProcessor Factory(ILogger logger, int intensityRange, int width, int height, 
+                                            IHistogramThresholdCalculator histcalculator, 
+                                            bool showImages,
+                                            int beltLeftStart,
+                                            int beltLeftEnd,
+                                            int beltRightStart,
+                                            int beltRightEnd)
         {
             logger?.Info($"{typeof(FactoryImagePreProcessor)} factory called.");
-            return new ImagePreProcessor(logger, intensityRange, width, height, histcalculator, showImages);
+            return new ImagePreProcessor(logger, intensityRange, width, height, histcalculator, showImages, beltLeftStart, beltLeftEnd, beltRightStart, beltRightEnd);
         }
     }
 

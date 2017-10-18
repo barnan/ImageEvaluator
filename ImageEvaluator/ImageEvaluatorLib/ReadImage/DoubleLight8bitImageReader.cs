@@ -45,8 +45,8 @@ namespace ImageEvaluatorLib.ReadImage
 
                 // make separate emgu images:
 
-                ushort[,,] emguImage1Array = _img1.Data;
-                ushort[,,] emguImage2Array = _img2.Data;
+                byte[,,] emguImage1Array = _img1.Data;
+                byte[,,] emguImage2Array = _img2.Data;
 
                 for (int i = 0; i < _height; i++)
                 {

@@ -10,6 +10,18 @@ using NLog;
 
 namespace ImageEvaluatorLib.FindEdgeLines
 {
+
+    class WaferEdgeFit
+    {
+        public float Slope { get; set; }
+        public float Intercept { get; set; }
+        public bool InvertedRepresentation { get; set; }
+        public float LineSpread { get; set; }
+
+        public VectorOfFloat FitParams { get; set; }
+    }
+
+
     class EdgeLineFinderEmgu1 : EdgeLineFinderBase
     {
         private byte[] _pixelbytes;
@@ -19,32 +31,39 @@ namespace ImageEvaluatorLib.FindEdgeLines
         {
         }
 
-        public override bool Run(Image<Gray, ushort> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData)
+        public override bool Run(Image<Gray, byte> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData)
         {
-
             if (!CheckInputData(originalImage, maskImage, _calcAreas))
             {
                 return false;
             }
 
+            WaferEdgeFit leftLineData;
+            WaferEdgeFit rightLineData;
+            WaferEdgeFit topLineData;
+            WaferEdgeFit bottomLineData;
 
-            using (Image<Gray, float> tempImage = originalImage.Convert<Gray, float>())
+            LineSpreadFunction(originalImage, out leftLineData, out rightLineData, out topLineData, out bottomLineData);
+
+            edgeFindData = new WaferEdgeFindData
             {
-                VectorOfFloat leftLineData;
-                VectorOfFloat rightLineData;
-                VectorOfFloat topLineData;
-                VectorOfFloat bottomLineData;
-
-
-                TestMethod(tempImage, out leftLineData, out rightLineData, out topLineData, out bottomLineData);
-            }
+                TopLineSpread = topLineData.LineSpread,
+                LeftLineSpread = leftLineData.LineSpread,
+                BottomLineSpread = bottomLineData.LineSpread,
+                RightLineSpread = rightLineData.LineSpread,
+            
+                TopSide = topLineData.FitParams,
+                LeftSide = leftLineData.FitParams,
+                BottomSide = bottomLineData.FitParams,
+                RightSide = rightLineData.FitParams
+            };
 
             return true;
         }
 
 
 
-        protected override bool CheckInputData(Image<Gray, ushort> originalImage, Image<Gray, byte> maskImage, Dictionary<SearchOrientations, Rectangle> calcAreas)
+        protected override bool CheckInputData(Image<Gray, byte> originalImage, Image<Gray, byte> maskImage, Dictionary<SearchOrientations, Rectangle> calcAreas)
         {
             if (originalImage == null )
             {
@@ -66,199 +85,196 @@ namespace ImageEvaluatorLib.FindEdgeLines
         }
 
 
-        public void TestMethod(Image<Gray, float> inputImage, out VectorOfFloat leftLineData, out VectorOfFloat rightLineData, out VectorOfFloat topLineData, out VectorOfFloat bottomLineData)
+        public static void LineSpreadFunction(Image<Gray, byte> workImage, out WaferEdgeFit leftLineData, out WaferEdgeFit rightLineData, out WaferEdgeFit topLineData, out WaferEdgeFit bottomLineData)
         {
-            Image<Gray, byte> workImage = inputImage.Convert<Gray, byte>();
-            Image<Gray, byte> sampleMask = new Image<Gray, byte>(workImage.Size);
-
-            int darkLimit = 40;
-            Gray white = new Gray(1);
-            float CONTOUR_AREA_LIMIT_RATIO = 0.01f;
             int width = workImage.Width;
             int height = workImage.Height;
 
-            var maskImage = workImage.ThresholdBinary(new Gray(darkLimit), white);
-            var finalWaferContour = new VectorOfVectorOfPoint();
+            //Recipe? Waferareapercent?
+            int darkLimit = 20;
+            CvInvoke.Threshold(workImage, workImage, darkLimit, 0, ThresholdType.ToZero);
 
-            using (Mat hierachy = new Mat())
+
+            FitEdge(workImage, height / 3, 2 * height / 3, 0, width / 8, false, out leftLineData);
+            FitEdge(workImage, height / 3, 2 * height / 3, 7 * width / 8, width, false, out rightLineData);
+            FitEdge(workImage, 0, height / 8, width / 3, 2 * width / 3, true, out topLineData);
+            FitEdge(workImage, 7 * height / 8, height, width / 3, 2 * width / 3, true, out bottomLineData);
+        }
+
+        public static void FitEdge(Image<Gray, byte> inputImage, int startRow, int endRow, int startCol, int endCol, bool isTopBottom, out WaferEdgeFit edge)
+        {
+            edge = new WaferEdgeFit();
+
+            Rectangle origRoi = inputImage.ROI;
+            Rectangle sideRoi = new Rectangle(startCol, startRow, endCol - startCol, endRow - startRow);
+
+            bool startFromRight = !isTopBottom && startCol > origRoi.Width / 2 || isTopBottom && startRow > origRoi.Height / 2;
+
+            inputImage.ROI = sideRoi;
+
+            int workingWidth = isTopBottom ? sideRoi.Height : sideRoi.Width;
+            int workingHeight = isTopBottom ? sideRoi.Width : sideRoi.Height;
+            using (Image<Gray, float> workImage = new Image<Gray, float>(workingWidth, workingHeight))
             {
-                using (VectorOfVectorOfPoint contours = new VectorOfVectorOfPoint())
+
+                double gradientLimit;
+
+                using (Image<Gray, float> sobelImage =
+                    isTopBottom ? inputImage.Sobel(0, 1, 3) : inputImage.Sobel(1, 0, 3))
                 {
-                    CvInvoke.FindContours(maskImage, contours, hierachy, RetrType.List, ChainApproxMethod.ChainApproxNone);
-
-                    for (int i = 0; i < contours.Size; i++)
+                    using (Image<Gray, float> nullImage = new Image<Gray, float>(sobelImage.Size))
                     {
-                        var currentContour = contours[i];
+                        CvInvoke.AbsDiff(sobelImage, nullImage, sobelImage);
+                    }
 
-                        var contourArea = CvInvoke.ContourArea(currentContour);
-                        if (contourArea > workImage.Height * workImage.Width * CONTOUR_AREA_LIMIT_RATIO)
+                    using (Image<Gray, byte> mask = new Image<Gray, byte>(sideRoi.Width, sideRoi.Height))
+                    {
+                        CvInvoke.Threshold(inputImage, mask, 0, 1, ThresholdType.Binary);
+                        MCvScalar gradientMean = new MCvScalar();
+                        MCvScalar gradientStd = new MCvScalar();
+                        CvInvoke.MeanStdDev(sobelImage, ref gradientMean, ref gradientStd, mask);
+                        double nSigma = 5;
+                        gradientLimit = gradientMean.V0 + nSigma * gradientStd.V0;
+                    }
+
+                    if (isTopBottom)
+                    {
+                        CvInvoke.Transpose(sobelImage, workImage);
+                    }
+                    else
+                    {
+                        sobelImage.CopyTo(workImage);
+                    }
+                }
+
+                inputImage.ROI = origRoi;
+
+                List<PointF> edgePoints = new List<PointF>();
+                List<float> fullWidthHalfMaximumVals = new List<float>();
+                var sobelData = workImage.Data;
+                int stride = 1;
+
+                for (int r = 0; r < workingHeight; r += stride)
+                {
+                    int approxEdgeCol = 0;
+                    if (!startFromRight)
+                    {
+                        for (int c = 0; c < workingWidth; c++)
                         {
-                            finalWaferContour.Push(currentContour);
+                            var currentValue = sobelData[r, c, 0];
+                            if (currentValue > gradientLimit)
+                            {
+                                approxEdgeCol = c;
+                                break;
+                            }
                         }
                     }
+                    else
+                    {
+                        for (int c = workingWidth - 1; c > 0; c--)
+                        {
+                            var currentValue = sobelData[r, c, 0];
+                            if (currentValue > gradientLimit)
+                            {
+                                approxEdgeCol = c;
+                                break;
+                            }
+                        }
+                    }
+
+                    int meanEdgeCol = 0;
+                    float maxValue = 0;
+                    var currentStartCol = Math.Max(approxEdgeCol - 5, 1);
+                    var currentEndCol = Math.Min(approxEdgeCol + 5 + 1, workingWidth - 1);
+                    for (int c = currentStartCol; c < currentEndCol; c++)
+                    {
+                        if (sobelData[r, c, 0] > maxValue)
+                        {
+                            maxValue = sobelData[r, c, 0];
+                            meanEdgeCol = c;
+                        }
+                    }
+
+                    if (!(maxValue > 0))
+                    {
+                        continue;
+                    }
+
+                    float halfMaxLeftValue = maxValue;
+                    float halfMaxRightValue = maxValue;
+                    int halfMaxLeftCol = meanEdgeCol;
+                    int halfMaxRightCol = meanEdgeCol;
+
+                    while (halfMaxLeftValue > maxValue / 2 && halfMaxLeftCol >= 0)
+                    {
+                        halfMaxLeftCol--;
+                        halfMaxLeftValue = sobelData[r, halfMaxLeftCol, 0];
+                    }
+                    while (halfMaxRightValue > maxValue / 2 && halfMaxRightCol < workingWidth)
+                    {
+                        halfMaxRightCol++;
+                        halfMaxRightValue = sobelData[r, halfMaxRightCol, 0];
+                    }
+
+                    float fwhm = halfMaxRightCol - halfMaxLeftCol;
+
+                    //Interpolation
+                    float dPixel = (maxValue / 2 - halfMaxLeftValue) /
+                                   (sobelData[r, halfMaxLeftCol + 1, 0] - halfMaxLeftValue);
+                    fwhm -= dPixel;
+                    dPixel = (maxValue / 2 - halfMaxRightValue) /
+                             (sobelData[r, halfMaxRightCol - 1, 0] - halfMaxRightValue);
+                    fwhm -= dPixel;
+
+                    fullWidthHalfMaximumVals.Add(fwhm);
+
+
+                    edgePoints.Add(isTopBottom
+                        ? new PointF(r + sideRoi.X, meanEdgeCol + sideRoi.Y)
+                        : new PointF(r + sideRoi.Y, meanEdgeCol + sideRoi.X));
+                }
+
+                VectorOfPointF yvector = new VectorOfPointF();
+                VectorOfFloat parameters = new VectorOfFloat();
+                yvector.Push(edgePoints.ToArray());
+                CvInvoke.FitLine(yvector, parameters, DistType.L12, 0, 0.01, 0.01);
+
+                float vx = parameters[0];
+                float vy = parameters[1];
+                float x0 = parameters[2];
+                float y0 = parameters[3];
+
+                edge.FitParams = parameters;
+                edge.Slope = vy / vx;
+                edge.Intercept = y0 - edge.Slope * x0;
+
+                fullWidthHalfMaximumVals.Sort();
+                int length = fullWidthHalfMaximumVals.Count;
+
+                if (length % 2 == 0)
+                {
+                    edge.LineSpread = (fullWidthHalfMaximumVals[length / 2 - 1] + fullWidthHalfMaximumVals[length / 2]) / 2;
+                }
+                else
+                {
+                    edge.LineSpread = fullWidthHalfMaximumVals[length / 2];
+                }
+
+                if (!isTopBottom)
+                {
+                    edge.InvertedRepresentation = true;
                 }
             }
-
-            for (int i = 0; i < finalWaferContour.Size; i++)
-            {
-                CvInvoke.DrawContours(sampleMask, finalWaferContour, i, new MCvScalar(1), -1);
-            }
-
-            workImage._Mul(sampleMask);
-            //sampleMask.Save("mask.png");
-
-            MCvScalar waferMean = new MCvScalar();
-            MCvScalar waferStd = new MCvScalar();
-            CvInvoke.MeanStdDev(workImage, ref waferMean, ref waferStd, sampleMask);
-
-            double nSigma = 0;
-            double gradLimit = waferMean.V0 - nSigma * waferStd.V0;
-
-            Image<Gray, float> gx = workImage.Sobel(1, 0, 3);
-            Image<Gray, float> gy = workImage.Sobel(0, 1, 3);
-
-            gx = gx.AbsDiff(new Gray(0));
-            gy = gy.AbsDiff(new Gray(0));
-
-            SaveFITS(gx.Convert<Gray, double>().Data, "sobelX.fits");
-            SaveFITS(gy.Convert<Gray, double>().Data, "sobelY.fits");
-
-            CvInvoke.Transpose(gy, gy);
-
-            SaveFITS(gy.Convert<Gray, double>().Data, "sobelYT.fits");
-
-
-
-            float leftSlope, leftIntercept, leftLineSpread;
-            float rightSlope, rightIntercept, rightLineSpread;
-            float topSlope, topIntercept, topLineSpread;
-            float bottomSlope, bottomIntercept, bottomLineSpread;
-            leftLineData = FitEdge(gx, height / 4, 3 * height / 4, 0, width / 8, gradLimit, out leftSlope, out leftIntercept, out leftLineSpread);
-            rightLineData = FitEdge(gx, height / 4, 3 * height / 4, 7 * width / 8, width, gradLimit, out rightSlope, out rightIntercept, out rightLineSpread);
-            topLineData = FitEdge(gy, width / 4, 3 * width / 4, 0, height / 8, gradLimit, out topSlope, out topIntercept, out topLineSpread);
-            bottomLineData = FitEdge(gy, width / 4, 3 * width / 4, 7 * height / 8, height, gradLimit, out bottomSlope, out bottomIntercept, out bottomLineSpread);
-
-            for (int c = 0; c < width; c++)
-            {
-                workImage.Data[(int)(topSlope * c + topIntercept), c, 0] = 255;
-                workImage.Data[(int)(bottomSlope * c + bottomIntercept), c, 0] = 255;
-            }
-            for (int r = 0; r < height; r++)
-            {
-                workImage.Data[r, (int)(leftSlope * r + leftIntercept), 0] = 255;
-                workImage.Data[r, (int)(rightSlope * r + rightIntercept), 0] = 255;
-            }
-
-            workImage.Save("sidepointsFit.png");
-
-            //return inputImage;
-
         }
 
 
 
-
-
-        public VectorOfFloat FitEdge(Image<Gray, float> sobelImage, int startRow, int endRow, int startCol, int endCol, double gradLimit, out float slope, out float intercept, out float lineSpread)
-        {
-            List<PointF> edgePoints = new List<PointF>();
-            var sobelData = sobelImage.Data;
-            int stride = 1;
-
-            List<float> fullWidthHalfMaximumVals = new List<float>();
-
-            for (int r = startRow; r < endRow; r += stride)
-            {
-                float mean = 0;
-                float variance = 0;
-                float nData = 0;
-
-                for (int c = startCol; c < endCol; c++)
-                {
-                    var currentValue = sobelData[r, c, 0];
-                    if (currentValue > gradLimit)
-                    {
-                        mean += currentValue * c;
-                        nData += currentValue;
-                    }
-                }
-
-                if (nData != 0)
-                {
-                    mean /= nData;
-                }
-
-                nData = 0;
-                int allowedRange = 30;
-                //TODO: check if mean is not 0
-                //Fix Belt handling
-                for (int c = startCol; c < endCol; c++)
-                {
-                    var currentValue = sobelData[r, c, 0];
-                    if (currentValue > gradLimit)
-                    {
-                        variance += currentValue * (float)Math.Pow(c - mean, 2);
-                        nData += currentValue;
-                    }
-                }
-
-                if (nData != 0)
-                {
-                    variance /= nData;
-                }
-
-                float fwhm = 2 * (float)Math.Sqrt(2 * Math.Log(2) * variance);
-                fullWidthHalfMaximumVals.Add(fwhm);
-
-                edgePoints.Add(new PointF(r, mean));
-            }
-
-            VectorOfPointF yvector = new VectorOfPointF();
-            VectorOfFloat parameters = new VectorOfFloat();
-            yvector.Push(edgePoints.ToArray());
-            CvInvoke.FitLine(yvector, parameters, DistType.L12, 0, 0.01, 0.01);
-
-            float vx = parameters[0];
-            float vy = parameters[1];
-            float x0 = parameters[2];
-            float y0 = parameters[3];
-
-            slope = vy / vx;
-            intercept = y0 - slope * x0;
-
-
-            fullWidthHalfMaximumVals.Sort();
-            int length = fullWidthHalfMaximumVals.Count;
-            lineSpread = 0;
-            if (length % 2 == 0)
-            {
-                lineSpread = (fullWidthHalfMaximumVals[length / 2 - 1] + fullWidthHalfMaximumVals[length / 2]) / 2;
-            }
-            else
-            {
-                lineSpread = fullWidthHalfMaximumVals[length / 2];
-            }
-
-            //debug:
-            //var m = new Image<Gray,byte>(sobelImage.Size);
-            //foreach (var point in edgePoints)
-            //{
-            //    m.Data[(int)point.X, (int)point.Y, 0] = 255;
-            //}
-            //m.Save("points.png");
-
-            return parameters;
-        }
-
-
-
-        public void SaveFITS(double[,,] pixels, string filename)
+        public void SaveFits(double[,,] pixels, string filename)
         {
             int width = pixels.GetLength(1);
             int height = pixels.GetLength(0);
             int stride = width * 8;
-            
-            string headerCard;
+
             System.Text.UTF8Encoding enc = new System.Text.UTF8Encoding();
             int cardCounter = 0;
 
@@ -319,7 +335,7 @@ namespace ImageEvaluatorLib.FindEdgeLines
             // */
 
             // SIMPLE = T
-            headerCard = String.Format("{0,-8}= {1,20} / {2,-47}", "SIMPLE", "T", "file conforms to FITS standard");
+            string headerCard = String.Format("{0,-8}= {1,20} / {2,-47}", "SIMPLE", "T", "file conforms to FITS standard");
             stream.Write(enc.GetBytes(headerCard), 0, 80);
             cardCounter++;
 

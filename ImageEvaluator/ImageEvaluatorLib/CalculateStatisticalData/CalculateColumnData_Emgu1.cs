@@ -1,6 +1,10 @@
-﻿using Emgu.CV;
+﻿using System;
+using Emgu.CV;
 using Emgu.CV.Structure;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using Emgu.CV.CvEnum;
+using Emgu.CV.UI;
 using ImageEvaluatorInterfaces;
 using NLog;
 
@@ -8,6 +12,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 {
     class CalculateColumnDataEmgu1 : CalculateColumnDataBaseEmgu
     {
+        
         /// <summary>
         /// 
         /// </summary>
@@ -35,97 +40,101 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         /// <param name="resu4"></param>
         /// <param name="resu1"></param>
         /// <param name="resu2"></param>
-        public override bool Run(Image<Gray, ushort> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector, 
-                                out double resu1, out double resu2, out double resu3, out double resu4)
+        /// <param name="resu5"></param>
+        /// <param name="resu6"></param>
+        public override bool Run(Image<Gray, byte> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector,
+            out double resu1, out double resu2, out double resu3, out double resu4, out double resu5, out double resu6)
         {
             resu1 = 0;
             resu2 = 0;
             resu3 = 0;
             resu4 = 0;
+            resu5 = 0;
+            resu6 = 0;
 
-            if (!IsInitialized)
+            _meanVector = new Image<Gray, double>(_height, 1);
+            _stdVector = new Image<Gray, double>(_height, 1);
+            _resultVector1 = _meanVector.Data;
+            _resultVector2 = _stdVector.Data;
+
+            try
             {
-                _logger.Error("CalculateColumnData_CSharp2 is not initialized.");
-                return false;
-            }
-
-            meanVector = _meanVector;
-            stdVector = _stdVector;
-
-            if (!CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector))
-            {
-                return false;
-            }
-
-            int imageWidth = inputImage.Width;
-            int indexMin = int.MaxValue;
-            int indexMax = int.MinValue;
-
-            for (int i = 0; i < pointArray.Length / 2; i++)
-            {
-                if (pointArray[i, 0] > 0 && pointArray[i, 1] < imageWidth && (pointArray[i, 1] - pointArray[i, 0]) < imageWidth)
+                if (!IsInitialized)
                 {
-                    Rectangle r = new Rectangle(pointArray[i, 0], i, pointArray[i, 1] - pointArray[i, 0], 1);
+                    _logger.Error("CalculateColumnData_CSharp2 is not initialized.");
+                    return false;
+                }
 
-                    MCvScalar mean = new MCvScalar();
-                    MCvScalar std = new MCvScalar();
+                meanVector = _meanVector;
+                stdVector = _stdVector;
 
-                    inputImage.ROI = r;
-                    CvInvoke.MeanStdDev(inputImage, ref mean, ref std);
+                if (!CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector))
+                {
+                    return false;
+                }
 
-                    _resultVector1[0, i, 0] = (float)mean.V0;
-                    _resultVector2[0, i, 0] = (float)std.V0;
+                int imageWidth = inputImage.Width;
+                int indexMin = int.MaxValue;
+                int indexMax = int.MinValue;
 
-                    if (i < indexMin)
+                for (int i = 0; i < pointArray.Length/2; i++)
+                {
+                    if (pointArray[i, 0] > 0 && pointArray[i, 1] < imageWidth && (pointArray[i, 1] - pointArray[i, 0]) < imageWidth)
                     {
-                        indexMin = i;
+                        Rectangle r = new Rectangle(pointArray[i, 0], i, pointArray[i, 1] - pointArray[i, 0], 1);
+
+                        MCvScalar mean = new MCvScalar();
+                        MCvScalar std = new MCvScalar();
+
+                        inputImage.ROI = r;
+                        CvInvoke.MeanStdDev(inputImage, ref mean, ref std);
+
+                        _resultVector1[0, i, 0] = (float) mean.V0;
+                        _resultVector2[0, i, 0] = (float) std.V0;
+
+                        if (i < indexMin)
+                        {
+                            indexMin = i;
+                        }
+
+                        if (i > indexMax)
+                        {
+                            indexMax = i;
+                        }
                     }
-
-                    if (i > indexMax)
+                    else
                     {
-                        indexMax = i;
+                        _resultVector1[0, i, 0] = 0.0f;
+                        _resultVector2[0, i, 0] = 0.0f;
                     }
                 }
-                else
+
+                if (!CalculateStatistics(indexMin, indexMax, maskImage))
                 {
-                    _resultVector1[0, i, 0] = 0.0f;
-                    _resultVector2[0, i, 0] = 0.0f;
+                    return false;
                 }
+
+                resu1 = _meanOfMean.V0;
+                resu2 = _stdOfMean.V0;
+                resu3 = _meanOfStd.V0;
+                resu4 = _stdOfStd.V0;
+                resu5 = Math.Max(_meanOfRegion2.V0 - _meanOfRegion1.V0, _meanOfRegion2.V0 - _meanOfRegion3.V0);
+                resu6 = Math.Abs(_meanOfRegion1.V0 - _meanOfRegion3.V0);
+
+                return true;
             }
-
-            MCvScalar meanOfMean = new MCvScalar();
-            MCvScalar stdOfMean = new MCvScalar();
-
-            MCvScalar meanOfStd = new MCvScalar();
-            MCvScalar stdOfStd = new MCvScalar();
-
-            using (Image<Gray, byte> tempMask1 = new Image<Gray, byte>(_meanVector.Width, _meanVector.Height))
+            catch (Exception ex)
             {
-                tempMask1.SetValue(255);
-
-                Rectangle rect1 = new Rectangle(0, 0, indexMin, 1);
-                Rectangle rect2 = new Rectangle(indexMax, 0, _meanVector.Size.Width - indexMax -1, 1);
-
-                tempMask1.ROI = rect1;
-                tempMask1.SetValue(0);
-
-                tempMask1.ROI = rect2;
-                tempMask1.SetValue(0);
-                tempMask1.ROI = new Rectangle(0, 0, _meanVector.Width, 1);
-
-                CvInvoke.MeanStdDev(_meanVector, ref meanOfMean, ref stdOfMean, tempMask1);
-                CvInvoke.MeanStdDev(_stdVector, ref meanOfStd, ref stdOfStd, tempMask1);
+                _logger?.Error($"Exception occured during CalculateColumnDataEmgu1 - Run: {ex}");
+                return false;
             }
-
-            resu1 = meanOfMean.V0;
-            resu2 = stdOfMean.V0;
-            resu3 = meanOfStd.V0;
-            resu4 = stdOfStd.V0;
-
-            inputImage.ROI = _fullMask;
-
-            return true;
+            finally
+            {
+                inputImage.ROI = _fullMask;
+            }
         }
+
+        
 
 
         /// <summary>
@@ -137,7 +146,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         /// <param name="meanVector"></param>
         /// <param name="stdVector"></param>
         /// <returns></returns>
-        protected override bool CheckInputData(Image<Gray, ushort> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, double> meanVector, Image<Gray, double> stdVector)
+        protected override bool CheckInputData(Image<Gray, byte> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, double> meanVector, Image<Gray, double> stdVector)
         {
             bool partResu = base.CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector);
 
@@ -149,6 +158,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
             return true;
         }
+
 
     }
 

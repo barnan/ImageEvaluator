@@ -10,10 +10,14 @@ namespace ImageEvaluator.MethodManager
 {
     class MethodManager2 : MethodManagerBase
     {
+        private int _width;
+        private int _height;
 
-        public MethodManager2(string[] paths)
+        public MethodManager2(string[] paths, int width, int height)
             : base(paths)
         {
+            _width = width;
+            _height = height;
         }
 
 

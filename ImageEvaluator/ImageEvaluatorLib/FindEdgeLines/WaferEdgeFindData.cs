@@ -5,10 +5,16 @@ namespace ImageEvaluatorLib.FindEdgeLines
 {
     class WaferEdgeFindData : IWaferEdgeFindData
     {
-        public VectorOfPoint LeftSide { get; set; }
-        public VectorOfPoint RightSide { get; set; }
-        public VectorOfPoint TopSide { get; set; }
-        public VectorOfPoint BottomSide { get; set; }
+        public VectorOfFloat LeftSide { get; set; }
+        public VectorOfFloat RightSide { get; set; }
+        public VectorOfFloat TopSide { get; set; }
+        public VectorOfFloat BottomSide { get; set; }
+
+        public float TopLineSpread { get; set; }
+        public float BottomLineSpread { get; set; }
+        public float LeftLineSpread { get; set; }
+        public float RightLineSpread { get; set; }
+
     }
 
 

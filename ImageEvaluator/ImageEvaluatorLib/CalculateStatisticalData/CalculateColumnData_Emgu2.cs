@@ -49,13 +49,22 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         /// <param name="resu2"></param>
         /// <param name="resu3"></param>
         /// <param name="resu4"></param>
-        public override bool Run(Image<Gray, ushort> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector,
-                                out double resu1, out double resu2, out double resu3, out double resu4)
+        /// <param name="resu5"></param>
+        /// <param name="resu6"></param>
+        public override bool Run(Image<Gray, byte> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector,
+                                out double resu1, out double resu2, out double resu3, out double resu4, out double resu5, out double resu6)
         {
             resu1 = 0;
             resu2 = 0;
             resu3 = 0;
             resu4 = 0;
+            resu5 = 0;
+            resu6 = 0;
+
+            _meanVector = new Image<Gray, double>(_height, 1);
+            _stdVector = new Image<Gray, double>(_height, 1);
+            _resultVector1 = _meanVector.Data;
+            _resultVector2 = _stdVector.Data;
 
             if (!IsInitialized)
             {
@@ -130,7 +139,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         }
 
 
-        protected override bool CheckInputData(Image<Gray, ushort> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, double> meanVector, Image<Gray, double> stdVector)
+        protected override bool CheckInputData(Image<Gray, byte> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, double> meanVector, Image<Gray, double> stdVector)
         {
             base.CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector);
 

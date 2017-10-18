@@ -16,7 +16,7 @@ namespace ImageEvaluatorLib.BorderSearch
         }
 
 
-        protected override void CalculatePoints(Image<Gray, byte> maskImage, string name)
+        protected override void CalculatePoints(Image<Gray, byte> origImage, Image<Gray, byte> maskImage, string name)
         {
             try
             {

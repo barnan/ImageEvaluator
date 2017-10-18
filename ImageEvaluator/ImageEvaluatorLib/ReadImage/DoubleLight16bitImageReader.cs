@@ -46,8 +46,8 @@ namespace ImageEvaluatorLib.ReadImage
                 // make separate emgu images:
 
                 // to speed up:
-                ushort[,,] emguImage1Array = _img1.Data;
-                ushort[,,] emguImage2Array = _img2.Data;
+                byte[,,] emguImage1Array = _img1.Data;
+                byte[,,] emguImage2Array = _img2.Data;
 
                 for (int i = 0; i < _height; i++)
                 {
@@ -56,8 +56,8 @@ namespace ImageEvaluatorLib.ReadImage
 
                     for (int j = 0; j < _width; j++)
                     {
-                        emguImage1Array[i, j, 0] = (ushort)(dataRow1[2 * j] + (dataRow1[2 * j + 1] << 8));
-                        emguImage2Array[i, j, 0] = (ushort)(dataRow2[2 * j] + (dataRow2[2 * j + 1] << 8));
+                        emguImage1Array[i, j, 0] = (byte)(dataRow1[2 * j] + (dataRow1[2 * j + 1] << 8));
+                        emguImage2Array[i, j, 0] = (byte)(dataRow2[2 * j] + (dataRow2[2 * j + 1] << 8));
                     }
                 }
 

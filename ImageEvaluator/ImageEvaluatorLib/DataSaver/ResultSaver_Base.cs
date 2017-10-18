@@ -61,7 +61,7 @@ namespace ImageEvaluatorLib.DataSaver
         }
 
 
-        public abstract bool SaveResult(IMeasurementResult result, string inputfilename);
+        public abstract bool SaveResult(IMeasurementResult result, string inputfilename, string ext);
 
 
     }

@@ -5,7 +5,6 @@ using Emgu.CV.Util;
 using NLog;
 using System;
 using System.Drawing;
-using System.IO;
 using ImageEvaluatorInterfaces;
 using Emgu.CV.UI;
 
@@ -25,8 +24,10 @@ namespace ImageEvaluatorLib.BorderSearch
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="origImage"></param>
         /// <param name="maskImage"></param>
-        protected override void CalculatePoints(Image<Gray, byte> maskImage, string name)
+        /// <param name="name"></param>
+        protected override void CalculatePoints(Image<Gray, byte> origImage, Image<Gray, byte> maskImage, string name)
         {
             using (Mat hierarchy = new Mat())
             {
@@ -36,23 +37,35 @@ namespace ImageEvaluatorLib.BorderSearch
                     {
                         CvInvoke.FindContours(maskImage, contour, hierarchy, RetrType.List, ChainApproxMethod.ChainApproxSimple);
 
-                        int verticalCenterLine = maskImage.Width / 2;
+                        int verticalCenterLine = maskImage.Width/2;
                         int magicNumber1 = 2000;
 
                         for (int i = 0; i < contour.Size; i++)
                         {
                             Point[] coordinateList = contour[i].ToArray();
 
-                            if (coordinateList.Length > 100)
+                            if (coordinateList.Length > 300)
                             {
                                 if (_showImages)
                                 {
-                                    maskImage.SetValue(new Gray(100.0), maskImage);
+                                    using (var tempImage = new Image<Gray, byte>(maskImage.Size))
+                                    {
+                                        maskImage.CopyTo(tempImage);
+                                        maskImage.SetValue(255.0, maskImage);
+                                        tempImage.Draw(coordinateList, new Gray(100.0), 2);
+                                        ImageViewer.Show(tempImage, "BorderSearcher_Emgu1 - contour points");
 
-                                    maskImage.Draw(coordinateList, new Gray(200.0), 2);
-                                    ImageViewer.Show(maskImage, "BorderSearcher_Emgu1 - contour points");
+                                        SaveMaskImage(name, tempImage, "orig");
+                                    }
+                                    using (var tempImage = new Image<Gray, byte>(origImage.Size))
+                                    {
+                                        origImage.CopyTo(tempImage);
+                                        tempImage.Draw(coordinateList, new Gray(200.0), 2);
+                                        ImageViewer.Show(tempImage, "BorderSearcher_Emgu1 - contour points");
 
-                                    SaveMaskImage(name, maskImage);
+                                        SaveMaskImage(name, tempImage, "orig");
+                                    }
+
                                 }
 
                                 for (int j = 0; j < contour[i].Size - 1; j++)
@@ -62,28 +75,27 @@ namespace ImageEvaluatorLib.BorderSearch
                                         LineSegment2D contourLineSegment = new LineSegment2D(new Point(coordinateList[j].X, coordinateList[j].Y),
                                             new Point(coordinateList[j + 1].X, coordinateList[j + 1].Y));
 
-                                        LineSegment2D horizontalLine;
                                         for (int k = 0; k < Math.Abs(coordinateList[j + 1].Y - coordinateList[j].Y); k++)
                                         {
                                             int difference = coordinateList[j + 1].Y - coordinateList[j].Y;
                                             int yCoord = coordinateList[j].Y + k*(difference/Math.Abs(difference));
 
-                                            horizontalLine = new LineSegment2D(new Point(0, yCoord), new Point(_imageWidth - 1, yCoord));
+                                            LineSegment2D horizontalLine = new LineSegment2D(new Point(0, yCoord), new Point(_imageWidth - 1, yCoord));
 
                                             var resu = GetIntersection(horizontalLine, contourLineSegment);
 
                                             if (resu.X < verticalCenterLine)
                                             {
-                                                if (_borderPoints[yCoord, 0] < resu.X)
+                                                if (_borderPoints[yCoord, 0] < resu.X + _borderSkipSize)
                                                 {
-                                                    _borderPoints[yCoord, 0] = resu.X;
+                                                    _borderPoints[yCoord, 0] = resu.X + _borderSkipSize;
                                                 }
                                             }
                                             else
                                             {
-                                                if (_borderPoints[yCoord, 1] > resu.X)
+                                                if (_borderPoints[yCoord, 1] > resu.X - _borderSkipSize)
                                                 {
-                                                    _borderPoints[yCoord, 1] = resu.X;
+                                                    _borderPoints[yCoord, 1] = resu.X - _borderSkipSize;
                                                 }
                                             }
 
@@ -93,13 +105,13 @@ namespace ImageEvaluatorLib.BorderSearch
                                 }
 
                             }
+
                         }
 
                         if (_showImages)
                         {
                             SavePointList(name);
                         }
-
                     }
                     catch (Exception ex)
                     {
@@ -107,6 +119,7 @@ namespace ImageEvaluatorLib.BorderSearch
                     }
                 }
             }
+
         }
 
         /// <summary>
@@ -119,7 +132,7 @@ namespace ImageEvaluatorLib.BorderSearch
         {
             if (line1.P1.X == line1.P2.X)
             {
-                return new Point((int)line1.P2.X, line2.P2.Y);
+                return new Point(line1.P2.X, line2.P2.Y);
             }
             double a1 = (line1.P1.Y - line1.P2.Y) / (double)(line1.P1.X - line1.P2.X);
             double b1 = line1.P1.Y - a1 * line1.P1.X;
@@ -127,7 +140,7 @@ namespace ImageEvaluatorLib.BorderSearch
 
             if (line2.P1.X == line2.P2.X)
             {
-                return new Point((int)line2.P2.X, line1.P2.Y);
+                return new Point(line2.P2.X, line1.P2.Y);
             }
             double a2 = (line2.P1.Y - line2.P2.Y) / (double)(line2.P1.X - line2.P2.X);
             double b2 = line2.P1.Y - a2 * line2.P1.X;

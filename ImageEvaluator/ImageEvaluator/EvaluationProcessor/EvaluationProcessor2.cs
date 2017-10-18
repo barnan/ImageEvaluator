@@ -14,8 +14,8 @@ namespace ImageEvaluator.EvaluationProcessor
         private readonly ISawmarkDeterminer _sawmarkDet;
         bool _initialized;
 
-        Image<Gray, ushort> _image1;
-        Image<Gray, ushort> _image2;
+        Image<Gray, byte> _image1;
+        Image<Gray, byte> _image2;
 
 
         public EvaluationProcessor2(ILogger logger, IDirectoryReader dirReader, ISawmarkDeterminer sawmarkDet)

@@ -21,19 +21,19 @@ namespace ImageEvaluatorLib.DataSaver
         }
 
 
-
         /// <summary>
         /// 
         /// </summary>
         /// <param name="result"></param>
         /// <param name="inputFileName"></param>
+        /// <param name="ext"></param>
         /// <returns></returns>
-        public override bool SaveResult(IMeasurementResult result, string inputFileName)
+        public override bool SaveResult(IMeasurementResult result, string inputFileName, string ext)
         {
             try
             {
                 string fileNameBase = Path.GetFileNameWithoutExtension(inputFileName);
-                string finalStatOutputName = Path.Combine(OutputFolder, $"{_prefix}.csv");
+                string finalStatOutputName = Path.Combine(OutputFolder, $"{_prefix}_{ext}.csv");
 
                 Type t = result.GetType();
                 List<PropertyInfo> propLis = t.GetProperties().ToList();
@@ -58,7 +58,11 @@ namespace ImageEvaluatorLib.DataSaver
                         {
                             foreach (PropertyInfo prop in propList)
                             {
-                                sw.Write(prop.Name + ",");
+                                sw.Write(prop.Name);
+                                if (propList.IndexOf(prop) != propList.Count - 1)
+                                {
+                                    sw.Write(",");
+                                }
                             }
                         }
                     }
@@ -85,7 +89,12 @@ namespace ImageEvaluatorLib.DataSaver
                                 sw.Write(Environment.NewLine);
                                 foreach (PropertyInfo prop in propList)
                                 {
-                                    sw.Write(prop.Name + ",");
+                                    sw.Write(prop.Name);
+
+                                    if (propList.IndexOf(prop) != propList.Count - 1)
+                                    {
+                                        sw.Write(",");
+                                    }
                                 }
                             }
                         }
@@ -126,7 +135,12 @@ namespace ImageEvaluatorLib.DataSaver
                             object obj = prop.GetValue(result);
                             if (!(obj is Image<Gray, double>))
                             {
-                                sw.Write((obj ?? string.Empty) + ",");
+                                sw.Write((obj ?? string.Empty));
+
+                                if (propList.IndexOf(prop) != propList.Count - 1)
+                                {
+                                    sw.Write(",");
+                                }
                             }
                         }
                     }

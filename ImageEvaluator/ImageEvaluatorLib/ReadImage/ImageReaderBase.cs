@@ -45,7 +45,7 @@ namespace ImageEvaluatorLib.ReadImage
         public bool IsInitialized { get; protected set; }
 
 
-        public abstract bool GetImage(string inputfileName, ref Image<Gray, ushort> img1, ref Image<Gray, ushort> img2);
+        public abstract bool GetImage(string inputfileName, ref Image<Gray, byte> img1, ref Image<Gray, byte> img2);
 
 
         protected abstract bool CheckFileName(string inputfileName);

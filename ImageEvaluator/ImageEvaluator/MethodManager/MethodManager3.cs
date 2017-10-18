@@ -17,9 +17,14 @@ namespace ImageEvaluator.MethodManager
 {
     class MethodManager3 : MethodManagerBase
     {
-        public MethodManager3(string[] paths)
+        private int _width;
+        private int _height;
+
+        public MethodManager3(string[] paths, int width, int height) 
             : base(paths)
         {
+            _width = width;
+            _height = height;
         }
 
 
@@ -27,37 +32,36 @@ namespace ImageEvaluator.MethodManager
         {
             try
             {
-                const int width = 8192;
-                const int height = 8192;
-
                 _logger = LogManager.GetCurrentClassLogger();
                 _logger?.Info("--------------------------------------------------------------------------------------------------------------------------------------");
 
-                bool show = true;
+                bool show = false;
 
-                IImageReader imageReader = new FactorySimpleLight8BitImageReader().Factory(_logger, width, show);
+                IImageReader imageReader = new FactorySimpleLight8BitImageReader().Factory(_logger, _width, show);
 
                 IDirectoryReader dirReader = new Factory_DirectoryReader().Factory(_logger, _inputPaths[_pathIndex], "raw", imageReader);
 
                 int histogramRange = 4096;
-                IHistogramThresholdCalculator histcalculator = new FactoryHistogramThresholdCalculatorCSharp1().Factory(_logger, histogramRange, 40);
+                //IHistogramThresholdCalculator histcalculator = new FactoryHistogramThresholdCalculatorCSharp1().Factory(_logger, 256, 40);
+                IHistogramThresholdCalculator histcalculator = new FactoryHistogramThresholdCalculatorCSharp1().Factory(_logger, 256, 50);
 
-                IImagePreProcessor preProcessor = new FactoryImagePreProcessor().Factory(_logger, histogramRange, width, height, histcalculator, show);
+                IImagePreProcessor preProcessor = new FactoryImagePreProcessor().Factory(_logger, histogramRange, _width, _height, histcalculator, show, 425, 565, 1500, 1640);
 
-                IBorderSearcher borderSearcher = new FactoryBorderSearcherEmgu2().Factory(_logger, 10, width, height, show);
+                IBorderSearcher borderSearcher = new FactoryBorderSearcherEmgu2().Factory(_logger, 10, _width, _height, show);
 
-                IColumnDataCalculator columnDataCalculator = new FactoryCalculateColumnDataEmgu1().Factory(_logger, width, height);
+                IColumnDataCalculator columnDataCalculator1 = new FactoryCalculateColumnDataEmgu1().Factory(_logger, _width, _height);
+                IColumnDataCalculator columnDataCalculator2 = new FactoryCalculateColumnDataEmgu3().Factory(_logger, _width, _height);
 
                 string outputFolder = Path.Combine(_inputPaths[_pathIndex], "output");
                 IResultSaver saver1 = new FactoryCsvColumnStatisticalResultSaver().Factory(outputFolder, "StatCalc", _logger);
-                IResultSaver saver2 = new FactoryCsvColumnResultSaver().Factory(outputFolder, "StatCalc", _logger);
+                IResultSaver saver2 = new FactoryCsvColumnResultSaver().Factory(outputFolder, "Mean", _logger);
 
 
-                IEdgeLineFinder finder = new FactoryEdgeLineFinderEmgu1().Factory(_logger, width, height);
+                IEdgeLineFinder finder = new FactoryEdgeLineFinderEmgu1().Factory(_logger, _width, _height);
 
                 IEdgeLineFitter fitter = new Factory_EdgeLineFitter_Emgu1().Factory(_logger);
 
-                _evaluationProcessor = new EvaluationProcessor3(_logger, dirReader, preProcessor, borderSearcher, columnDataCalculator, saver1, saver2, finder);
+                _evaluationProcessor = new EvaluationProcessor3(_logger, dirReader, preProcessor, borderSearcher, columnDataCalculator1, columnDataCalculator2, saver1, saver2, finder);
             }
             catch (Exception ex)
             {

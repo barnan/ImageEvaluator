@@ -17,10 +17,13 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         protected double[,,] _resultVector1;
         protected double[,,] _resultVector2;
         protected ILogger _logger;
-        protected Rectangle _fullMask;
+        protected Rectangle _fullROI;
+        protected Rectangle _fullLineROI;
 
 
         protected MCvScalar _meanOfMean;
+        protected MCvScalar _minOfMean;
+        protected MCvScalar _maxOfMean;
         protected MCvScalar _stdOfMean;
         protected MCvScalar _meanOfStd;
         protected MCvScalar _stdOfStd;
@@ -68,9 +71,16 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         /// <param name="resu4"></param>
         /// <param name="resu1"></param>
         /// <param name="resu2"></param>
+        /// <param name="resu5"></param>
+        /// <param name="resu6"></param>
+        /// <param name="resu7"></param>
+        /// <param name="resu8"></param>
+        /// <param name="resu9"></param>
+        /// <param name="resu10"></param>
         /// <returns></returns>
         public abstract bool Run(Image<Gray, byte> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector,
-                                out double resu1, out double resu2, out double resu3, out double resu4, out double resu5, out double resu6);
+                                out double resu1, out double resu2, out double resu3, out double resu4, out double resu5, out double resu6, out double resu7, out double resu8,
+                                out double resu9, out double resu10);
 
 
         /// <summary>
@@ -119,7 +129,8 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             {
                 //_meanVector = new Image<Gray, double>(_height, 1);
                 //_stdVector = new Image<Gray, double>(_height, 1);
-                _fullMask = new Rectangle(0, 0, _width, _height);
+                _fullROI = new Rectangle(0, 0, _width, _height);
+                _fullLineROI = new Rectangle(0, 0, _width, 1);
                 _reducedMask = new Matrix<byte>(_height, 1);
 
                 return true;
@@ -164,9 +175,49 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 maskImage.Reduce(_reducedMask, ReduceDimension.SingleCol, ReduceType.ReduceAvg);
                 Image<Gray, byte> tempReducedMask = new Image<Gray, byte>(_reducedMask.Height, 1);
 
+                int thresh = 150; // 150 means -> 1204 pixels in case of H2048, 2409 pixels in ase of  H4096, 4818 in case of H8192  (H->Height)
+
+                for (int i = 0; i < _reducedMask.Height / 2; i++)
+                {
+                    tempReducedMask.Data[0, i, 0] = 0;
+                    if (_reducedMask[i, 0] > thresh)  
+                    {
+                        indexMin = i;
+                        break;
+                    }
+                }
+                for (int i = _reducedMask.Height - 1; i > _reducedMask.Height / 2; i--)
+                {
+                    tempReducedMask.Data[0, i, 0] = 0;
+                    if (_reducedMask[i, 0] > thresh)
+                    {
+                        indexMax = i;
+                        break;
+                    }
+                }
+
+                int value1 = _reducedMask.Height;
+                int value2 = _reducedMask.Height;
+                for (int i = indexMin; i < indexMax; i++)
+                {
+                    if (_reducedMask[i, 0] < thresh)
+                    {
+                        value1 = i - indexMin;
+                        break;
+                    }
+                }
+                for (int i = indexMax; i > indexMin; i--)
+                {
+                    if (_reducedMask[i, 0] < thresh)
+                    {
+                        value2 = indexMax - i;
+                        break;
+                    }
+                }
+
                 for (int i = 0; i < _reducedMask.Height; i++)
                 {
-                    if (_reducedMask[i, 0] == 0)
+                    if (_reducedMask[i, 0] < thresh)
                     {
                         tempReducedMask.Data[0, i, 0] = 0;
                     }
@@ -176,38 +227,12 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                     }
                 }
 
-
-                int value1 = _reducedMask.Rows;
-                int value2 = 0;
-                for (int i = indexMin; i < indexMax; i++)
-                {
-                    if (_reducedMask[i, 0] == 0)
-                    {
-                        value1 = i - indexMin;
-                        break;
-                    }
-                }
-                for (int i = indexMax; i > indexMin; i--)
-                {
-                    if (_reducedMask[i, 0] == 0)
-                    {
-                        value2 = indexMax - i;
-                        break;
-                    }
-                }
-
-                Rectangle rect1 = new Rectangle(indexMin, 0, indexMax - indexMin, 1);
-                Rectangle fullRoi = new Rectangle(0, 0, _meanVector.Width, 1);
-
-                //_meanVector.ROI = rect1;
-                //_stdVector.ROI = rect1;
-
                 CvInvoke.MeanStdDev(_meanVector, ref _meanOfMean, ref _stdOfMean, tempReducedMask);
                 CvInvoke.MeanStdDev(_stdVector, ref _meanOfStd, ref _stdOfStd, tempReducedMask);
 
-                int regionWidth = (indexMax - indexMin) / 5;
+                int regionWidth = (indexMax - indexMin)/5;
                 Rectangle rect3 = new Rectangle(indexMin, 0, Math.Min(regionWidth, value1), 1);
-                Rectangle rect4 = new Rectangle(indexMin + 2 * regionWidth, 0, regionWidth, 1);
+                Rectangle rect4 = new Rectangle(indexMin + 2*regionWidth, 0, regionWidth, 1);
                 Rectangle rect5 = new Rectangle(indexMax - Math.Min(regionWidth, value2), 0, Math.Min(regionWidth, value2), 1);
 
                 _meanVector.ROI = rect3;
@@ -219,8 +244,14 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 _meanVector.ROI = rect5;
                 CvInvoke.MeanStdDev(_meanVector, ref _meanOfRegion3, ref stdOfRegion3);
 
-                _meanVector.ROI = fullRoi;
-                _stdVector.ROI = fullRoi;
+                double maxVal = 0.0;
+                double minVal = 0.0;
+                Point maxPos = new Point();
+                Point minPos = new Point();
+
+                CvInvoke.MinMaxLoc(_meanVector, ref minVal, ref maxVal, ref minPos, ref maxPos, tempReducedMask);
+                _minOfMean = new MCvScalar(minVal);
+                _maxOfMean = new MCvScalar(maxVal);
 
                 return true;
             }
@@ -229,8 +260,12 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 _logger?.Error($"Exception occured during CalculateColumnDataEmgu1 - CalculateStatistics: {ex}");
                 return false;
             }
+            finally
+            {
+                _meanVector.ROI = _fullROI;
+                _stdVector.ROI = _fullLineROI;
+            }
         }
-
 
 
     }

@@ -40,11 +40,12 @@ namespace ImageEvaluatorLib.BorderSearch
 
                         if (coordinateList.Length > 300)
                         {
+                            maskImage.SetValue(255.0, maskImage);
+
                             if (_showImages)
                             {
                                 using (var tempImage = new Image<Gray, byte>(maskImage.Size))
                                 {
-                                    maskImage.SetValue(255.0, maskImage);
                                     maskImage.CopyTo(tempImage);
                                     tempImage.Draw(coordinateList, new Gray(100.0), 2);
                                     ImageViewer.Show(tempImage, "BorderSearcher_Emgu1 - contour points");
@@ -66,14 +67,14 @@ namespace ImageEvaluatorLib.BorderSearch
                             {
                                 if ((coordinateList[j].Y != coordinateList[j + 1].Y) && (Math.Abs(coordinateList[j].Y - coordinateList[j + 1].Y) < magicNumber1))
                                 {
-                                    if (coordinateList[j].X < verticalCenterLine)
+                                    if (coordinateList[j].X + _borderSkipSize < verticalCenterLine)
                                     {
                                         if (_borderPoints[coordinateList[j].Y, 0] < coordinateList[j].X + _borderSkipSize)
                                         {
                                             _borderPoints[coordinateList[j].Y, 0] = coordinateList[j].X + _borderSkipSize;
                                         }
                                     }
-                                    else
+                                    else if (coordinateList[j].X - _borderSkipSize > verticalCenterLine)
                                     {
                                         if (_borderPoints[coordinateList[j].Y, 1] > coordinateList[j].X - _borderSkipSize)
                                         {

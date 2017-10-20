@@ -120,17 +120,23 @@ namespace ImageEvaluator.EvaluationProcessor
                 double resu4;
                 double resu5;
                 double resu6;
-                _columnDataCalculator1.Run(_image1, _mask1, _borderPoints1, ref _meanVector1, ref _stdVector1, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6);
+                double resu7;
+                double resu8;
+                double resu9;
+                double resu10;
+                _columnDataCalculator1.Run(_image1, _mask1, _borderPoints1, ref _meanVector1, ref _stdVector1, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6, out resu7, out resu8, out resu9, out resu10);
 
                 IColumnStatisticalMeasurementResult result1 = new ColumnStatisticalMeasurementResult
                 {
                     Name = name,
-                    ColumnMeanMean = resu1,
-                    ColumnStdMean = resu2,
-                    ColumnMeanStd = resu3,
-                    ColumnStdStd = resu4,
+                    MeanOfMean = resu1,
+                    StdOfMean = resu2,
+                    MeanOfStd = resu3,
+                    StdOfStd = resu4,
                     ColumnHomogenity1 = resu5,
-                    ColumnHomogenity2 = resu6
+                    ColumnHomogenity2 = resu6,
+                    MinOfMean = resu7,
+                    MaxOfMean = resu8
                 };
 
                 IColumnMeasurementResult result2 = new ColumnMeasurementResult
@@ -144,9 +150,9 @@ namespace ImageEvaluator.EvaluationProcessor
 
                 LogElapsedTime(_watch1, $"Column data, statistical calculation 1: {Path.GetFileName(name)}");
 
-                _columnDataCalculator2.Run(_image1, _mask1, _borderPoints1, ref _meanVector1, ref _stdVector1, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6);
-                result1.MeanOfNoise = resu1;
-                result1.StdOfNoise = resu2;
+                _columnDataCalculator2.Run(_image1, _mask1, _borderPoints1, ref _meanVector1, ref _stdVector1, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6, out resu7, out resu8, out resu9, out resu10);
+                result1.MeanOfNoiseMean = resu1;
+                result1.StdOfNoiseMean = resu2;
                 result1.MeanOfNoiseStd = resu3;
                 result1.StdOfNoiseStd = resu4;
 

@@ -20,14 +20,16 @@ namespace ImageEvaluatorInterfaces
 
     public interface IColumnStatisticalMeasurementResult : IMeasurementResult
     {
-        double ColumnMeanMean { get; set; }
-        double ColumnMeanStd { get; set; }
-        double ColumnStdMean { get; set; }
-        double ColumnStdStd { get; set; }
+        double MeanOfMean { get; set; }
+        double MeanOfStd { get; set; }
+        double MaxOfMean { get; set; }
+        double MinOfMean { get; set; }
+        double StdOfMean { get; set; }
+        double StdOfStd { get; set; }
         double ColumnHomogenity1 { get; set; }
         double ColumnHomogenity2 { get; set; }
-        double MeanOfNoise { get; set; }
-        double StdOfNoise { get; set; }
+        double MeanOfNoiseMean { get; set; }
+        double StdOfNoiseMean { get; set; }
         double MeanOfNoiseStd { get; set; }
         double StdOfNoiseStd { get; set; }
         double LeftLineSpread { get; set; }

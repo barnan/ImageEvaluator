@@ -42,8 +42,13 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         /// <param name="resu2"></param>
         /// <param name="resu5"></param>
         /// <param name="resu6"></param>
+        /// <param name="resu7"></param>
+        /// <param name="resu8"></param>
+        /// <param name="resu9"></param>
+        /// <param name="resu10"></param>
         public override bool Run(Image<Gray, byte> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector,
-            out double resu1, out double resu2, out double resu3, out double resu4, out double resu5, out double resu6)
+            out double resu1, out double resu2, out double resu3, out double resu4, out double resu5, out double resu6, out double resu7, out double resu8,
+                                out double resu9, out double resu10)
         {
             resu1 = 0;
             resu2 = 0;
@@ -51,6 +56,10 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             resu4 = 0;
             resu5 = 0;
             resu6 = 0;
+            resu7 = 0;
+            resu8 = 0;
+            resu9 = 0;
+            resu10 = 0;
 
             _meanVector = new Image<Gray, double>(_height, 1);
             _stdVector = new Image<Gray, double>(_height, 1);
@@ -118,8 +127,10 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 resu2 = _stdOfMean.V0;
                 resu3 = _meanOfStd.V0;
                 resu4 = _stdOfStd.V0;
-                resu5 = Math.Max(_meanOfRegion2.V0 - _meanOfRegion1.V0, _meanOfRegion2.V0 - _meanOfRegion3.V0);
+                resu5 = Math.Max(Math.Abs(_meanOfRegion2.V0 - _meanOfRegion1.V0), Math.Abs(_meanOfRegion2.V0 - _meanOfRegion3.V0));
                 resu6 = Math.Abs(_meanOfRegion1.V0 - _meanOfRegion3.V0);
+                resu7 = _minOfMean.V0;
+                resu8 = _maxOfMean.V0;
 
                 return true;
             }
@@ -130,7 +141,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
             finally
             {
-                inputImage.ROI = _fullMask;
+                inputImage.ROI = _fullROI;
             }
         }
 

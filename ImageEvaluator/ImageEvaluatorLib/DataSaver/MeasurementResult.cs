@@ -22,14 +22,16 @@ namespace ImageEvaluatorLib.DataSaver
     public class ColumnStatisticalMeasurementResult : IColumnStatisticalMeasurementResult
     {
         public string Name { get; set; }
-        public double ColumnMeanMean { get; set; }
-        public double ColumnMeanStd { get; set; }
-        public double ColumnStdMean { get; set; }
-        public double ColumnStdStd { get; set; }
+        public double MeanOfMean { get; set; }
+        public double MaxOfMean { get; set; }
+        public double MinOfMean { get; set; }
+        public double MeanOfStd { get; set; }
+        public double StdOfMean { get; set; }
+        public double StdOfStd { get; set; }
         public double ColumnHomogenity1 { get; set; }
         public double ColumnHomogenity2 { get; set; }
-        public double MeanOfNoise { get; set; }
-        public double StdOfNoise { get; set; }
+        public double MeanOfNoiseMean { get; set; }
+        public double StdOfNoiseMean { get; set; }
         public double MeanOfNoiseStd { get; set; }
         public double StdOfNoiseStd { get; set; }
         public double LeftLineSpread { get; set; }

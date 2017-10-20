@@ -84,14 +84,14 @@ namespace ImageEvaluatorLib.BorderSearch
 
                                             var resu = GetIntersection(horizontalLine, contourLineSegment);
 
-                                            if (resu.X < verticalCenterLine)
+                                            if (resu.X + _borderSkipSize < verticalCenterLine)
                                             {
                                                 if (_borderPoints[yCoord, 0] < resu.X + _borderSkipSize)
                                                 {
                                                     _borderPoints[yCoord, 0] = resu.X + _borderSkipSize;
                                                 }
                                             }
-                                            else
+                                            else if (resu.X - _borderSkipSize > verticalCenterLine)
                                             {
                                                 if (_borderPoints[yCoord, 1] > resu.X - _borderSkipSize)
                                                 {

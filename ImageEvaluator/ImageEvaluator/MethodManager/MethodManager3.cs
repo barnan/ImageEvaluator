@@ -43,7 +43,7 @@ namespace ImageEvaluator.MethodManager
 
                 int histogramRange = 4096;
                 //IHistogramThresholdCalculator histcalculator = new FactoryHistogramThresholdCalculatorCSharp1().Factory(_logger, 256, 40);
-                IHistogramThresholdCalculator histcalculator = new FactoryHistogramThresholdCalculatorCSharp1().Factory(_logger, 256, 50);
+                IHistogramThresholdCalculator histcalculator = new FactoryHistogramThresholdCalculatorCSharp1().Factory(_logger, 256, 30);
 
                 IImagePreProcessor preProcessor = new FactoryImagePreProcessor().Factory(_logger, histogramRange, _width, _height, histcalculator, show, 425, 565, 1500, 1640);
 

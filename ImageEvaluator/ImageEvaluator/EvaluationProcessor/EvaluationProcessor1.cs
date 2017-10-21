@@ -20,10 +20,8 @@ namespace ImageEvaluator.EvaluationProcessor
         bool _initialized;
 
 
-        Image<Gray, byte> _image1;
-        Image<Gray, byte> _image2;
-        Image<Gray, byte> _mask1;
-        Image<Gray, byte> _mask2;
+        Image<Gray, byte>[] _images;
+        Image<Gray, byte>[] _masks;
         int[,] _borderPoints1;
         int[,] _borderPoints2;
         Image<Gray, double> _meanVector1;
@@ -54,11 +52,11 @@ namespace ImageEvaluator.EvaluationProcessor
             _edgeFinder = edgeFinder;
             _edgeFitter = edgeFitter;
 
-            _logger?.Info("EvaluationProcessor1 instantiated.");
+            _logger?.Info($"{this.GetType().Name} instantiated.");
 
             Init();
 
-            _logger?.Info("EvaluationProcessor1 " + (_initialized ? string.Empty : "NOT") + " initialized.");
+            _logger?.Info($"{this.GetType().Name} " + (_initialized ? string.Empty : "NOT") + " initialized.");
         }
 
 
@@ -97,29 +95,28 @@ namespace ImageEvaluator.EvaluationProcessor
         {
             if (!_initialized)
             {
-                _logger?.Error("EvaluationProcessor1 Run is not initialized yet.");
+                _logger?.Error($"{this.GetType().Name} Run is not initialized yet.");
                 return false;
             }
 
-            _logger?.Info("EvaluationProcessor1 Run started.");
-            Console.WriteLine("EvaluationProcessor1 Run started.");
+            _logger?.Info($"{this.GetType().Name} Run started.");
 
-            while (!_dirReader.EndOfDirectory())
+            while (!_dirReader.IsEndOfDirectory())
             {
                 _watch1.Restart();
 
                 string name = string.Empty;
-                _dirReader.GetNextImage(ref _image1, ref _image2, ref name);
+                _dirReader.GetNextImage(ref _images, ref name);
 
                 LogElapsedTime(_watch1, $"Image reading: {Path.GetFileName(name)}");
 
-                _preProc.Run(_image1, ref _mask1, name);
-                _preProc.Run(_image2, ref _mask2, name);
+                _preProc.Run(_images[0], ref _masks[0], name);
+                _preProc.Run(_images[1], ref _masks[1], name);
 
                 LogElapsedTime(_watch1, $"Image pre-processing: {Path.GetFileName(name)}");
 
-                _borderSearcher.Run(_image1, _mask1, ref _borderPoints1, name);
-                _borderSearcher.Run(_image2, _mask2, ref _borderPoints2, name);
+                _borderSearcher.Run(_images[0], _masks[0], ref _borderPoints1, name);
+                _borderSearcher.Run(_images[1], _masks[1], ref _borderPoints2, name);
 
                 LogElapsedTime(_watch1, $"Border search: {Path.GetFileName(name)}");
 
@@ -134,8 +131,8 @@ namespace ImageEvaluator.EvaluationProcessor
                 double resu8;
                 double resu9;
                 double resu10;
-                _columnDataCalculator.Run(_image1, _mask1, _borderPoints1, ref _meanVector1, ref _stdVector1, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6, out resu7, out resu8, out resu9, out resu10);
-                _columnDataCalculator.Run(_image2, _mask2, _borderPoints2, ref _meanVector2, ref _stdVector2, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6, out resu7, out resu8, out resu9, out resu10);
+                _columnDataCalculator.Run(_images[0], _masks[0], _borderPoints1, ref _meanVector1, ref _stdVector1, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6, out resu7, out resu8, out resu9, out resu10);
+                _columnDataCalculator.Run(_images[1], _masks[1], _borderPoints2, ref _meanVector2, ref _stdVector2, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6, out resu7, out resu8, out resu9, out resu10);
 
                 LogElapsedTime(_watch1, $"Column data, statistical calculation: {Path.GetFileName(name)}");
 
@@ -150,8 +147,8 @@ namespace ImageEvaluator.EvaluationProcessor
                 IWaferEdgeFindData waferEdgeFindData1 = null;
                 IWaferEdgeFindData waferEdgeFindData2 = null;
 
-                _edgeFinder.Run(_image1, _mask1, ref waferEdgeFindData1);
-                _edgeFinder.Run(_image2, _mask2, ref waferEdgeFindData2);
+                _edgeFinder.Run(_images[0], _masks[0], ref waferEdgeFindData1);
+                _edgeFinder.Run(_images[1], _masks[1], ref waferEdgeFindData2);
 
                 LogElapsedTime(_watch1, "Edge finder");
 
@@ -166,7 +163,7 @@ namespace ImageEvaluator.EvaluationProcessor
                 Console.WriteLine();
             }
 
-            _logger?.Info("EvaluationProcessor1 Run ended.");
+            _logger?.Info($"{this.GetType().Name} Run ended.");
 
             return true;
         }

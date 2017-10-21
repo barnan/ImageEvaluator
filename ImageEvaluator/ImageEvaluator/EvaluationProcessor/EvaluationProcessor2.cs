@@ -14,7 +14,7 @@ namespace ImageEvaluator.EvaluationProcessor
         private readonly ISawmarkDeterminer _sawmarkDet;
         bool _initialized;
 
-        Image<Gray, byte> _image1;
+        Image<Gray, byte>[] _images;
         Image<Gray, byte> _image2;
 
 
@@ -53,16 +53,16 @@ namespace ImageEvaluator.EvaluationProcessor
 
             _logger?.Info("EvaluationProcessor2 Run started.");
 
-            while (!_dirReader.EndOfDirectory())
+            while (!_dirReader.IsEndOfDirectory())
             {
                 _watch1.Restart();
 
                 string name = string.Empty;
-                _dirReader.GetNextImage(ref _image1, ref _image2, ref name);
+                _dirReader.GetNextImage(ref _images, ref name);
 
                 LogElapsedTime(_watch1, $"Image reading: {Path.GetFileName(name)}");
 
-                _sawmarkDet.Run(_image1, name);
+                _sawmarkDet.Run(_images[0], name);
 
                 LogElapsedTime(_watch1, $"Determine wafer orientation: {Path.GetFileName(name)}");
 

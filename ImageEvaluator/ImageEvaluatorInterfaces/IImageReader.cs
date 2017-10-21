@@ -6,19 +6,13 @@ namespace ImageEvaluatorInterfaces
 {
     public interface IImageReader : IInitalizable
     {
-        bool GetImage(string fileName, ref Image<Gray, byte> img1, ref Image<Gray, byte> img2);
+        bool GetImage(string fileName, ref Image<Gray, byte>[] img1);
     }
 
 
-    public interface IDoubleLightImageReader_Creator
+    public interface IImageReader_Creator
     {
-        IImageReader Factory(ILogger logger, int width, bool showImages);
-    }
-
-
-    public interface ISimpleLightImageReader_Creator
-    {
-        IImageReader Factory(ILogger logger, int width, bool showImages);
+        IImageReader Factory(ILogger logger, int width, int height, bool showImages);
     }
 
 

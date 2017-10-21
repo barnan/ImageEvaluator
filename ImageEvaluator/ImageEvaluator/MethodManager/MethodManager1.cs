@@ -34,25 +34,23 @@ namespace ImageEvaluator.MethodManager
         {
             try
             {
-                const int width = 4096;
-
                 _logger = LogManager.GetCurrentClassLogger();
                 _logger?.Info("--------------------------------------------------------------------------------------------------------------------------------------");
 
                 bool show = false;
 
-                IImageReader imageReader = new Factory_DoubleLight16bitImageReader().Factory(_logger, width, show);
+                IImageReader imageReader = new Factory_DoubleLight16bitImageReader().Factory(_logger, _width, _height, show);
 
                 IDirectoryReader dirReader = new Factory_DirectoryReader().Factory(_logger, _inputPaths[_pathIndex], "raw", imageReader);
 
                 int histogramRange = 4096;
                 IHistogramThresholdCalculator histcalculator = new FactoryHistogramThresholdCalculatorEmgu1().Factory(_logger, histogramRange);
 
-                IImagePreProcessor preProcessor = new FactoryImagePreProcessor().Factory(_logger, histogramRange, width, _height, histcalculator, show, 425, 565, 1500, 1640);
+                IImagePreProcessor preProcessor = new FactoryImagePreProcessor().Factory(_logger, histogramRange, _width, _height, histcalculator, show, 425, 565, 1500, 1640);
 
-                IBorderSearcher borderSearcher = new FactoryBorderSearcherEmgu1().Factory(_logger, 10, width, _height, show);
+                IBorderSearcher borderSearcher = new FactoryBorderSearcherEmgu1().Factory(_logger, 10, _width, _height, show);
 
-                IColumnDataCalculator columnDataCalculator = new FactoryCalculateColumnDataEmgu1().Factory(_logger, width, _height);
+                IColumnDataCalculator columnDataCalculator = new FactoryCalculateColumnDataEmgu1().Factory(_logger, _width, _height);
 
                 string outputFolder = Path.Combine(_inputPaths[_pathIndex], "output");
                 IResultSaver saver = new FactoryCsvColumnResultSaver().Factory(outputFolder, "StatCalc", _logger);
@@ -62,8 +60,8 @@ namespace ImageEvaluator.MethodManager
                 calcareas.Add(SearchOrientations.TopToBottom, new Rectangle(1000, 50, 2000, 450));
                 calcareas.Add(SearchOrientations.LeftToRight, new Rectangle(50, 1000, 450, 2000));
                 calcareas.Add(SearchOrientations.BottomToTop, new Rectangle(1000, _height - 501, 2000, 500));
-                calcareas.Add(SearchOrientations.RightToLeft, new Rectangle(width - 501, 1000, 500, 2000));
-                IEdgeLineFinder finder = new FactoryEdgeLineFinderCSharp1().Factory(_logger, width, _height, calcareas);
+                calcareas.Add(SearchOrientations.RightToLeft, new Rectangle(_width - 501, 1000, 500, 2000));
+                IEdgeLineFinder finder = new FactoryEdgeLineFinderCSharp1().Factory(_logger, _width, _height, calcareas);
 
                 IEdgeLineFitter fitter = new Factory_EdgeLineFitter_Emgu1().Factory(_logger);
 

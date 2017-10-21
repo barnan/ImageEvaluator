@@ -25,14 +25,12 @@ namespace ImageEvaluator.MethodManager
         {
             try
             {
-                const int width = 4096;
-
                 _logger = LogManager.GetCurrentClassLogger();
                 _logger?.Info("--------------------------------------------------------------------------------------------------------------------------------------");
 
                 bool show = false;
 
-                IImageReader imageReader = new FactoryDoubleLight8BitImageReader().Factory(_logger, width, show);
+                IImageReader imageReader = new FactoryDoubleLight8BitImageReader().Factory(_logger, _width, _height, show);
 
                 //string inputFolder = @"d:\WaferOrientationCheck\MCI_Images\Diamond_Mono_0degree_U5\";
                 if (_inputPaths == null)

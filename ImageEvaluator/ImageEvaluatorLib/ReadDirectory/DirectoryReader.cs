@@ -17,7 +17,7 @@ namespace ImageEvaluatorLib.ReadDirectory
         private string[] _fileList;
         private IImageReader _reader;
         private ILogger _logger;
-        protected bool _isInitialized;
+
 
 
         /// <summary>
@@ -29,14 +29,12 @@ namespace ImageEvaluatorLib.ReadDirectory
         /// <param name="reader"></param>
         internal DirectoryReader(ILogger logger, string directoryName, string extension, IImageReader reader)
         {
-            //_logger = logger;
             _logger = LogManager.GetCurrentClassLogger();
             _directoryName = directoryName;
             _extension = extension;
             _reader = reader;
 
-            _logger?.Info("DirectoryReader instantiated.");
-
+            _logger?.Info($"{this.GetType().Name} instantiated.");
         }
 
 
@@ -52,7 +50,7 @@ namespace ImageEvaluatorLib.ReadDirectory
                 if (!Directory.Exists(_directoryName))
                 {
                     _logger?.Error($"The directory ({ _directoryName}) does not exist -> _initialized=false.");
-                    return _isInitialized = false;
+                    return IsInitialized = false;
                 }
 
                 List<string> allList = new List<string>(Directory.GetFiles(_directoryName));
@@ -61,13 +59,13 @@ namespace ImageEvaluatorLib.ReadDirectory
                 if (_fileList == null || _fileList.Length < 0)
                 {
                     _logger?.Error($"The directory ({_directoryName}) contains NO files with the given extension: ({ _extension}) -> _initialized=false.");
-                    return _isInitialized = false;
+                    return IsInitialized = false;
                 }
             }
             catch (Exception ex)
             {
                 _logger?.Error($"Exception during DirReader-CheckDir: {ex.Message}");
-                return _isInitialized = false;
+                return IsInitialized = false;
             }
 
             return true;
@@ -81,20 +79,20 @@ namespace ImageEvaluatorLib.ReadDirectory
         /// <returns></returns>
         public bool Init()
         {
-            _isInitialized = (CheckDir() && _reader.Init());
+            IsInitialized = (CheckDir() && _reader.Init());
             _logger?.Trace("DirectoryReader " + (IsInitialized ? string.Empty : "NOT") + " initialized.");
 
             return IsInitialized;
         }
 
-        public bool IsInitialized => _isInitialized;
+        public bool IsInitialized { get; protected set; }
 
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
-        public bool GetNextImage(ref Image<Gray, byte> img1, ref Image<Gray, byte> img2, ref string name)
+        public bool GetNextImage(ref Image<Gray, byte>[] img, ref string name)
         {
             if (!IsInitialized)
             {
@@ -109,7 +107,7 @@ namespace ImageEvaluatorLib.ReadDirectory
 
             try
             {
-                bool resu = _reader.GetImage(_fileList[_currentImageNumber], ref img1, ref img2);
+                bool resu = _reader.GetImage(_fileList[_currentImageNumber], ref img);
 
                 if (resu)
                 {
@@ -147,7 +145,7 @@ namespace ImageEvaluatorLib.ReadDirectory
         /// 
         /// </summary>
         /// <returns></returns>
-        public bool EndOfDirectory()
+        public bool IsEndOfDirectory()
         {
             if (!IsInitialized)
                 return true;
@@ -159,6 +157,7 @@ namespace ImageEvaluatorLib.ReadDirectory
 
 
     }
+
 
 
 

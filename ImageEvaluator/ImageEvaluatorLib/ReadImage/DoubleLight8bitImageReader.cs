@@ -14,12 +14,12 @@ namespace ImageEvaluatorLib.ReadImage
         /// <param name="width"></param>
         /// <param name="showImages"></param>
         /// <param name="logger"></param>
-        internal DoubleLight8BitImageReader(ILogger logger, int width, bool showImages)
-            : base(logger, width, showImages)
+        internal DoubleLight8BitImageReader(ILogger logger, int width, int height, bool showImages)
+            : base(logger, width, height, showImages)
         {
             _bitNumber = 1;
 
-            _logger?.Info("DoubleLight8bitImageReader instantiated.");
+            _logger?.Info($"{this.GetType().Name} instantiated.");
         }
 
 
@@ -37,7 +37,7 @@ namespace ImageEvaluatorLib.ReadImage
                 byte[] inputImage = File.ReadAllBytes(_fileName);
                 int stride = _width;
 
-                Console.WriteLine($"       DoubleLight8bitImageReader - Image reading time: {sw.ElapsedMilliseconds}ms.");
+                Console.WriteLine($"{this.GetType().Name} - Image reading time: {sw.ElapsedMilliseconds}ms.");
                 sw.Restart();
 
                 byte[] dataRow1 = new byte[stride];
@@ -45,8 +45,8 @@ namespace ImageEvaluatorLib.ReadImage
 
                 // make separate emgu images:
 
-                byte[,,] emguImage1Array = _img1.Data;
-                byte[,,] emguImage2Array = _img2.Data;
+                byte[,,] emguImage1Array = _images[0].Data;
+                byte[,,] emguImage2Array = _images[1].Data;
 
                 for (int i = 0; i < _height; i++)
                 {
@@ -61,7 +61,7 @@ namespace ImageEvaluatorLib.ReadImage
 
                 }
 
-                Console.WriteLine($"       DoubleLight8bitImageReader - Image conversion time to emgu-image: {sw.ElapsedMilliseconds}ms.");
+                Console.WriteLine($"{this.GetType().Name} - Image conversion time to emgu-image: {sw.ElapsedMilliseconds}ms.");
             }
             catch (Exception ex)
             {
@@ -79,12 +79,12 @@ namespace ImageEvaluatorLib.ReadImage
     /// <summary>
     /// 
     /// </summary>
-    public class FactoryDoubleLight8BitImageReader : IDoubleLightImageReader_Creator
+    public class FactoryDoubleLight8BitImageReader : IImageReader_Creator
     {
-        public IImageReader Factory(ILogger logger, int width, bool showImages)
+        public IImageReader Factory(ILogger logger, int width, int height, bool showImages)
         {
             logger?.Info($"{typeof(FactoryDoubleLight8BitImageReader)} factory called.");
-            return new DoubleLight8BitImageReader(logger, width, showImages);
+            return new DoubleLight8BitImageReader(logger, width, height, showImages);
         }
     }
 

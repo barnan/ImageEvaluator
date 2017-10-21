@@ -6,11 +6,11 @@ namespace ImageEvaluatorInterfaces
 {
     public interface IDirectoryReader : IInitalizable
     {
-        bool GetNextImage(ref Image<Gray, byte> img1, ref Image<Gray, byte> img2, ref string name);
+        bool GetNextImage(ref Image<Gray, byte>[] img, ref string name);
 
         bool Restart();
 
-        bool EndOfDirectory();
+        bool IsEndOfDirectory();
     }
 
 

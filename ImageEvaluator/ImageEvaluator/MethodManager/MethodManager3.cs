@@ -20,7 +20,7 @@ namespace ImageEvaluator.MethodManager
         private int _width;
         private int _height;
 
-        public MethodManager3(string[] paths, int width, int height) 
+        public MethodManager3(string[] paths, int width, int height)
             : base(paths)
         {
             _width = width;
@@ -37,7 +37,7 @@ namespace ImageEvaluator.MethodManager
 
                 bool show = false;
 
-                IImageReader imageReader = new FactorySimpleLight8BitImageReader().Factory(_logger, _width, show);
+                IImageReader imageReader = new FactorySimpleLight8BitImageReader().Factory(_logger, _width, _height, show);
 
                 IDirectoryReader dirReader = new Factory_DirectoryReader().Factory(_logger, _inputPaths[_pathIndex], "raw", imageReader);
 

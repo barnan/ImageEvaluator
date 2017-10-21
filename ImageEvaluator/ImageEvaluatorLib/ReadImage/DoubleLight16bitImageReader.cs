@@ -14,12 +14,12 @@ namespace ImageEvaluatorLib.ReadImage
         /// <param name="logger"></param>
         /// <param name="width"></param>
         /// <param name="showImages"></param>
-        internal DoubleLight16BitImageReader(ILogger logger, int width, bool showImages)
-            : base(logger, width, showImages)
+        internal DoubleLight16BitImageReader(ILogger logger, int width, int height, bool showImages)
+            : base(logger, width, height, showImages)
         {
             _bitNumber = 2;
 
-            _logger?.Info("DoubleLight16bitImageReader instantiated.");
+            _logger?.Info($"{this.GetType().Name} instantiated.");
         }
 
 
@@ -37,7 +37,7 @@ namespace ImageEvaluatorLib.ReadImage
                 byte[] inputImage = File.ReadAllBytes(_fileName);
                 int stride = _width * 2;
 
-                Console.WriteLine($"       DoubleLight16bitImageReader - Image reading time: {sw.ElapsedMilliseconds}ms.");
+                Console.WriteLine($"{this.GetType().Name} - Image reading time: {sw.ElapsedMilliseconds}ms.");
                 sw.Restart();
 
                 byte[] dataRow1 = new byte[stride];
@@ -46,8 +46,8 @@ namespace ImageEvaluatorLib.ReadImage
                 // make separate emgu images:
 
                 // to speed up:
-                byte[,,] emguImage1Array = _img1.Data;
-                byte[,,] emguImage2Array = _img2.Data;
+                byte[,,] emguImage1Array = _images[0].Data;
+                byte[,,] emguImage2Array = _images[1].Data;
 
                 for (int i = 0; i < _height; i++)
                 {
@@ -61,7 +61,7 @@ namespace ImageEvaluatorLib.ReadImage
                     }
                 }
 
-                Console.WriteLine($"       DoubleLight16bitImageReader - Image conversion time to emgu-image: {sw.ElapsedMilliseconds}ms.");
+                Console.WriteLine($"{this.GetType().Name} - Image conversion time to emgu-image: {sw.ElapsedMilliseconds}ms.");
             }
             catch (Exception ex)
             {
@@ -79,12 +79,12 @@ namespace ImageEvaluatorLib.ReadImage
     /// <summary>
     /// 
     /// </summary>
-    public class Factory_DoubleLight16bitImageReader : IDoubleLightImageReader_Creator
+    public class Factory_DoubleLight16bitImageReader : IImageReader_Creator
     {
-        public IImageReader Factory(ILogger logger, int width, bool showImages)
+        public IImageReader Factory(ILogger logger, int width, int height, bool showImages)
         {
             logger?.Info($"{typeof(Factory_DoubleLight16bitImageReader)} factory called.");
-            return new DoubleLight16BitImageReader(logger, width, showImages);
+            return new DoubleLight16BitImageReader(logger, width, height, showImages);
         }
     }
 

@@ -4,6 +4,8 @@ using Emgu.CV.Structure;
 using NLog;
 using System;
 using ImageEvaluatorInterfaces;
+using System.Collections.Generic;
+using ImageEvaluatorInterfaces.BaseClasses;
 
 namespace ImageEvaluatorLib.CalculateStatisticalData
 {
@@ -36,10 +38,13 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         /// <param name="resu4"></param>
         /// <param name="resu5"></param>
         /// <param name="resu6"></param>
-        public override bool Run(Image<Gray, byte> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector,
+        public override bool Run(List<NamedData> data, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector,
                                 out double resu1, out double resu2, out double resu3, out double resu4, out double resu5, out double resu6, out double resu7, out double resu8,
                                 out double resu9, out double resu10)
         {
+            Image<Gray, byte>[] rawImages = null;
+            Image<Gray, byte>[] maskImages = null;
+
             resu1 = 0;
             resu2 = 0;
             resu3 = 0;
@@ -62,37 +67,52 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 return false;
             }
 
-            if (!CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector))
-                return false;
+            rawImages = GetEmguByteImages("_rawImages", data);
+            int imageCounterRaw = rawImages?.Length ?? 0;
 
-            byte[,,] imgData = inputImage.Data;
+            maskImages = GetEmguByteImages("maskImages", data);
+            int imageCounterMask = maskImages?.Length ?? 0;
 
-            meanVector = _meanVector;
-            stdVector = _stdVector;
-
-            for (int i = 0; i < pointArray.Length / 2; i++)
+            if (imageCounterMask != imageCounterRaw)
             {
-                try
-                {
-                    double sum = 0;
-                    double sum2 = 0;
-                    int counter = 0;
+                _logger.Info($"{this.GetType()} input and mask image number is not the same!");
+                return false;
+            }
 
-                    for (int j = 0; j < (pointArray[i, 1] - pointArray[i, 0]); j++)
-                    {
-                        sum += imgData[i, pointArray[i, 0] + j, 0];
-                        sum2 += (imgData[i, pointArray[i, 0] + j, 0] * imgData[i, pointArray[i, 0] + j, 0]);
-                        counter++;
-                    }
+            for (int m = 0; m < imageCounterRaw; m++)
+            {
+                meanVector = _meanVector;
+                stdVector = _stdVector;
 
-                    _resultVector1[0, i, 0] = (float)(sum / counter);
-                    _resultVector2[0, i, 0] = (float)Math.Sqrt(sum2 / (counter - 1) - (sum * sum / Math.Pow(counter - 1, 2)));
-
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error during the CalculateColumnData_CSharp2-CalculateStatistics, i:{i}, message: {ex}.");
+                if (!CheckInputData(rawImages[m], maskImages[m], pointArray, meanVector, stdVector))
                     return false;
+
+                byte[,,] imgData = rawImages[m].Data;
+
+                for (int i = 0; i < pointArray.Length / 2; i++)
+                {
+                    try
+                    {
+                        double sum = 0;
+                        double sum2 = 0;
+                        int counter = 0;
+
+                        for (int j = 0; j < (pointArray[i, 1] - pointArray[i, 0]); j++)
+                        {
+                            sum += imgData[i, pointArray[i, 0] + j, 0];
+                            sum2 += (imgData[i, pointArray[i, 0] + j, 0] * imgData[i, pointArray[i, 0] + j, 0]);
+                            counter++;
+                        }
+
+                        _resultVector1[0, i, 0] = (float)(sum / counter);
+                        _resultVector2[0, i, 0] = (float)Math.Sqrt(sum2 / (counter - 1) - (sum * sum / Math.Pow(counter - 1, 2)));
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error during the CalculateColumnData_CSharp2-CalculateStatistics, i:{i}, message: {ex}.");
+                        return false;
+                    }
                 }
             }
 

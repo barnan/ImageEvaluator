@@ -7,12 +7,14 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.UI;
 using ImageEvaluatorInterfaces;
 using NLog;
+using System.Collections.Generic;
+using ImageEvaluatorInterfaces.BaseClasses;
 
 namespace ImageEvaluatorLib.CalculateStatisticalData
 {
     class CalculateColumnDataEmgu1 : CalculateColumnDataBaseEmgu
     {
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -46,10 +48,14 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         /// <param name="resu8"></param>
         /// <param name="resu9"></param>
         /// <param name="resu10"></param>
-        public override bool Run(Image<Gray, byte> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector,
+        public override bool Run(List<NamedData> data, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector,
             out double resu1, out double resu2, out double resu3, out double resu4, out double resu5, out double resu6, out double resu7, out double resu8,
-                                out double resu9, out double resu10)
+            out double resu9, out double resu10)
         {
+
+            Image<Gray, byte>[] rawImages = null;
+            Image<Gray, byte>[] maskImages = null;
+
             resu1 = 0;
             resu2 = 0;
             resu3 = 0;
@@ -74,53 +80,71 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                     return false;
                 }
 
-                meanVector = _meanVector;
-                stdVector = _stdVector;
+                rawImages = GetEmguByteImages("_rawImages", data);
+                int imageCounterRaw = rawImages?.Length ?? 0;
 
-                if (!CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector))
+                maskImages = GetEmguByteImages("maskImages", data);
+                int imageCounterMask = maskImages?.Length ?? 0;
+
+                if (imageCounterMask != imageCounterRaw)
                 {
+                    _logger.Info($"{this.GetType()} input and mask image number is not the same!");
                     return false;
                 }
 
-                int imageWidth = inputImage.Width;
-                int indexMin = int.MaxValue;
-                int indexMax = int.MinValue;
 
-                for (int i = 0; i < pointArray.Length/2; i++)
+                for (int m = 0; m < imageCounterRaw; m++)
                 {
-                    if (pointArray[i, 0] > 0 && pointArray[i, 1] < imageWidth && (pointArray[i, 1] - pointArray[i, 0]) < imageWidth)
+                    meanVector = _meanVector;
+                    stdVector = _stdVector;
+
+                    if (!CheckInputData(rawImages[m], maskImages[m], pointArray, meanVector, stdVector))
                     {
-                        Rectangle r = new Rectangle(pointArray[i, 0], i, pointArray[i, 1] - pointArray[i, 0], 1);
+                        _logger.Info($"{this.GetType()} input and mask data is not proper!");
+                        continue;
+                    }
 
-                        MCvScalar mean = new MCvScalar();
-                        MCvScalar std = new MCvScalar();
+                    int imageWidth = rawImages[m].Width;
+                    int indexMin = int.MaxValue;
+                    int indexMax = int.MinValue;
 
-                        inputImage.ROI = r;
-                        CvInvoke.MeanStdDev(inputImage, ref mean, ref std);
-
-                        _resultVector1[0, i, 0] = (float) mean.V0;
-                        _resultVector2[0, i, 0] = (float) std.V0;
-
-                        if (i < indexMin)
+                    for (int i = 0; i < pointArray.Length / 2; i++)
+                    {
+                        if (pointArray[i, 0] > 0 && pointArray[i, 1] < imageWidth && (pointArray[i, 1] - pointArray[i, 0]) < imageWidth)
                         {
-                            indexMin = i;
+                            Rectangle r = new Rectangle(pointArray[i, 0], i, pointArray[i, 1] - pointArray[i, 0], 1);
+
+                            MCvScalar mean = new MCvScalar();
+                            MCvScalar std = new MCvScalar();
+
+                            rawImages[m].ROI = r;
+                            CvInvoke.MeanStdDev(rawImages[m], ref mean, ref std);
+
+                            _resultVector1[0, i, 0] = (float)mean.V0;
+                            _resultVector2[0, i, 0] = (float)std.V0;
+
+                            if (i < indexMin)
+                            {
+                                indexMin = i;
+                            }
+
+                            if (i > indexMax)
+                            {
+                                indexMax = i;
+                            }
                         }
-
-                        if (i > indexMax)
+                        else
                         {
-                            indexMax = i;
+                            _resultVector1[0, i, 0] = 0.0f;
+                            _resultVector2[0, i, 0] = 0.0f;
                         }
                     }
-                    else
-                    {
-                        _resultVector1[0, i, 0] = 0.0f;
-                        _resultVector2[0, i, 0] = 0.0f;
-                    }
-                }
 
-                if (!CalculateStatistics(indexMin, indexMax, maskImage))
-                {
-                    return false;
+                    if (!CalculateStatistics(indexMin, indexMax, maskImages[m]))
+                    {
+                        return false;
+                    }
+
                 }
 
                 resu1 = _meanOfMean.V0;
@@ -141,11 +165,24 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
             finally
             {
-                inputImage.ROI = _fullROI;
+                foreach (var item in rawImages)
+                {
+                    if (item != null)
+                    {
+                        item.ROI = _fullROI;
+                    }
+                }
+                foreach (var item in maskImages)
+                {
+                    if (item != null)
+                    {
+                        item.ROI = _fullROI;
+                    }
+                }
             }
         }
 
-        
+
 
 
         /// <summary>

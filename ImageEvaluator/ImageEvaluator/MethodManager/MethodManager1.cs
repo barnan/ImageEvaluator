@@ -14,6 +14,7 @@ using ImageEvaluator.EvaluationProcessor;
 using ImageEvaluatorLib.BorderSearch;
 using ImageEvaluatorLib.ThresholdCalculator;
 using NLog;
+using ImageEvaluatorInterfaces.BaseClasses;
 
 namespace ImageEvaluator.MethodManager
 {
@@ -46,7 +47,8 @@ namespace ImageEvaluator.MethodManager
                 int histogramRange = 4096;
                 IHistogramThresholdCalculator histcalculator = new FactoryHistogramThresholdCalculatorEmgu1().Factory(_logger, histogramRange);
 
-                IImagePreProcessor preProcessor = new FactoryImagePreProcessor().Factory(_logger, histogramRange, _width, _height, histcalculator, show, 425, 565, 1500, 1640);
+                BeltCoordinates beltCoords = new BeltCoordinates { LeftBeltStart = 425, LeftBeltEnd = 565, RightBeltStart = 1500, RightBeltEnd = 1640 };
+                IImagePreProcessor preProcessor = new FactoryImagePreProcessor().Factory(_logger, histogramRange, _width, _height, histcalculator, show, beltCoords);
 
                 IBorderSearcher borderSearcher = new FactoryBorderSearcherEmgu1().Factory(_logger, 10, _width, _height, show);
 

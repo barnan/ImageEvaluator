@@ -3,37 +3,58 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using ImageEvaluatorInterfaces;
 using NLog;
+using System.Collections.Generic;
+using ImageEvaluatorInterfaces.BaseClasses;
+using ImageEvaluatorLib.BaseClasses;
 
 namespace ImageEvaluatorLib.DetermineSawmarkOrientation
 {
-    public class DetermineSawmarkOrientation : ISawmarkDeterminer
+    internal class DetermineSawmarkOrientation : NamedDataProvider, ISawmarkDeterminer
     {
         private IWaferOrientationDetector det;
-        private bool _isInitialized;
+        private ILogger _logger;
 
-        public DetermineSawmarkOrientation(IWaferOrientationDetector det)
+        public DetermineSawmarkOrientation(ILogger logger, IWaferOrientationDetector det)
         {
             this.det = det;
+            this._logger = logger;
         }
 
 
         public bool Init()
         {
             det.Init();
-            return _isInitialized = det.IsInitialized;
+            return IsInitialized = det.IsInitialized;
         }
 
 
-        public bool IsInitialized => _isInitialized;
+        public bool IsInitialized { get; protected set; }
 
 
-        public void Run(Image<Gray, byte> image, string name)
+        public bool Run(List<NamedData> data, string name)
         {
-            byte[] input = image.Bytes; //ReadDoubleLightImage(name);
+            Image<Gray, byte>[] rawImages = null;
 
-            CancellationToken token = new CancellationToken();
+            if (!IsInitialized)
+            {
+                _logger.Error($"{this.GetType().Name} is not initialized.");
+                return false;
+            }
 
-            det.Run(input, token, 1.3, 10, 4, 50);
+            rawImages = GetEmguByteImages("_rawImages", data);
+            int imageCounterRaw = rawImages?.Length ?? 0;
+
+
+            for (int m = 0; m < imageCounterRaw; m++)
+            {
+                byte[] input = rawImages[m].Bytes; //ReadDoubleLightImage(name);
+
+                CancellationToken token = new CancellationToken();
+
+                det.Run(input, token, 1.3, 10, 4, 50);
+            }
+
+            return true;
         }
     }
 
@@ -43,7 +64,7 @@ namespace ImageEvaluatorLib.DetermineSawmarkOrientation
         public ISawmarkDeterminer Factory(ILogger logger, IWaferOrientationDetector detector)
         {
             logger?.Info($"{typeof(Factory_DetermineSawmarkOrientation).ToString()} factory called.");
-            return new DetermineSawmarkOrientation(detector);
+            return new DetermineSawmarkOrientation(logger, detector);
         }
     }
 }

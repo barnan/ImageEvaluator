@@ -2,8 +2,10 @@
 using Emgu.CV.Structure;
 using Emgu.CV.UI;
 using ImageEvaluatorInterfaces;
+using ImageEvaluatorInterfaces.BaseClasses;
 using NLog;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 
@@ -18,7 +20,7 @@ namespace ImageEvaluatorLib.ReadImage
         protected ILogger _logger;
         protected bool _showImages;
         protected int _imageNum;
-        protected Image<Gray, byte>[] _images;
+        protected Image<Gray, byte>[] _rawImages;
         protected Rectangle _fullROI;
 
 
@@ -104,10 +106,10 @@ namespace ImageEvaluatorLib.ReadImage
 
             try
             {
-                _images = new Image<Gray, byte>[_imageNum];
+                _rawImages = new Image<Gray, byte>[_imageNum];
                 for (int i = 0; i < _imageNum; i++)
                 {
-                    _images[0] = new Image<Gray, byte>(_width, _height);
+                    _rawImages[0] = new Image<Gray, byte>(_width, _height);
                 }
 
                 _fullROI = new Rectangle(0, 0, _width, _height);
@@ -129,9 +131,9 @@ namespace ImageEvaluatorLib.ReadImage
 
                 for (int i = 0; i < _imageNum; i++)
                 {
-                    if (_images[i].IsROISet)
+                    if (_rawImages[i].IsROISet)
                     {
-                        _images[i].ROI = _fullROI;
+                        _rawImages[i].ROI = _fullROI;
                     }
                 }
 
@@ -151,7 +153,7 @@ namespace ImageEvaluatorLib.ReadImage
         {
             for (int i = 0; i < _imageNum; i++)
             {
-                _images[i]?.Dispose();
+                _rawImages[i]?.Dispose();
             }
 
             return true;
@@ -165,7 +167,7 @@ namespace ImageEvaluatorLib.ReadImage
         /// <param name="img1"></param>
         /// <param name="img2"></param>
         /// <returns></returns>
-        public virtual bool GetImage(string inputfileName, ref Image<Gray, byte>[] images)
+        public virtual bool GetImage(string inputfileName, List<NamedData> data)
         {
             if (!IsInitialized)
             {
@@ -187,7 +189,8 @@ namespace ImageEvaluatorLib.ReadImage
             {
                 ResetImageROI();
 
-                images = _images;
+                data.Add(new EmguByteNamedData(_rawImages, "Contains the raw input images", nameof(_rawImages)));
+                //images = _images;
             }
             catch (Exception ex)
             {
@@ -203,7 +206,7 @@ namespace ImageEvaluatorLib.ReadImage
                 {
                     for (int i = 0; i < _imageNum; i++)
                     {
-                        ImageViewer.Show(_images[i], $"{this.GetType().Name} - input image 1");
+                        ImageViewer.Show(_rawImages[i], $"{this.GetType().Name} - input image 1");
                     }
                 }
 

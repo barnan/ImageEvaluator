@@ -6,6 +6,7 @@ using Emgu.CV.Structure;
 using Emgu.CV.Util;
 using ImageEvaluatorInterfaces;
 using NLog;
+using ImageEvaluatorInterfaces.BaseClasses;
 
 namespace ImageEvaluatorLib.FindEdgeLines
 {
@@ -14,7 +15,7 @@ namespace ImageEvaluatorLib.FindEdgeLines
         public EdgeLineFinderCSharp1(ILogger logger, int width, int height, Dictionary<SearchOrientations, Rectangle> calcareas)
             : base(logger, width, height, calcareas)
         {
-            _logger?.Info($"{typeof(EdgeLineFinderCSharp1)} instantiated.");
+            _logger?.Info($"{this.GetType().Name} instantiated.");
         }
 
 
@@ -25,33 +26,61 @@ namespace ImageEvaluatorLib.FindEdgeLines
         /// <param name="maskImage"></param>
         /// <param name="edgeFindData"></param>
         /// <returns></returns>
-        public override bool Run(Image<Gray, byte> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData)
+        public override bool Run(List<NamedData> data, ref IWaferEdgeFindData edgeFindData)
         {
-            if (!CheckInputData(originalImage, maskImage, _calcAreas))
+
+            Image<Gray, byte>[] rawImages = null;
+            Image<Gray, byte>[] maskImages = null;
+
+
+            if (!IsInitialized)
             {
+                _logger.Error($"{this.GetType().Name} is not initialized.");
                 return false;
             }
 
-            Point[] topPoints = FindPoints(maskImage, _calcAreas[SearchOrientations.TopToBottom], SearchOrientations.TopToBottom);
-            Point[] bottomPoints = FindPoints(maskImage, _calcAreas[SearchOrientations.BottomToTop], SearchOrientations.BottomToTop);
-            Point[] leftPoints = FindPoints(maskImage, _calcAreas[SearchOrientations.LeftToRight], SearchOrientations.LeftToRight);
-            Point[] rightPoints = FindPoints(maskImage, _calcAreas[SearchOrientations.RightToLeft], SearchOrientations.RightToLeft);
+            rawImages = GetEmguByteImages("_rawImages", data);
+            int imageCounterRaw = rawImages?.Length ?? 0;
 
-            if (topPoints?.Length < 1 || bottomPoints?.Length < 1 || leftPoints?.Length < 1 || rightPoints?.Length < 1)
+            maskImages = GetEmguByteImages("maskImages", data);
+            int imageCounterMask = maskImages?.Length ?? 0;
+
+            if (imageCounterMask != imageCounterRaw)
             {
-                _logger?.Trace("The found edge segments are not proper in EdgeLineFinder_CSharp1");
+                _logger.Info($"{this.GetType()} input and mask image number is not the same!");
                 return false;
             }
 
-            //WaferEdgeFindData result = new WaferEdgeFindData
-            //{
-            //    TopSide = new VectorOfPoint(topPoints),
-            //    BottomSide = new VectorOfPoint(bottomPoints),
-            //    LeftSide = new VectorOfPoint(leftPoints),
-            //    RightSide = new VectorOfPoint(rightPoints)
-            //};
 
-            //edgeFindData = result;
+            for (int m = 0; m < imageCounterRaw; m++)
+            {
+                if (!CheckInputData(rawImages[m], maskImages[m], _calcAreas))
+                {
+                    _logger.Info($"{this.GetType()} input and mask data is not proper!");
+                    continue;
+                }
+
+                Point[] topPoints = FindPoints(maskImages[m], _calcAreas[SearchOrientations.TopToBottom], SearchOrientations.TopToBottom);
+                Point[] bottomPoints = FindPoints(maskImages[m], _calcAreas[SearchOrientations.BottomToTop], SearchOrientations.BottomToTop);
+                Point[] leftPoints = FindPoints(maskImages[m], _calcAreas[SearchOrientations.LeftToRight], SearchOrientations.LeftToRight);
+                Point[] rightPoints = FindPoints(maskImages[m], _calcAreas[SearchOrientations.RightToLeft], SearchOrientations.RightToLeft);
+
+                if (topPoints?.Length < 1 || bottomPoints?.Length < 1 || leftPoints?.Length < 1 || rightPoints?.Length < 1)
+                {
+                    _logger?.Trace("The found edge segments are not proper in EdgeLineFinder_CSharp1");
+                    return false;
+                }
+
+                //WaferEdgeFindData result = new WaferEdgeFindData
+                //{
+                //    TopSide = new VectorOfPoint(topPoints),
+                //    BottomSide = new VectorOfPoint(bottomPoints),
+                //    LeftSide = new VectorOfPoint(leftPoints),
+                //    RightSide = new VectorOfPoint(rightPoints)
+                //};
+
+                //edgeFindData = result;
+            }
 
             return true;
         }

@@ -1,12 +1,12 @@
-﻿using Emgu.CV;
-using Emgu.CV.Structure;
-using NLog;
+﻿using NLog;
+using System.Collections.Generic;
+using ImageEvaluatorInterfaces.BaseClasses;
 
 namespace ImageEvaluatorInterfaces
 {
     public interface IImageReader : IInitalizable
     {
-        bool GetImage(string fileName, ref Image<Gray, byte>[] img1);
+        bool GetImage(string fileName, List<NamedData> data);
     }
 
 

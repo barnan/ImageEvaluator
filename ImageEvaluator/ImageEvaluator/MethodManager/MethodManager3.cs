@@ -12,6 +12,7 @@ using ImageEvaluatorLib.ReadDirectory;
 using ImageEvaluatorLib.ReadImage;
 using ImageEvaluatorLib.ThresholdCalculator;
 using NLog;
+using ImageEvaluatorInterfaces.BaseClasses;
 
 namespace ImageEvaluator.MethodManager
 {
@@ -35,7 +36,7 @@ namespace ImageEvaluator.MethodManager
                 _logger = LogManager.GetCurrentClassLogger();
                 _logger?.Info("--------------------------------------------------------------------------------------------------------------------------------------");
 
-                bool show = false;
+                bool show = true;
 
                 IImageReader imageReader = new FactorySimpleLight8BitImageReader().Factory(_logger, _width, _height, show);
 
@@ -45,7 +46,8 @@ namespace ImageEvaluator.MethodManager
                 //IHistogramThresholdCalculator histcalculator = new FactoryHistogramThresholdCalculatorCSharp1().Factory(_logger, 256, 40);
                 IHistogramThresholdCalculator histcalculator = new FactoryHistogramThresholdCalculatorCSharp1().Factory(_logger, 256, 30);
 
-                IImagePreProcessor preProcessor = new FactoryImagePreProcessor().Factory(_logger, histogramRange, _width, _height, histcalculator, show, 425, 565, 1500, 1640);
+                BeltCoordinates beltCoords = new BeltCoordinates { LeftBeltStart = 425, LeftBeltEnd = 565, RightBeltStart = 1500, RightBeltEnd = 1640 };
+                IImagePreProcessor preProcessor = new FactoryImagePreProcessor().Factory(_logger, histogramRange, _width, _height, histcalculator, show, beltCoords);
 
                 IBorderSearcher borderSearcher = new FactoryBorderSearcherEmgu2().Factory(_logger, 10, _width, _height, show);
 

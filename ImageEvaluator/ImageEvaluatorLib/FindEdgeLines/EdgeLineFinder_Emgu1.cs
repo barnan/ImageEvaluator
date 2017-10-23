@@ -7,6 +7,7 @@ using Emgu.CV.Structure;
 using Emgu.CV.Util;
 using ImageEvaluatorInterfaces;
 using NLog;
+using ImageEvaluatorInterfaces.BaseClasses;
 
 namespace ImageEvaluatorLib.FindEdgeLines
 {
@@ -26,46 +27,84 @@ namespace ImageEvaluatorLib.FindEdgeLines
     {
         private byte[] _pixelbytes;
 
-        public EdgeLineFinderEmgu1(ILogger logger, int width, int height, Dictionary<SearchOrientations, Rectangle> calcareas) 
+        public EdgeLineFinderEmgu1(ILogger logger, int width, int height, Dictionary<SearchOrientations, Rectangle> calcareas)
             : base(logger, width, height, calcareas)
         {
+            _logger?.Info($"{this.GetType().Name} instantiated.");
         }
 
-        public override bool Run(Image<Gray, byte> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData)
+        public override bool Run(List<NamedData> data, ref IWaferEdgeFindData edgeFindData)
         {
-            if (!CheckInputData(originalImage, maskImage, _calcAreas))
+
+            Image<Gray, byte>[] rawImages = null;
+            Image<Gray, byte>[] maskImages = null;
+
+            try
             {
+                if (!IsInitialized)
+                {
+                    _logger.Error($"{this.GetType().Name} is not initialized.");
+                    return false;
+                }
+
+                rawImages = GetEmguByteImages("_rawImages", data);
+                int imageCounterRaw = rawImages?.Length ?? 0;
+
+                maskImages = GetEmguByteImages("maskImages", data);
+                int imageCounterMask = maskImages?.Length ?? 0;
+
+                if (imageCounterMask != imageCounterRaw)
+                {
+                    _logger.Info($"{this.GetType()} input and mask image number is not the same!");
+                    return false;
+                }
+
+
+                for (int m = 0; m < imageCounterRaw; m++)
+                {
+
+                    if (!CheckInputData(rawImages[m], maskImages[m], _calcAreas))
+                    {
+                        _logger.Info($"{this.GetType()} input and mask data is not proper!");
+                        continue;
+                    }
+
+                    WaferEdgeFit leftLineData;
+                    WaferEdgeFit rightLineData;
+                    WaferEdgeFit topLineData;
+                    WaferEdgeFit bottomLineData;
+
+                    LineSpreadFunction(rawImages[m], out leftLineData, out rightLineData, out topLineData, out bottomLineData);
+
+                    edgeFindData = new WaferEdgeFindData
+                    {
+                        TopLineSpread = topLineData.LineSpread,
+                        LeftLineSpread = leftLineData.LineSpread,
+                        BottomLineSpread = bottomLineData.LineSpread,
+                        RightLineSpread = rightLineData.LineSpread,
+
+                        TopSide = topLineData.FitParams,
+                        LeftSide = leftLineData.FitParams,
+                        BottomSide = bottomLineData.FitParams,
+                        RightSide = rightLineData.FitParams
+                    };
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error($"Exception occured during CalculateColumnDataEmgu1 - Run: {ex}");
                 return false;
             }
 
-            WaferEdgeFit leftLineData;
-            WaferEdgeFit rightLineData;
-            WaferEdgeFit topLineData;
-            WaferEdgeFit bottomLineData;
-
-            LineSpreadFunction(originalImage, out leftLineData, out rightLineData, out topLineData, out bottomLineData);
-
-            edgeFindData = new WaferEdgeFindData
-            {
-                TopLineSpread = topLineData.LineSpread,
-                LeftLineSpread = leftLineData.LineSpread,
-                BottomLineSpread = bottomLineData.LineSpread,
-                RightLineSpread = rightLineData.LineSpread,
-            
-                TopSide = topLineData.FitParams,
-                LeftSide = leftLineData.FitParams,
-                BottomSide = bottomLineData.FitParams,
-                RightSide = rightLineData.FitParams
-            };
-
-            return true;
         }
 
 
 
         protected override bool CheckInputData(Image<Gray, byte> originalImage, Image<Gray, byte> maskImage, Dictionary<SearchOrientations, Rectangle> calcAreas)
         {
-            if (originalImage == null )
+            if (originalImage == null)
             {
                 _logger?.Trace("EdgeLineFinder - the input data is not proper, some of them is null.");
                 return false;

@@ -1,12 +1,12 @@
-﻿using Emgu.CV;
-using Emgu.CV.Structure;
+﻿using ImageEvaluatorInterfaces.BaseClasses;
 using NLog;
+using System.Collections.Generic;
 
 namespace ImageEvaluatorInterfaces
 {
     public interface ISawmarkDeterminer : IInitalizable
     {
-        void Run(Image<Gray, byte> image, string name);
+        bool Run(List<NamedData> data, string name);
     }
 
 

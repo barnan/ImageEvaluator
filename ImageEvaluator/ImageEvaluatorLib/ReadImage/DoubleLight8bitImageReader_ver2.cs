@@ -40,8 +40,8 @@ namespace ImageEvaluatorLib.ReadImage
                     Buffer.BlockCopy(inputImage, 2 * i * wid + wid, image2, 0, wid);
                 }
 
-                _images[0].Bytes = image1;
-                _images[1].Bytes = image2;
+                _rawImages[0].Bytes = image1;
+                _rawImages[1].Bytes = image2;
 
                 Console.WriteLine($"{this.GetType().Name} - Image conversion time to emgu-image: {sw.ElapsedMilliseconds}ms.");
 

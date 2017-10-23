@@ -17,7 +17,6 @@ namespace ImageEvaluator.EvaluationProcessor
         readonly IResultSaver _saver;
         private readonly IEdgeLineFinder _edgeFinder;
         private readonly IEdgeLineFitter _edgeFitter;
-        bool _initialized;
 
 
         Image<Gray, byte>[] _images;
@@ -56,7 +55,7 @@ namespace ImageEvaluator.EvaluationProcessor
 
             Init();
 
-            _logger?.Info($"{this.GetType().Name} " + (_initialized ? string.Empty : "NOT") + " initialized.");
+            _logger?.Info($"{this.GetType().Name} " + (IsInitialized ? string.Empty : "NOT") + " initialized.");
         }
 
 
@@ -83,7 +82,7 @@ namespace ImageEvaluator.EvaluationProcessor
             resu = resu && _edgeFitter.Init();
             CheckInit(resu, nameof(_edgeFitter));
 
-            return _initialized = resu;
+            return IsInitialized = resu;
         }
 
 
@@ -93,7 +92,7 @@ namespace ImageEvaluator.EvaluationProcessor
         /// <returns></returns>
         public override bool Run()
         {
-            if (!_initialized)
+            if (!IsInitialized)
             {
                 _logger?.Error($"{this.GetType().Name} Run is not initialized yet.");
                 return false;
@@ -106,17 +105,17 @@ namespace ImageEvaluator.EvaluationProcessor
                 _watch1.Restart();
 
                 string name = string.Empty;
-                _dirReader.GetNextImage(ref _images, ref name);
+                _dirReader.GetNextImage(_dynamicResult, ref name);
 
                 LogElapsedTime(_watch1, $"Image reading: {Path.GetFileName(name)}");
 
-                _preProc.Run(_images[0], ref _masks[0], name);
-                _preProc.Run(_images[1], ref _masks[1], name);
+                _preProc.Run(_dynamicResult, name);
+                //_preProc.Run(_dynamicResult, name);
 
                 LogElapsedTime(_watch1, $"Image pre-processing: {Path.GetFileName(name)}");
 
-                _borderSearcher.Run(_images[0], _masks[0], ref _borderPoints1, name);
-                _borderSearcher.Run(_images[1], _masks[1], ref _borderPoints2, name);
+                _borderSearcher.Run(_dynamicResult, ref _borderPoints1, name);
+                //_borderSearcher.Run(_images[1], _masks[1], ref _borderPoints2, name);
 
                 LogElapsedTime(_watch1, $"Border search: {Path.GetFileName(name)}");
 
@@ -131,8 +130,8 @@ namespace ImageEvaluator.EvaluationProcessor
                 double resu8;
                 double resu9;
                 double resu10;
-                _columnDataCalculator.Run(_images[0], _masks[0], _borderPoints1, ref _meanVector1, ref _stdVector1, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6, out resu7, out resu8, out resu9, out resu10);
-                _columnDataCalculator.Run(_images[1], _masks[1], _borderPoints2, ref _meanVector2, ref _stdVector2, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6, out resu7, out resu8, out resu9, out resu10);
+                _columnDataCalculator.Run(_dynamicResult, _borderPoints1, ref _meanVector1, ref _stdVector1, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6, out resu7, out resu8, out resu9, out resu10);
+                //_columnDataCalculator.Run(_dynamicResult, _borderPoints2, ref _meanVector2, ref _stdVector2, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6, out resu7, out resu8, out resu9, out resu10);
 
                 LogElapsedTime(_watch1, $"Column data, statistical calculation: {Path.GetFileName(name)}");
 
@@ -147,8 +146,8 @@ namespace ImageEvaluator.EvaluationProcessor
                 IWaferEdgeFindData waferEdgeFindData1 = null;
                 IWaferEdgeFindData waferEdgeFindData2 = null;
 
-                _edgeFinder.Run(_images[0], _masks[0], ref waferEdgeFindData1);
-                _edgeFinder.Run(_images[1], _masks[1], ref waferEdgeFindData2);
+                _edgeFinder.Run(_dynamicResult, ref waferEdgeFindData1);
+                //_edgeFinder.Run(_images[1], _masks[1], ref waferEdgeFindData2);
 
                 LogElapsedTime(_watch1, "Edge finder");
 

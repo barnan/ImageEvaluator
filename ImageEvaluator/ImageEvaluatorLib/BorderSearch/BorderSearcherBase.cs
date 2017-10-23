@@ -4,10 +4,13 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using ImageEvaluatorInterfaces;
 using NLog;
+using System.Collections.Generic;
+using ImageEvaluatorInterfaces.BaseClasses;
+using ImageEvaluatorLib.BaseClasses;
 
 namespace ImageEvaluatorLib.BorderSearch
 {
-    internal abstract class BorderSearcherBase : IBorderSearcher
+    internal abstract class BorderSearcherBase : NamedDataProvider, IBorderSearcher
     {
 
         protected int[,] _borderPoints;
@@ -48,7 +51,7 @@ namespace ImageEvaluatorLib.BorderSearch
         /// <param name="maskImage"></param>
         /// <param name="pointList"></param>
         /// <returns></returns>
-        public bool Run(Image<Gray, byte> origImage, Image<Gray, byte> maskImage, ref int[,] pointList, string name)
+        public bool Run(List<NamedData> data, ref int[,] pointList, string name)
         {
             if (!IsInitialized)
             {
@@ -58,16 +61,31 @@ namespace ImageEvaluatorLib.BorderSearch
 
             try
             {
-                if (!CheckInputImage(maskImage))
+                Image<Gray, byte>[] rawImages = GetEmguByteImages("_rawImages", data);
+                int imageCounterRaw = rawImages?.Length ?? 0;
+
+                Image<Gray, byte>[] maskImages = GetEmguByteImages("maskImages", data);
+                int imageCounterMask = maskImages?.Length ?? 0;
+
+                if (imageCounterMask != imageCounterRaw)
                 {
-                    _logger?.Error("GetBorderPoints - Invalid input image.");
+                    _logger.Info($"{this.GetType()} input and mask image number is not the same!");
                     return false;
                 }
 
-                ResetPointList();
-                pointList = _borderPoints;
+                for (int m = 0; m < imageCounterRaw; m++)
+                {
+                    if (!CheckInputImage(maskImages[m]))
+                    {
+                        _logger?.Info("GetBorderPoints - Invalid input mask image.");
+                        continue;
+                    }
 
-                CalculatePoints(origImage, maskImage, name);
+                    ResetPointList();
+                    pointList = _borderPoints;
+
+                    CalculatePoints(rawImages[m], maskImages[m], name);
+                }
             }
             catch (Exception ex)
             {

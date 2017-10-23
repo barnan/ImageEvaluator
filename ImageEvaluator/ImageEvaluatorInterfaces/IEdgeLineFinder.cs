@@ -3,12 +3,13 @@ using System.Drawing;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using NLog;
+using ImageEvaluatorInterfaces.BaseClasses;
 
 namespace ImageEvaluatorInterfaces
 {
     public interface IEdgeLineFinder : IInitalizable
     {
-        bool Run(Image<Gray, byte> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData);
+        bool Run(List<NamedData> data, ref IWaferEdgeFindData edgeFindData);
     }
 
 

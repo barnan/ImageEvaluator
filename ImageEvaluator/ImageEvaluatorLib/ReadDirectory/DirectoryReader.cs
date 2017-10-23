@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ImageEvaluatorInterfaces;
 using NLog;
+using ImageEvaluatorInterfaces.BaseClasses;
 
 namespace ImageEvaluatorLib.ReadDirectory
 {
@@ -92,7 +93,7 @@ namespace ImageEvaluatorLib.ReadDirectory
         /// 
         /// </summary>
         /// <returns></returns>
-        public bool GetNextImage(ref Image<Gray, byte>[] img, ref string name)
+        public bool GetNextImage(List<NamedData> data, ref string name)
         {
             if (!IsInitialized)
             {
@@ -107,7 +108,7 @@ namespace ImageEvaluatorLib.ReadDirectory
 
             try
             {
-                bool resu = _reader.GetImage(_fileList[_currentImageNumber], ref img);
+                bool resu = _reader.GetImage(_fileList[_currentImageNumber], data);
 
                 if (resu)
                 {

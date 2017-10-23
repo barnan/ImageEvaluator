@@ -4,10 +4,12 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using ImageEvaluatorInterfaces;
 using NLog;
+using ImageEvaluatorInterfaces.BaseClasses;
+using ImageEvaluatorLib.BaseClasses;
 
 namespace ImageEvaluatorLib.FindEdgeLines
 {
-    abstract class EdgeLineFinderBase : IEdgeLineFinder
+    abstract class EdgeLineFinderBase : NamedDataProvider, IEdgeLineFinder
     {
         protected readonly ILogger _logger;
         protected int _width;
@@ -24,7 +26,7 @@ namespace ImageEvaluatorLib.FindEdgeLines
         }
 
 
-        public abstract bool Run(Image<Gray, byte> originalImage, Image<Gray, byte> maskImage, ref IWaferEdgeFindData edgeFindData);
+        public abstract bool Run(List<NamedData> data, ref IWaferEdgeFindData edgeFindData);
 
 
         public virtual bool Init()

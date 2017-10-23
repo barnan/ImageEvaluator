@@ -1,12 +1,12 @@
-﻿using Emgu.CV;
-using Emgu.CV.Structure;
+﻿using ImageEvaluatorInterfaces.BaseClasses;
 using NLog;
+using System.Collections.Generic;
 
 namespace ImageEvaluatorInterfaces
 {
     public interface IBorderSearcher : IInitalizable
     {
-        bool Run(Image<Gray, byte> origImage, Image<Gray, byte> maskImage, ref int[,] pointList, string name);
+        bool Run(List<NamedData> data, ref int[,] pointList, string name);
 
     }
 

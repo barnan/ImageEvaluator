@@ -4,6 +4,8 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using ImageEvaluatorInterfaces;
 using NLog;
+using System.Collections.Generic;
+using ImageEvaluatorInterfaces.BaseClasses;
 
 namespace ImageEvaluatorLib.CalculateStatisticalData
 {
@@ -12,7 +14,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         private Image<Gray, byte> _lineSegment1;
         private Image<Gray, byte> _lineSegment2;
 
-        
+
 
         public CalculateColumnDataEmgu3(ILogger logger, int width, int height)
             : base(logger, width, height)
@@ -37,10 +39,13 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         /// <param name="resu5"></param>
         /// <param name="resu6"></param>
         /// <returns></returns>
-        public override bool Run(Image<Gray, byte> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector,
+        public override bool Run(List<NamedData> data, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector,
             out double resu1, out double resu2, out double resu3, out double resu4, out double resu5, out double resu6, out double resu7, out double resu8,
             out double resu9, out double resu10)
         {
+            Image<Gray, byte>[] rawImages = null;
+            Image<Gray, byte>[] maskImages = null;
+
             resu1 = 0;
             resu2 = 0;
             resu3 = 0;
@@ -57,80 +62,99 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             _resultVector2 = _stdVector.Data;
 
             try
-            { 
+            {
                 if (!IsInitialized)
                 {
                     _logger.Error("CalculateColumnData_CSharp2 is not initialized.");
                     return false;
                 }
 
-                meanVector = _meanVector;
-                stdVector = _stdVector;
 
-                if (!CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector))
+                rawImages = GetEmguByteImages("_rawImages", data);
+                int imageCounterRaw = rawImages?.Length ?? 0;
+
+                maskImages = GetEmguByteImages("maskImages", data);
+                int imageCounterMask = maskImages?.Length ?? 0;
+
+                if (imageCounterMask != imageCounterRaw)
                 {
+                    _logger.Info($"{this.GetType()} input and mask image number is not the same!");
                     return false;
                 }
 
-                int imageWidth = inputImage.Width;
-                int indexMin = int.MaxValue;
-                int indexMax = int.MinValue;
-
-                for (int i = 0; i < pointArray.Length/2; i++)
+                for (int m = 0; m < imageCounterRaw; m++)
                 {
-                    if (pointArray[i, 0] > 0 && pointArray[i, 1] < imageWidth && (pointArray[i, 1] - pointArray[i, 0]) < imageWidth)
+                    meanVector = _meanVector;
+                    stdVector = _stdVector;
+
+                    if (!CheckInputData(rawImages[m], maskImages[m], pointArray, meanVector, stdVector))
                     {
+                        _logger.Info($"{this.GetType()} input and mask data is not proper!");
+                        continue;
+                    }
 
-                        MCvScalar noiseMean = new MCvScalar();
-                        MCvScalar noisestd = new MCvScalar();
 
-                        Rectangle r1 = new Rectangle(pointArray[i, 0], i, pointArray[i, 1] - pointArray[i, 0], 1);
-                        Rectangle r2 = new Rectangle(pointArray[i, 0] + 1, i, pointArray[i, 1] - pointArray[i, 0], 1);
+                    int imageWidth = rawImages[m].Width;
+                    int indexMin = int.MaxValue;
+                    int indexMax = int.MinValue;
 
-                        inputImage.ROI = r1;
-                        using (_lineSegment1 = inputImage.Copy())
+                    for (int i = 0; i < pointArray.Length / 2; i++)
+                    {
+                        if (pointArray[i, 0] > 0 && pointArray[i, 1] < imageWidth && (pointArray[i, 1] - pointArray[i, 0]) < imageWidth)
                         {
-                            inputImage.ROI = r2;
-                            using (_lineSegment2 = inputImage.Copy())
-                            {
-                                using (Image<Gray, byte> tempImage = _lineSegment1 - _lineSegment2)
-                                {
-                                    CvInvoke.MeanStdDev(tempImage, ref noiseMean, ref noisestd);
 
-                                    _resultVector1[0, i, 0] = (float) noiseMean.V0;
-                                    _resultVector2[0, i, 0] = (float) noisestd.V0;
+                            MCvScalar noiseMean = new MCvScalar();
+                            MCvScalar noisestd = new MCvScalar();
+
+                            Rectangle r1 = new Rectangle(pointArray[i, 0], i, pointArray[i, 1] - pointArray[i, 0], 1);
+                            Rectangle r2 = new Rectangle(pointArray[i, 0] + 1, i, pointArray[i, 1] - pointArray[i, 0], 1);
+
+                            rawImages[m].ROI = r1;
+                            using (_lineSegment1 = rawImages[m].Copy())
+                            {
+                                rawImages[m].ROI = r2;
+                                using (_lineSegment2 = rawImages[m].Copy())
+                                {
+                                    using (Image<Gray, byte> tempImage = _lineSegment1 - _lineSegment2)
+                                    {
+                                        CvInvoke.MeanStdDev(tempImage, ref noiseMean, ref noisestd);
+
+                                        _resultVector1[0, i, 0] = (float)noiseMean.V0;
+                                        _resultVector2[0, i, 0] = (float)noisestd.V0;
+                                    }
                                 }
                             }
-                        }
 
-                        if (i < indexMin)
+                            if (i < indexMin)
+                            {
+                                indexMin = i;
+                            }
+
+                            if (i > indexMax)
+                            {
+                                indexMax = i;
+                            }
+
+                        }
+                        else
                         {
-                            indexMin = i;
+                            _resultVector1[0, i, 0] = 0.0f;
+                            _resultVector2[0, i, 0] = 0.0f;
                         }
-
-                        if (i > indexMax)
-                        {
-                            indexMax = i;
-                        }
-
                     }
-                    else
+
+                    if (!CalculateStatistics(indexMin, indexMax, maskImages[m]))
                     {
-                        _resultVector1[0, i, 0] = 0.0f;
-                        _resultVector2[0, i, 0] = 0.0f;
+                        return false;
                     }
+
+                    resu1 = _meanOfMean.V0;
+                    resu2 = _stdOfMean.V0;
+                    resu3 = _meanOfStd.V0;
+                    resu4 = _stdOfStd.V0;
+
                 }
 
-                if (!CalculateStatistics(indexMin, indexMax, maskImage))
-                {
-                    return false;
-                }
-
-                resu1 = _meanOfMean.V0;
-                resu2 = _stdOfMean.V0;
-                resu3 = _meanOfStd.V0;
-                resu4 = _stdOfStd.V0;
-                
                 return true;
             }
             catch (Exception ex)
@@ -140,7 +164,20 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
             finally
             {
-                inputImage.ROI = _fullROI;
+                foreach (var item in rawImages)
+                {
+                    if (item != null)
+                    {
+                        item.ROI = _fullROI;
+                    }
+                }
+                foreach (var item in maskImages)
+                {
+                    if (item != null)
+                    {
+                        item.ROI = _fullROI;
+                    }
+                }
             }
 
         }

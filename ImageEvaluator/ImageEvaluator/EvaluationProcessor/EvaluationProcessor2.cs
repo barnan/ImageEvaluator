@@ -12,10 +12,8 @@ namespace ImageEvaluator.EvaluationProcessor
 
         private readonly IDirectoryReader _dirReader;
         private readonly ISawmarkDeterminer _sawmarkDet;
-        bool _initialized;
 
-        Image<Gray, byte>[] _images;
-        Image<Gray, byte> _image2;
+        //Image<Gray, byte>[] _images;
 
 
         public EvaluationProcessor2(ILogger logger, IDirectoryReader dirReader, ISawmarkDeterminer sawmarkDet)
@@ -38,14 +36,14 @@ namespace ImageEvaluator.EvaluationProcessor
             resu = resu & _sawmarkDet.Init();
             CheckInit(resu, nameof(_sawmarkDet));
 
-            _logger?.Info("EvaluationProcessor2 " + (_initialized ? string.Empty : "NOT") + " initialized.");
+            _logger?.Info("EvaluationProcessor2 " + (IsInitialized ? string.Empty : "NOT") + " initialized.");
 
-            return _initialized = resu;
+            return IsInitialized = resu;
         }
 
         public override bool Run()
         {
-            if (!_initialized)
+            if (!IsInitialized)
             {
                 _logger?.Error("EvaluationProcessor2 Run is not initialized yet.");
                 return false;
@@ -58,11 +56,11 @@ namespace ImageEvaluator.EvaluationProcessor
                 _watch1.Restart();
 
                 string name = string.Empty;
-                _dirReader.GetNextImage(ref _images, ref name);
+                _dirReader.GetNextImage(_dynamicResult, ref name);
 
                 LogElapsedTime(_watch1, $"Image reading: {Path.GetFileName(name)}");
 
-                _sawmarkDet.Run(_images[0], name);
+                _sawmarkDet.Run(_dynamicResult, name);
 
                 LogElapsedTime(_watch1, $"Determine wafer orientation: {Path.GetFileName(name)}");
 

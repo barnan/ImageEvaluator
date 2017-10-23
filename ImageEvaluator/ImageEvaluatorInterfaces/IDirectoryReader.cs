@@ -1,12 +1,12 @@
-﻿using Emgu.CV;
-using Emgu.CV.Structure;
+﻿using ImageEvaluatorInterfaces.BaseClasses;
 using NLog;
+using System.Collections.Generic;
 
 namespace ImageEvaluatorInterfaces
 {
     public interface IDirectoryReader : IInitalizable
     {
-        bool GetNextImage(ref Image<Gray, byte>[] img, ref string name);
+        bool GetNextImage(List<NamedData> data, ref string name);
 
         bool Restart();
 

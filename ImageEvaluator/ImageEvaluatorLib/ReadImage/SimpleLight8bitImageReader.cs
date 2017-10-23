@@ -33,7 +33,7 @@ namespace ImageEvaluatorLib.ReadImage
                 Console.WriteLine($"{this.GetType().Name} - Image reading time: {sw.ElapsedMilliseconds}ms.");
                 sw.Restart();
 
-                byte[,,] emguImage1Array = _images[0].Data;
+                byte[,,] emguImage1Array = _rawImages[0].Data;
 
                 for (int i = 0; i < _height; i++)
                 {

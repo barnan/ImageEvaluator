@@ -8,10 +8,13 @@ using NLog;
 using Emgu.CV.UI;
 using ImageEvaluatorInterfaces;
 using ImageEvaluatorLib.ThresholdCalculator;
+using ImageEvaluatorInterfaces.BaseClasses;
+using System.Collections.Generic;
+using ImageEvaluatorLib.BaseClasses;
 
 namespace ImageEvaluatorLib.PreProcessor
 {
-    class ImagePreProcessor : IImagePreProcessor
+    class ImagePreProcessor : NamedDataProvider, IImagePreProcessor
     {
         private IHistogramThresholdCalculator _thresholdcalculator;
         private DenseHistogram _hist;
@@ -39,13 +42,7 @@ namespace ImageEvaluatorLib.PreProcessor
         /// <param name="beltLeftEnd"></param>
         /// <param name="beltRightStart"></param>
         /// <param name="beltRightEnd"></param>
-        internal ImagePreProcessor(ILogger logger, int intensityRange, int width, int height, 
-                                    IHistogramThresholdCalculator histcalculator, 
-                                    bool showImages, 
-                                    int beltLeftStart,
-                                    int beltLeftEnd,
-                                    int beltRightStart,
-                                    int beltRightEnd)
+        internal ImagePreProcessor(ILogger logger, int intensityRange, int width, int height, IHistogramThresholdCalculator histcalculator, bool showImages, BeltCoordinates beltcoords)
         {
             _intensityRange = intensityRange;
             _showImages = showImages;
@@ -53,13 +50,7 @@ namespace ImageEvaluatorLib.PreProcessor
             _height = height;
             _logger = logger;
             _thresholdcalculator = histcalculator;
-            _beltCoordinates = new BeltCoordinates
-            {
-                LeftStart = beltLeftStart,
-                LeftEnd = beltLeftEnd,
-                RightStart = beltRightStart,
-                RightEnd = beltRightEnd
-            };
+            _beltCoordinates = beltcoords;
         }
 
 
@@ -69,8 +60,8 @@ namespace ImageEvaluatorLib.PreProcessor
         /// <returns></returns>
         public virtual bool Init()
         {
-            IsInitialized = CheckWidthData() 
-                            && InitEmguImages() 
+            IsInitialized = CheckWidthData()
+                            && InitEmguImages()
                             && _thresholdcalculator.Init();
 
             _logger?.Info("ImagePreProcessor " + (IsInitialized ? string.Empty : "NOT") + " initialized.");
@@ -88,67 +79,84 @@ namespace ImageEvaluatorLib.PreProcessor
         /// <param name="maskImage"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public bool Run(Image<Gray, byte> inputImage, ref Image<Gray, byte> maskImage, string name)
+        public bool Run(List<NamedData> data, string name)
         {
             try
             {
-                CvInvoke.Transpose(inputImage, inputImage);
+                Image<Gray, byte>[] inputImages = GetEmguByteImages("_rawImages", data);
+                int imageCounter = inputImages?.Length ?? 0;
 
-                // calculate historamm for binarythreshold
-                _hist.Calculate<byte>(new[] {inputImage}, false, null);
-
-                float thresh;
-                _thresholdcalculator.Run(_hist, out thresh);
-
-                if (_showImages)
+                if (imageCounter == 0)
                 {
-                    SaveHistogram(name);
+                    _logger.Info("No raw image was found dynamicresult!");
+                    return false;
                 }
 
-                // create mask image:
-                double maskValue = 255.0;
-                CvInvoke.Threshold(inputImage, _thresholdedImage, thresh, maskValue, ThresholdType.Binary);
+                Image<Gray, byte>[] maskImages = new Image<Gray, byte>[imageCounter];
 
-                CvInvoke.Erode(_thresholdedImage, _dilatedImage, null, new Point(-1, -1), 3, BorderType.Default, new MCvScalar(0));
-                CvInvoke.Dilate(_dilatedImage, _thresholdedImage, null, new Point(-1, -1), 4, BorderType.Default, new MCvScalar(0));
-
-                maskImage = _thresholdedImage;
-
-                maskImage.Reduce(_reducedMask, ReduceDimension.SingleCol, ReduceType.ReduceAvg);
-
-                int count = 0;
-                double MagicThreshold1 = 0.4;   // 40%
-                double MagicThreshold2 = 0.18;   // 15%
-                for (int i = 0; i < _reducedMask.Height; i++)
+                for (int m = 0; m < imageCounter; m++)
                 {
-                    if (_reducedMask[i, 0] > (1 - MagicThreshold1) * maskValue)
+
+                    CvInvoke.Transpose(inputImages[m], inputImages[m]);
+
+                    // calculate historamm for binarythreshold
+                    _hist.Calculate<byte>(new[] { inputImages[0] }, false, null);
+
+                    float thresh;
+                    _thresholdcalculator.Run(_hist, out thresh);
+
+                    if (_showImages)
                     {
-                        count++;
+                        SaveHistogram(name);
+                    }
+
+                    // create mask image:
+                    double maskValue = 255.0;
+                    CvInvoke.Threshold(inputImages[m], _thresholdedImage, thresh, maskValue, ThresholdType.Binary);
+
+                    CvInvoke.Erode(_thresholdedImage, _dilatedImage, null, new Point(-1, -1), 3, BorderType.Default, new MCvScalar(0));
+                    CvInvoke.Dilate(_dilatedImage, _thresholdedImage, null, new Point(-1, -1), 4, BorderType.Default, new MCvScalar(0));
+
+                    maskImages[m] = _thresholdedImage;
+
+                    maskImages[m].Reduce(_reducedMask, ReduceDimension.SingleCol, ReduceType.ReduceAvg);
+
+                    int count = 0;
+                    double MagicThreshold1 = 0.4;   // 40%
+                    double MagicThreshold2 = 0.18;   // 15%
+                    for (int i = 0; i < _reducedMask.Height; i++)
+                    {
+                        if (_reducedMask[i, 0] > (1 - MagicThreshold1) * maskValue)
+                        {
+                            count++;
+                        }
+                    }
+                    if (count < maskImages[m].Height * (1 - MagicThreshold2))
+                    {
+                        Rectangle fullRoi = new Rectangle(0, 0, maskImages[m].Width, maskImages[m].Height);
+                        Rectangle rectLeft = new Rectangle(0, _beltCoordinates.LeftBeltStart, maskImages[m].Width, _beltCoordinates.LeftBeltEnd - _beltCoordinates.LeftBeltStart);
+                        Rectangle rectRight = new Rectangle(0, _beltCoordinates.RightBeltStart, maskImages[m].Width, _beltCoordinates.RightBeltEnd - _beltCoordinates.RightBeltStart);
+
+                        maskImages[m].ROI = rectLeft;
+                        maskImages[m].SetValue(0.0);
+
+                        maskImages[m].ROI = rectRight;
+                        maskImages[m].SetValue(0.0);
+
+                        maskImages[m].ROI = fullRoi; // new Rectangle(0, 0, maskImage.Width, maskImage.Height);
+                    }
+
+
+                    if (_showImages)
+                    {
+                        ImageViewer.Show(inputImages[m], "ImagePreProcessor - transposed image");
+                        ImageViewer.Show(maskImages[m], "ImagePreProcessor - maskImage");
+
+                        SaveMaskImage(name, maskImages[m]);
                     }
                 }
-                if (count < maskImage.Height * (1- MagicThreshold2))
-                {
-                    Rectangle fullRoi = new Rectangle(0, 0, maskImage.Width, maskImage.Height);
-                    Rectangle rectLeft = new Rectangle(0, _beltCoordinates.LeftStart, maskImage.Width, _beltCoordinates.LeftEnd- _beltCoordinates.LeftStart);
-                    Rectangle rectRight = new Rectangle(0, _beltCoordinates.RightStart, maskImage.Width, _beltCoordinates.RightEnd - _beltCoordinates.RightStart);
 
-                    maskImage.ROI = rectLeft;
-                    maskImage.SetValue(0.0);
-
-                    maskImage.ROI = rectRight;
-                    maskImage.SetValue(0.0);
-
-                    maskImage.ROI = fullRoi; // new Rectangle(0, 0, maskImage.Width, maskImage.Height);
-                }
-
-
-                if (_showImages)
-                {
-                    ImageViewer.Show(inputImage, "ImagePreProcessor - transposed image");
-                    ImageViewer.Show(maskImage, "ImagePreProcessor - maskImage");
-
-                    SaveMaskImage(name, maskImage);
-                }
+                data.Add(new EmguByteNamedData(maskImages, "maskimages", "maskImages"));
 
                 return true;
             }
@@ -193,7 +201,7 @@ namespace ImageEvaluatorLib.PreProcessor
             {
                 Directory.CreateDirectory(directory);
             }
-            
+
             maskImage.Save(finalOutputName);
         }
 
@@ -253,26 +261,13 @@ namespace ImageEvaluatorLib.PreProcessor
     }
 
 
-    internal class BeltCoordinates
-    {
-        public int LeftStart { get; set; }
-        public int LeftEnd { get; set; }
-        public int RightStart { get; set; }
-        public int RightEnd { get; set; }
-    }
 
     public class FactoryImagePreProcessor : IImagePreProcessorCreator
     {
-        public IImagePreProcessor Factory(ILogger logger, int intensityRange, int width, int height, 
-                                            IHistogramThresholdCalculator histcalculator, 
-                                            bool showImages,
-                                            int beltLeftStart,
-                                            int beltLeftEnd,
-                                            int beltRightStart,
-                                            int beltRightEnd)
+        public IImagePreProcessor Factory(ILogger logger, int intensityRange, int width, int height, IHistogramThresholdCalculator histcalculator, bool showImages, BeltCoordinates beltcoords)
         {
             logger?.Info($"{typeof(FactoryImagePreProcessor)} factory called.");
-            return new ImagePreProcessor(logger, intensityRange, width, height, histcalculator, showImages, beltLeftStart, beltLeftEnd, beltRightStart, beltRightEnd);
+            return new ImagePreProcessor(logger, intensityRange, width, height, histcalculator, showImages, beltcoords);
         }
     }
 

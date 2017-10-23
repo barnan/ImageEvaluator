@@ -5,10 +5,13 @@ using Emgu.CV.CvEnum;
 using Emgu.CV.Structure;
 using ImageEvaluatorInterfaces;
 using NLog;
+using System.Collections.Generic;
+using ImageEvaluatorInterfaces.BaseClasses;
+using ImageEvaluatorLib.BaseClasses;
 
 namespace ImageEvaluatorLib.CalculateStatisticalData
 {
-    internal abstract class CalculateColumnDataBase : IColumnDataCalculator
+    internal abstract class CalculateColumnDataBase : NamedDataProvider, IColumnDataCalculator
     {
         protected int _width;
         protected int _height;
@@ -78,7 +81,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         /// <param name="resu9"></param>
         /// <param name="resu10"></param>
         /// <returns></returns>
-        public abstract bool Run(Image<Gray, byte> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector,
+        public abstract bool Run(List<NamedData> data, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector,
                                 out double resu1, out double resu2, out double resu3, out double resu4, out double resu5, out double resu6, out double resu7, out double resu8,
                                 out double resu9, out double resu10);
 
@@ -180,7 +183,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 for (int i = 0; i < _reducedMask.Height / 2; i++)
                 {
                     tempReducedMask.Data[0, i, 0] = 0;
-                    if (_reducedMask[i, 0] > thresh)  
+                    if (_reducedMask[i, 0] > thresh)
                     {
                         indexMin = i;
                         break;
@@ -230,9 +233,19 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 CvInvoke.MeanStdDev(_meanVector, ref _meanOfMean, ref _stdOfMean, tempReducedMask);
                 CvInvoke.MeanStdDev(_stdVector, ref _meanOfStd, ref _stdOfStd, tempReducedMask);
 
-                int regionWidth = (indexMax - indexMin)/5;
+                double maxVal = 0.0;
+                double minVal = 0.0;
+                Point maxPos = new Point();
+                Point minPos = new Point();
+
+                CvInvoke.MinMaxLoc(_meanVector, ref minVal, ref maxVal, ref minPos, ref maxPos, tempReducedMask);
+                _minOfMean = new MCvScalar(minVal);
+                _maxOfMean = new MCvScalar(maxVal);
+
+
+                int regionWidth = (indexMax - indexMin) / 5;
                 Rectangle rect3 = new Rectangle(indexMin, 0, Math.Min(regionWidth, value1), 1);
-                Rectangle rect4 = new Rectangle(indexMin + 2*regionWidth, 0, regionWidth, 1);
+                Rectangle rect4 = new Rectangle(indexMin + 2 * regionWidth, 0, regionWidth, 1);
                 Rectangle rect5 = new Rectangle(indexMax - Math.Min(regionWidth, value2), 0, Math.Min(regionWidth, value2), 1);
 
                 _meanVector.ROI = rect3;
@@ -243,15 +256,6 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
                 _meanVector.ROI = rect5;
                 CvInvoke.MeanStdDev(_meanVector, ref _meanOfRegion3, ref stdOfRegion3);
-
-                double maxVal = 0.0;
-                double minVal = 0.0;
-                Point maxPos = new Point();
-                Point minPos = new Point();
-
-                CvInvoke.MinMaxLoc(_meanVector, ref minVal, ref maxVal, ref minPos, ref maxPos, tempReducedMask);
-                _minOfMean = new MCvScalar(minVal);
-                _maxOfMean = new MCvScalar(maxVal);
 
                 return true;
             }

@@ -1,6 +1,8 @@
 ﻿using ImageEvaluatorInterfaces;
+using ImageEvaluatorInterfaces.BaseClasses;
 using NLog;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace ImageEvaluator.EvaluationProcessor
@@ -9,17 +11,14 @@ namespace ImageEvaluator.EvaluationProcessor
     {
         protected readonly ILogger _logger;
         protected Stopwatch _watch1;
-        private bool _isInitialized;
+        protected bool _isInitialized;
+        protected List<NamedData> _dynamicResult = new List<NamedData>();
 
 
         public abstract bool Run();
         public abstract bool Init();
 
-        public bool IsInitialized
-        {
-            get { return _isInitialized; }
-        }
-
+        public bool IsInitialized { get; protected set; }
 
         protected EvaluationProcessorBase(ILogger logger)
         {

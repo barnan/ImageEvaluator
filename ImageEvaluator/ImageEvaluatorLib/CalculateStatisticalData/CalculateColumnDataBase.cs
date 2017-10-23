@@ -37,11 +37,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
         private Matrix<byte> _reducedMask;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
+
         protected CalculateColumnDataBase(ILogger logger, int width, int height)
         {
             _logger = logger;
@@ -59,42 +55,14 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             return IsInitialized;
         }
 
+
+
         public bool IsInitialized { get; protected set; }
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="inputImage"></param>
-        /// <param name="maskImage"></param>
-        /// <param name="pointArray"></param>
-        /// <param name="meanVector"></param>
-        /// <param name="stdVector"></param>
-        /// <param name="resu3"></param>
-        /// <param name="resu4"></param>
-        /// <param name="resu1"></param>
-        /// <param name="resu2"></param>
-        /// <param name="resu5"></param>
-        /// <param name="resu6"></param>
-        /// <param name="resu7"></param>
-        /// <param name="resu8"></param>
-        /// <param name="resu9"></param>
-        /// <param name="resu10"></param>
-        /// <returns></returns>
-        public abstract bool Run(List<NamedData> data, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector,
-                                out double resu1, out double resu2, out double resu3, out double resu4, out double resu5, out double resu6, out double resu7, out double resu8,
-                                out double resu9, out double resu10);
+        public abstract bool Run(List<NamedData> data, string fileName);
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="inputImage"></param>
-        /// <param name="maskImage"></param>
-        /// <param name="pointArray"></param>
-        /// <param name="meanVector"></param>
-        /// <param name="stdVector"></param>
-        /// <returns></returns>
         protected virtual bool CheckInputData(Image<Gray, byte> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, double> meanVector, Image<Gray, double> stdVector)
         {
             try
@@ -119,10 +87,6 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         }
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         protected virtual bool InitEmguImages()
         {
             if (IsInitialized)
@@ -130,8 +94,6 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
             try
             {
-                //_meanVector = new Image<Gray, double>(_height, 1);
-                //_stdVector = new Image<Gray, double>(_height, 1);
                 _fullROI = new Rectangle(0, 0, _width, _height);
                 _fullLineROI = new Rectangle(0, 0, _width, 1);
                 _reducedMask = new Matrix<byte>(_height, 1);
@@ -143,6 +105,18 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 _logger?.Error($"Error during CalculcateColumnData - Init: {ex}.");
                 return false;
             }
+        }
+
+
+        protected virtual bool ReAllocateEmgu()
+        {
+            if (!IsInitialized)
+                return false;
+
+            _meanVector = new Image<Gray, double>(_height, 1);
+            _stdVector = new Image<Gray, double>(_height, 1);
+
+            return true;
         }
 
 
@@ -160,21 +134,24 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
         protected bool CalculateStatistics(int indexMin, int indexMax, Image<Gray, byte> maskImage)
         {
-            _meanOfMean = new MCvScalar();
-            _stdOfMean = new MCvScalar();
-            _meanOfStd = new MCvScalar();
-            _stdOfStd = new MCvScalar();
-
-            _meanOfRegion1 = new MCvScalar();
-            _meanOfRegion2 = new MCvScalar();
-            _meanOfRegion3 = new MCvScalar();
-
-            MCvScalar stdOfRegion1 = new MCvScalar();
-            MCvScalar stdOfRegion2 = new MCvScalar();
-            MCvScalar stdOfRegion3 = new MCvScalar();
-
             try
             {
+                _meanOfMean = new MCvScalar();
+                _stdOfMean = new MCvScalar();
+                _meanOfStd = new MCvScalar();
+                _stdOfStd = new MCvScalar();
+                _minOfMean = new MCvScalar();
+                _maxOfMean = new MCvScalar();
+
+                _meanOfRegion1 = new MCvScalar();
+                _meanOfRegion2 = new MCvScalar();
+                _meanOfRegion3 = new MCvScalar();
+
+                MCvScalar stdOfRegion1 = new MCvScalar();
+                MCvScalar stdOfRegion2 = new MCvScalar();
+                MCvScalar stdOfRegion3 = new MCvScalar();
+
+
                 maskImage.Reduce(_reducedMask, ReduceDimension.SingleCol, ReduceType.ReduceAvg);
                 Image<Gray, byte> tempReducedMask = new Image<Gray, byte>(_reducedMask.Height, 1);
 
@@ -241,7 +218,6 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 CvInvoke.MinMaxLoc(_meanVector, ref minVal, ref maxVal, ref minPos, ref maxPos, tempReducedMask);
                 _minOfMean = new MCvScalar(minVal);
                 _maxOfMean = new MCvScalar(maxVal);
-
 
                 int regionWidth = (indexMax - indexMin) / 5;
                 Rectangle rect3 = new Rectangle(indexMin, 0, Math.Min(regionWidth, value1), 1);

@@ -190,7 +190,7 @@ namespace ImageEvaluatorLib.ReadImage
                 ResetImageROI();
 
                 data.Add(new EmguByteNamedData(_rawImages, "Contains the raw input images", nameof(_rawImages)));
-                //images = _images;
+
             }
             catch (Exception ex)
             {

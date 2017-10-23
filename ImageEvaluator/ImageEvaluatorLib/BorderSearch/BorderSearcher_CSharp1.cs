@@ -16,7 +16,7 @@ namespace ImageEvaluatorLib.BorderSearch
         }
 
 
-        protected override void CalculatePoints(Image<Gray, byte> origImage, Image<Gray, byte> maskImage, string name)
+        protected override bool CalculatePoints(Image<Gray, byte> origImage, Image<Gray, byte> maskImage, string name)
         {
             try
             {
@@ -50,10 +50,13 @@ namespace ImageEvaluatorLib.BorderSearch
                 {
                     SavePointList(name);
                 }
+
+                return true;
             }
             catch (Exception ex)
             {
                 _logger?.Error($"Exception caught in BorderSearcher_CSharp1-CalculatePoints: {ex}.");
+                return false;
             }
 
         }

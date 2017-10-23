@@ -31,27 +31,20 @@ namespace ImageEvaluatorLib.BorderSearch
         }
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public bool Init()
-        {
-            IsInitialized = InitArrays();
-            _logger?.Info($"{typeof(BorderSearcherBase)}" + (IsInitialized ? string.Empty : " NOT") + " initialized.");
-            return IsInitialized;
-        }
-
         public bool IsInitialized { get; protected set; }
 
+        public bool Init()
+        {
+            AllocArrays();
+            ResetPointList();
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="maskImage"></param>
-        /// <param name="pointList"></param>
-        /// <returns></returns>
-        public bool Run(List<NamedData> data, ref int[,] pointList, string name)
+            _logger?.Info($"{typeof(BorderSearcherBase)}" + (IsInitialized ? string.Empty : " NOT") + " initialized.");
+
+            return IsInitialized = true;
+        }
+
+
+        public bool Run(List<NamedData> data, string name)
         {
             if (!IsInitialized)
             {
@@ -73,6 +66,8 @@ namespace ImageEvaluatorLib.BorderSearch
                     return false;
                 }
 
+                int[][,] borderPointArrayList = new int[imageCounterRaw][,];
+
                 for (int m = 0; m < imageCounterRaw; m++)
                 {
                     if (!CheckInputImage(maskImages[m]))
@@ -81,11 +76,18 @@ namespace ImageEvaluatorLib.BorderSearch
                         continue;
                     }
 
-                    ResetPointList();
-                    pointList = _borderPoints;
+                    if (!(AllocArrays() && ResetPointList()))
+                    {
+                        _logger.Info($"{this.GetType().Name} array re-allocation failed.");
+                        continue;
+                    }
 
                     CalculatePoints(rawImages[m], maskImages[m], name);
+
+                    borderPointArrayList[m] = _borderPoints;
                 }
+
+                data.Add(new NamedData<BorderPointArrays>(new BorderPointArrays(borderPointArrayList), "borderPointArrayList", "contains the found border points"));
             }
             catch (Exception ex)
             {
@@ -98,18 +100,11 @@ namespace ImageEvaluatorLib.BorderSearch
 
 
 
-        protected abstract void CalculatePoints(Image<Gray, byte> origImage, Image<Gray, byte> maskImage, string name);
+        protected abstract bool CalculatePoints(Image<Gray, byte> origImage, Image<Gray, byte> maskImage, string name);
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        protected bool InitArrays()
+        protected bool AllocArrays()
         {
-            if (IsInitialized)
-                return IsInitialized;
-
             _borderPoints = new int[_imageHeight, 2];
 
             return true;
@@ -132,11 +127,6 @@ namespace ImageEvaluatorLib.BorderSearch
         }
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="maskImage"></param>
-        /// <returns></returns>
         protected bool CheckInputImage(Image<Gray, byte> maskImage)
         {
             if (maskImage == null || maskImage.Height != _imageHeight || maskImage.Width != _imageHeight)

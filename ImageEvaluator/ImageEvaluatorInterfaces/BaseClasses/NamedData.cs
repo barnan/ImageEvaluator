@@ -33,6 +33,11 @@ namespace ImageEvaluatorInterfaces.BaseClasses
             return this as DoubleNamedData;
         }
 
+        public DoubleVectorNamedData AsDoubleVectorNamedData()
+        {
+            return this as DoubleVectorNamedData;
+        }
+
         public FloatNamedData AsFloatNamedData()
         {
             return this as FloatNamedData;
@@ -63,6 +68,10 @@ namespace ImageEvaluatorInterfaces.BaseClasses
             return this as EmguFloatNamedData;
         }
 
+        public BorderPointArraysNamedData AsBorderPointArraysNamedData()
+        {
+            return this as BorderPointArraysNamedData;
+        }
 
 
     }
@@ -78,8 +87,8 @@ namespace ImageEvaluatorInterfaces.BaseClasses
             get { return typeof(T); }
         }
 
-        public NamedData(T value, string name, string description)
-            : base(name, description)
+        public NamedData(T value, string description, string name)
+            : base(description, name)
         {
             Value = value;
         }
@@ -92,7 +101,7 @@ namespace ImageEvaluatorInterfaces.BaseClasses
     }
 
 
-    public class LongNamedData : NamedData<long>
+    public sealed class LongNamedData : NamedData<long>
     {
         public LongNamedData(long value, string description, string name)
             : base(value, description, name)
@@ -101,7 +110,7 @@ namespace ImageEvaluatorInterfaces.BaseClasses
 
     }
 
-    public class DoubleNamedData : NamedData<double>
+    public sealed class DoubleNamedData : NamedData<double>
     {
         public DoubleNamedData(double value, string description, string name)
             : base(value, description, name)
@@ -109,7 +118,16 @@ namespace ImageEvaluatorInterfaces.BaseClasses
         }
     }
 
-    public class FloatNamedData : NamedData<float>
+
+    public sealed class DoubleVectorNamedData : NamedData<double[]>
+    {
+        public DoubleVectorNamedData(double[] value, string description, string name)
+            : base(value, description, name)
+        {
+        }
+    }
+
+    public sealed class FloatNamedData : NamedData<float>
     {
         public FloatNamedData(float value, string description, string name)
             : base(value, description, name)
@@ -117,7 +135,7 @@ namespace ImageEvaluatorInterfaces.BaseClasses
         }
     }
 
-    public class BooleanNamedData : NamedData<bool>
+    public sealed class BooleanNamedData : NamedData<bool>
     {
         public BooleanNamedData(bool value, string description, string name)
             : base(value, description, name)
@@ -125,7 +143,7 @@ namespace ImageEvaluatorInterfaces.BaseClasses
         }
     }
 
-    public class DateTimeNamedData : NamedData<DateTime>
+    public sealed class DateTimeNamedData : NamedData<DateTime>
     {
         public DateTimeNamedData(DateTime value, string description, string name)
             : base(value, description, name)
@@ -133,7 +151,7 @@ namespace ImageEvaluatorInterfaces.BaseClasses
         }
     }
 
-    public class TimeSpanNamedData : NamedData<TimeSpan>
+    public sealed class TimeSpanNamedData : NamedData<TimeSpan>
     {
         public TimeSpanNamedData(TimeSpan value, string description, string name)
             : base(value, description, name)
@@ -141,7 +159,7 @@ namespace ImageEvaluatorInterfaces.BaseClasses
         }
     }
 
-    public class StringNamedData : NamedData<string>
+    public sealed class StringNamedData : NamedData<string>
     {
         public StringNamedData(string value, string description, string name)
             : base(value, description, name)
@@ -149,7 +167,7 @@ namespace ImageEvaluatorInterfaces.BaseClasses
         }
     }
 
-    public class EmguByteNamedData : NamedData<Image<Gray, byte>[]>
+    public sealed class EmguByteNamedData : NamedData<Image<Gray, byte>[]>
     {
         public EmguByteNamedData(Image<Gray, byte>[] value, string description, string name)
             : base(value, description, name)
@@ -157,9 +175,17 @@ namespace ImageEvaluatorInterfaces.BaseClasses
         }
     }
 
-    public class EmguFloatNamedData : NamedData<Image<Gray, byte>[]>
+    public sealed class EmguFloatNamedData : NamedData<Image<Gray, byte>[]>
     {
         public EmguFloatNamedData(Image<Gray, byte>[] value, string description, string name)
+            : base(value, description, name)
+        {
+        }
+    }
+
+    public sealed class BorderPointArraysNamedData : NamedData<BorderPointArrays>
+    {
+        public BorderPointArraysNamedData(BorderPointArrays value, string description, string name)
             : base(value, description, name)
         {
         }

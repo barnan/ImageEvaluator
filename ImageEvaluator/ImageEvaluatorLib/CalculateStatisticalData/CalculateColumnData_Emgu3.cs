@@ -21,51 +21,20 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         {
             InitEmguImages();
 
-            _logger?.Info("CalculateColumnData_Emgu3 instantiated.");
+            _logger?.Info($"{this.GetType().Name} instantiated.");
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="inputImage"></param>
-        /// <param name="maskImage"></param>
-        /// <param name="pointArray"></param>
-        /// <param name="meanVector"></param>
-        /// <param name="stdVector"></param>
-        /// <param name="resu1"></param>
-        /// <param name="resu2"></param>
-        /// <param name="resu3"></param>
-        /// <param name="resu4"></param>
-        /// <param name="resu5"></param>
-        /// <param name="resu6"></param>
-        /// <returns></returns>
-        public override bool Run(List<NamedData> data, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector,
-            out double resu1, out double resu2, out double resu3, out double resu4, out double resu5, out double resu6, out double resu7, out double resu8,
-            out double resu9, out double resu10)
+        public override bool Run(List<NamedData> data, string fileName)
         {
             Image<Gray, byte>[] rawImages = null;
             Image<Gray, byte>[] maskImages = null;
-
-            resu1 = 0;
-            resu2 = 0;
-            resu3 = 0;
-            resu4 = 0;
-            resu5 = 0;
-            resu6 = 0;
-            resu7 = 0;
-            resu8 = 0;
-            resu9 = 0;
-            resu10 = 0;
-            _meanVector = new Image<Gray, double>(_height, 1);
-            _stdVector = new Image<Gray, double>(_height, 1);
-            _resultVector1 = _meanVector.Data;
-            _resultVector2 = _stdVector.Data;
+            BorderPointArrays borderPointarrays;
 
             try
             {
                 if (!IsInitialized)
                 {
-                    _logger.Error("CalculateColumnData_CSharp2 is not initialized.");
+                    _logger.Error($"{this.GetType().Name} is not initialized.");
                     return false;
                 }
 
@@ -76,23 +45,37 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 maskImages = GetEmguByteImages("maskImages", data);
                 int imageCounterMask = maskImages?.Length ?? 0;
 
-                if (imageCounterMask != imageCounterRaw)
+                borderPointarrays = GetBorderPointArrays("borderPointArrayList", data);
+
+                if ((imageCounterMask != imageCounterRaw) || (imageCounterRaw == 0) || (imageCounterRaw != borderPointarrays.Count))
                 {
                     _logger.Info($"{this.GetType()} input and mask image number is not the same!");
                     return false;
                 }
 
+
+                double[] meanOfMean = new double[imageCounterRaw];
+                double[] stdOfMean = new double[imageCounterRaw];
+                double[] meanOfStd = new double[imageCounterRaw];
+                double[] stdOfStd = new double[imageCounterRaw];
+                double[] homogeneity1 = new double[imageCounterRaw];
+                double[] homogeneity2 = new double[imageCounterRaw];
+                double[] minOfMean = new double[imageCounterRaw];
+                double[] maxOfMean = new double[imageCounterRaw];
+
+
                 for (int m = 0; m < imageCounterRaw; m++)
                 {
-                    meanVector = _meanVector;
-                    stdVector = _stdVector;
 
-                    if (!CheckInputData(rawImages[m], maskImages[m], pointArray, meanVector, stdVector))
+                    if (!CheckInputData(rawImages[m], maskImages[m], borderPointarrays[m], _meanVector, _stdVector))
                     {
                         _logger.Info($"{this.GetType()} input and mask data is not proper!");
                         continue;
                     }
 
+                    ReAllocateEmgu();
+                    _resultVector1 = _meanVector.Data;
+                    _resultVector2 = _stdVector.Data;
 
                     int imageWidth = rawImages[m].Width;
                     int indexMin = int.MaxValue;
@@ -159,7 +142,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Exception occured during CalculateColumnDataEmgu1 - Run: {ex}");
+                _logger?.Error($"Exception occured during {this.GetType().Name} - Run: {ex}");
                 return false;
             }
             finally

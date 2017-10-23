@@ -6,7 +6,7 @@ namespace ImageEvaluatorInterfaces
 {
     public interface IBorderSearcher : IInitalizable
     {
-        bool Run(List<NamedData> data, ref int[,] pointList, string name);
+        bool Run(List<NamedData> data, string name);
 
     }
 

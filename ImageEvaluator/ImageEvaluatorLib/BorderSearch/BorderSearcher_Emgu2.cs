@@ -23,7 +23,7 @@ namespace ImageEvaluatorLib.BorderSearch
             _showImages = show;
         }
 
-        protected override void CalculatePoints(Image<Gray, byte> origImage, Image<Gray, byte> maskImage, string name)
+        protected override bool CalculatePoints(Image<Gray, byte> origImage, Image<Gray, byte> maskImage, string name)
         {
             using (VectorOfVectorOfPoint contour = new VectorOfVectorOfPoint())
             {
@@ -93,10 +93,13 @@ namespace ImageEvaluatorLib.BorderSearch
                     {
                         SavePointList(name);
                     }
+
+                    return true;
                 }
                 catch (Exception ex)
                 {
                     _logger?.Error($"Exception caught in BorderSearcher_Emgu1-CalculatePoints: {ex}.");
+                    return false;
                 }
 
             }
@@ -104,7 +107,7 @@ namespace ImageEvaluatorLib.BorderSearch
         }
 
 
-        
+
 
 
     }

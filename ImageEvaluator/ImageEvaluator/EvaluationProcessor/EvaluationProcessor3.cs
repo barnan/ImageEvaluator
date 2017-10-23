@@ -106,7 +106,7 @@ namespace ImageEvaluator.EvaluationProcessor
 
                 LogElapsedTime(_watch1, $"Image pre-processing: {name}");
 
-                _borderSearcher.Run(_dynamicResult, ref _borderPoints1, path);
+                _borderSearcher.Run(_dynamicResult, path);
 
                 LogElapsedTime(_watch1, $"Border search: {Path.GetFileName(name)}");
 
@@ -120,7 +120,8 @@ namespace ImageEvaluator.EvaluationProcessor
                 double resu8;
                 double resu9;
                 double resu10;
-                _columnDataCalculator1.Run(_dynamicResult, _borderPoints1, ref _meanVector1, ref _stdVector1, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6, out resu7, out resu8, out resu9, out resu10);
+                //_columnDataCalculator1.Run(_dynamicResult, _borderPoints1, ref _meanVector1, ref _stdVector1, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6, out resu7, out resu8, out resu9, out resu10);
+                _columnDataCalculator1.Run(_dynamicResult, path);
 
                 IColumnStatisticalMeasurementResult result1 = new ColumnStatisticalMeasurementResult
                 {

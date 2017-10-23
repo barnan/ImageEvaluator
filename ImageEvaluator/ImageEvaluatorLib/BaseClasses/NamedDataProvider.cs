@@ -1,11 +1,7 @@
 ﻿using Emgu.CV;
 using Emgu.CV.Structure;
 using ImageEvaluatorInterfaces.BaseClasses;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ImageEvaluatorLib.BaseClasses
 {
@@ -14,7 +10,6 @@ namespace ImageEvaluatorLib.BaseClasses
 
         public Image<Gray, byte>[] GetEmguByteImages(string name, List<NamedData> data)
         {
-
             Image<Gray, byte>[] images = null;
             foreach (NamedData item in data)
             {
@@ -27,6 +22,23 @@ namespace ImageEvaluatorLib.BaseClasses
                 }
             }
             return images;
+        }
+
+
+        public BorderPointArrays GetBorderPointArrays(string name, List<NamedData> data)
+        {
+            BorderPointArrays arrays = null;
+            foreach (NamedData item in data)
+            {
+                if (item.AsBorderPointArraysNamedData() != null)
+                {
+                    if (item.AsBorderPointArraysNamedData().Name == name)
+                    {
+                        arrays = item?.AsBorderPointArraysNamedData();
+                    }
+                }
+            }
+            return arrays;
         }
 
 

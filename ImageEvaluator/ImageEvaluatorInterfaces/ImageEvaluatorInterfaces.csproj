@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseClasses\BeltCoordinates.cs" />
+    <Compile Include="BaseClasses\BorderPointArrays.cs" />
     <Compile Include="BaseClasses\NamedData.cs" />
     <Compile Include="IBorderSearcher.cs" />
     <Compile Include="IColumnDataCalculator.cs" />

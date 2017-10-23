@@ -27,7 +27,7 @@ namespace ImageEvaluatorLib.BorderSearch
         /// <param name="origImage"></param>
         /// <param name="maskImage"></param>
         /// <param name="name"></param>
-        protected override void CalculatePoints(Image<Gray, byte> origImage, Image<Gray, byte> maskImage, string name)
+        protected override bool CalculatePoints(Image<Gray, byte> origImage, Image<Gray, byte> maskImage, string name)
         {
             using (Mat hierarchy = new Mat())
             {
@@ -37,7 +37,7 @@ namespace ImageEvaluatorLib.BorderSearch
                     {
                         CvInvoke.FindContours(maskImage, contour, hierarchy, RetrType.List, ChainApproxMethod.ChainApproxSimple);
 
-                        int verticalCenterLine = maskImage.Width/2;
+                        int verticalCenterLine = maskImage.Width / 2;
                         int magicNumber1 = 2000;
 
                         for (int i = 0; i < contour.Size; i++)
@@ -78,7 +78,7 @@ namespace ImageEvaluatorLib.BorderSearch
                                         for (int k = 0; k < Math.Abs(coordinateList[j + 1].Y - coordinateList[j].Y); k++)
                                         {
                                             int difference = coordinateList[j + 1].Y - coordinateList[j].Y;
-                                            int yCoord = coordinateList[j].Y + k*(difference/Math.Abs(difference));
+                                            int yCoord = coordinateList[j].Y + k * (difference / Math.Abs(difference));
 
                                             LineSegment2D horizontalLine = new LineSegment2D(new Point(0, yCoord), new Point(_imageWidth - 1, yCoord));
 
@@ -112,10 +112,13 @@ namespace ImageEvaluatorLib.BorderSearch
                         {
                             SavePointList(name);
                         }
+
+                        return true;
                     }
                     catch (Exception ex)
                     {
                         _logger?.Error($"Exception caught in BorderSearcher_Emgu1-CalculatePoints: {ex}.");
+                        return false;
                     }
                 }
             }

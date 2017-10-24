@@ -15,12 +15,6 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
     class CalculateColumnDataEmgu1 : CalculateColumnDataBaseEmgu
     {
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="logger"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
         internal CalculateColumnDataEmgu1(ILogger logger, int width, int height)
             : base(logger, width, height)
         {
@@ -32,12 +26,9 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
         public override bool Run(List<NamedData> data, string fileName)
         {
-
             Image<Gray, byte>[] rawImages = null;
             Image<Gray, byte>[] maskImages = null;
-            BorderPointArrays borderPointarrays;
-
-
+            BorderPointArrays borderPointarrays = null;
 
             try
             {
@@ -47,77 +38,30 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                     return false;
                 }
 
-                rawImages = GetEmguByteImages("_rawImages", data);
-                int imageCounterRaw = rawImages?.Length ?? 0;
-
-                maskImages = GetEmguByteImages("maskImages", data);
-                int imageCounterMask = maskImages?.Length ?? 0;
-
-                borderPointarrays = GetBorderPointArrays("borderPointArrayList", data);
-
-
-                if ((imageCounterMask != imageCounterRaw) || (imageCounterRaw == 0) || (imageCounterRaw != borderPointarrays.Count))
+                int imageCounter = LoadNamedData(data, ref borderPointarrays, ref rawImages, ref maskImages);
+                if (imageCounter == 0)
                 {
-                    _logger.Info($"{this.GetType()} input and mask image number is not the same!");
-                    return false;
+                    _logger.Info($"{this.GetType().Name} - No images were loaded from dynamicresult");
                 }
 
-                double[] meanOfMean = new double[imageCounterRaw];
-                double[] stdOfMean = new double[imageCounterRaw];
-                double[] meanOfStd = new double[imageCounterRaw];
-                double[] stdOfStd = new double[imageCounterRaw];
-                double[] homogeneity1 = new double[imageCounterRaw];
-                double[] homogeneity2 = new double[imageCounterRaw];
-                double[] minOfMean = new double[imageCounterRaw];
-                double[] maxOfMean = new double[imageCounterRaw];
+                double[] meanOfMean = new double[imageCounter];
+                double[] stdOfMean = new double[imageCounter];
+                double[] meanOfStd = new double[imageCounter];
+                double[] stdOfStd = new double[imageCounter];
+                double[] homogeneity1 = new double[imageCounter];
+                double[] homogeneity2 = new double[imageCounter];
+                double[] minOfMean = new double[imageCounter];
+                double[] maxOfMean = new double[imageCounter];
 
-                for (int m = 0; m < imageCounterRaw; m++)
+                for (int m = 0; m < imageCounter; m++)
                 {
-                    if (!CheckInputData(rawImages[m], maskImages[m], borderPointarrays[m], _meanVector, _stdVector))
+                    int[] indexes = Iterate(rawImages[m], maskImages[m], borderPointarrays[m]);
+                    if (indexes == null || indexes.Length != 2)
                     {
-                        _logger.Info($"{this.GetType()} input and mask data is not proper!");
-                        continue;
+                        _logger.Info($"{this.GetType().Name} - problem during Iterate. Return indexes are not proper for further calculation.");
                     }
-
-                    ReAllocateEmgu();
-                    _resultVector1 = _meanVector.Data;
-                    _resultVector2 = _stdVector.Data;
-
-                    int imageWidth = rawImages[m].Width;
-                    int indexMin = int.MaxValue;
-                    int indexMax = int.MinValue;
-
-                    for (int i = 0; i < borderPointarrays[m].Length / 2; i++)
-                    {
-                        if (borderPointarrays[m][i, 0] > 0 && borderPointarrays[m][i, 1] < imageWidth && (borderPointarrays[m][i, 1] - borderPointarrays[m][i, 0]) < imageWidth)
-                        {
-                            Rectangle r = new Rectangle(borderPointarrays[m][i, 0], i, borderPointarrays[m][i, 1] - borderPointarrays[m][i, 0], 1);
-
-                            MCvScalar mean = new MCvScalar();
-                            MCvScalar std = new MCvScalar();
-
-                            rawImages[m].ROI = r;
-                            CvInvoke.MeanStdDev(rawImages[m], ref mean, ref std);
-
-                            _resultVector1[0, i, 0] = (float)mean.V0;
-                            _resultVector2[0, i, 0] = (float)std.V0;
-
-                            if (i < indexMin)
-                            {
-                                indexMin = i;
-                            }
-
-                            if (i > indexMax)
-                            {
-                                indexMax = i;
-                            }
-                        }
-                        else
-                        {
-                            _resultVector1[0, i, 0] = 0.0f;
-                            _resultVector2[0, i, 0] = 0.0f;
-                        }
-                    }
+                    int indexMin = indexes[0];
+                    int indexMax = indexes[1];
 
                     if (!CalculateStatistics(indexMin, indexMax, maskImages[m]))
                     {
@@ -173,16 +117,66 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
 
 
+        protected int[] Iterate(Image<Gray, byte> rawImage, Image<Gray, byte> maskImage, int[,] pointArray)
+        {
+            try
+            {
+                if (!CheckInputData(rawImage, maskImage, pointArray, _firstVector, _secondVector))
+                {
+                    _logger.Info($"{this.GetType()} input and mask data is not proper!");
+                    return null;
+                }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="inputImage"></param>
-        /// <param name="maskImage"></param>
-        /// <param name="pointArray"></param>
-        /// <param name="meanVector"></param>
-        /// <param name="stdVector"></param>
-        /// <returns></returns>
+                ReAllocateEmgu();
+                double[,,] resultVector1 = _firstVector.Data;
+                double[,,] resultVector2 = _secondVector.Data;
+
+                int imageWidth = rawImage.Width;
+                int indexMin = int.MaxValue;
+                int indexMax = int.MinValue;
+
+                for (int i = 0; i < pointArray.Length / 2; i++)
+                {
+                    if (pointArray[i, 0] > 0 && pointArray[i, 1] < imageWidth && (pointArray[i, 1] - pointArray[i, 0]) < imageWidth)
+                    {
+                        Rectangle r = new Rectangle(pointArray[i, 0], i, pointArray[i, 1] - pointArray[i, 0], 1);
+
+                        MCvScalar mean = new MCvScalar();
+                        MCvScalar std = new MCvScalar();
+
+                        rawImage.ROI = r;
+                        CvInvoke.MeanStdDev(rawImage, ref mean, ref std);
+
+                        resultVector1[0, i, 0] = mean.V0;
+                        resultVector2[0, i, 0] = std.V0;
+
+                        if (i < indexMin)
+                        {
+                            indexMin = i;
+                        }
+
+                        if (i > indexMax)
+                        {
+                            indexMax = i;
+                        }
+                    }
+                    else
+                    {
+                        resultVector1[0, i, 0] = 0.0f;
+                        resultVector2[0, i, 0] = 0.0f;
+                    }
+                }
+
+                return new int[] { indexMin, indexMax };
+            }
+            catch (Exception)
+            {
+                _logger.Error($"Exception during {this.GetType().Name} - Iterate.");
+                throw;
+            }
+        }
+
+
         protected override bool CheckInputData(Image<Gray, byte> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, double> meanVector, Image<Gray, double> stdVector)
         {
             bool partResu = base.CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector);
@@ -196,13 +190,9 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             return true;
         }
 
-
     }
 
 
-    /// <summary>
-    /// 
-    /// </summary>
     public class FactoryCalculateColumnDataEmgu1 : IColumnDataCalculator_Creator
     {
         public IColumnDataCalculator Factory(ILogger logger, int width, int height)

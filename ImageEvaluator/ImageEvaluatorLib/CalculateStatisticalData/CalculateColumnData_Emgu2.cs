@@ -39,20 +39,6 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         }
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="inputImage"></param>
-        /// <param name="maskImage"></param>
-        /// <param name="pointArray"></param>
-        /// <param name="meanVector"></param>
-        /// <param name="stdVector"></param>
-        /// <param name="resu1"></param>
-        /// <param name="resu2"></param>
-        /// <param name="resu3"></param>
-        /// <param name="resu4"></param>
-        /// <param name="resu5"></param>
-        /// <param name="resu6"></param>
         public override bool Run(List<NamedData> data, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector,
             out double resu1, out double resu2, out double resu3, out double resu4, out double resu5, out double resu6, out double resu7, out double resu8,
             out double resu9, out double resu10)
@@ -71,10 +57,10 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             resu9 = 0;
             resu10 = 0;
 
-            _meanVector = new Image<Gray, double>(_height, 1);
-            _stdVector = new Image<Gray, double>(_height, 1);
-            _resultVector1 = _meanVector.Data;
-            _resultVector2 = _stdVector.Data;
+            _firstVector = new Image<Gray, double>(_height, 1);
+            _secondVector = new Image<Gray, double>(_height, 1);
+            _resultVector1 = _firstVector.Data;
+            _resultVector2 = _secondVector.Data;
 
             if (!IsInitialized)
             {
@@ -103,8 +89,8 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                     continue;
                 }
 
-                meanVector = _meanVector;
-                stdVector = _stdVector;
+                meanVector = _firstVector;
+                stdVector = _secondVector;
 
                 // mask the outer area to zero
                 Gray zero = new Gray(0.0);

@@ -15,13 +15,13 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
     {
         protected int _width;
         protected int _height;
-        protected Image<Gray, double> _meanVector;
-        protected Image<Gray, double> _stdVector;
-        protected double[,,] _resultVector1;
-        protected double[,,] _resultVector2;
+
         protected ILogger _logger;
         protected Rectangle _fullROI;
         protected Rectangle _fullLineROI;
+
+        protected Image<Gray, double> _firstVector;
+        protected Image<Gray, double> _secondVector;
 
 
         protected MCvScalar _meanOfMean;
@@ -113,8 +113,8 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             if (!IsInitialized)
                 return false;
 
-            _meanVector = new Image<Gray, double>(_height, 1);
-            _stdVector = new Image<Gray, double>(_height, 1);
+            _firstVector = new Image<Gray, double>(_height, 1);
+            _secondVector = new Image<Gray, double>(_height, 1);
 
             return true;
         }
@@ -122,14 +122,38 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
         protected virtual bool ClearEmguImages()
         {
-            _meanVector?.Dispose();
-            _stdVector?.Dispose();
+            _firstVector?.Dispose();
+            _secondVector?.Dispose();
             _reducedMask?.Dispose();
 
             IsInitialized = false;
 
             return true;
         }
+
+        protected virtual int LoadNamedData(List<NamedData> data, ref BorderPointArrays borderPoints, ref Image<Gray, byte>[] rawImages, ref Image<Gray, byte>[] maskImages)
+        {
+
+            rawImages = GetEmguByteImages("_rawImages", data);
+            int imageCounterRaw = rawImages?.Length ?? 0;
+
+            maskImages = GetEmguByteImages("maskImages", data);
+            int imageCounterMask = maskImages?.Length ?? 0;
+
+            borderPoints = GetBorderPointArrays("borderPointArrayList", data);
+
+
+            if ((imageCounterMask != imageCounterRaw) || (imageCounterRaw == 0) || (imageCounterRaw != borderPoints.Count))
+            {
+                _logger.Info($"{this.GetType()} input and mask image number is not the same!");
+                return 0;
+            }
+
+            return imageCounterRaw;
+        }
+
+
+
 
 
         protected bool CalculateStatistics(int indexMin, int indexMax, Image<Gray, byte> maskImage)
@@ -207,15 +231,15 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                     }
                 }
 
-                CvInvoke.MeanStdDev(_meanVector, ref _meanOfMean, ref _stdOfMean, tempReducedMask);
-                CvInvoke.MeanStdDev(_stdVector, ref _meanOfStd, ref _stdOfStd, tempReducedMask);
+                CvInvoke.MeanStdDev(_firstVector, ref _meanOfMean, ref _stdOfMean, tempReducedMask);
+                CvInvoke.MeanStdDev(_secondVector, ref _meanOfStd, ref _stdOfStd, tempReducedMask);
 
                 double maxVal = 0.0;
                 double minVal = 0.0;
                 Point maxPos = new Point();
                 Point minPos = new Point();
 
-                CvInvoke.MinMaxLoc(_meanVector, ref minVal, ref maxVal, ref minPos, ref maxPos, tempReducedMask);
+                CvInvoke.MinMaxLoc(_firstVector, ref minVal, ref maxVal, ref minPos, ref maxPos, tempReducedMask);
                 _minOfMean = new MCvScalar(minVal);
                 _maxOfMean = new MCvScalar(maxVal);
 
@@ -224,14 +248,14 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 Rectangle rect4 = new Rectangle(indexMin + 2 * regionWidth, 0, regionWidth, 1);
                 Rectangle rect5 = new Rectangle(indexMax - Math.Min(regionWidth, value2), 0, Math.Min(regionWidth, value2), 1);
 
-                _meanVector.ROI = rect3;
-                CvInvoke.MeanStdDev(_meanVector, ref _meanOfRegion1, ref stdOfRegion1);
+                _firstVector.ROI = rect3;
+                CvInvoke.MeanStdDev(_firstVector, ref _meanOfRegion1, ref stdOfRegion1);
 
-                _meanVector.ROI = rect4;
-                CvInvoke.MeanStdDev(_meanVector, ref _meanOfRegion2, ref stdOfRegion2);
+                _firstVector.ROI = rect4;
+                CvInvoke.MeanStdDev(_firstVector, ref _meanOfRegion2, ref stdOfRegion2);
 
-                _meanVector.ROI = rect5;
-                CvInvoke.MeanStdDev(_meanVector, ref _meanOfRegion3, ref stdOfRegion3);
+                _firstVector.ROI = rect5;
+                CvInvoke.MeanStdDev(_firstVector, ref _meanOfRegion3, ref stdOfRegion3);
 
                 return true;
             }
@@ -242,8 +266,8 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
             finally
             {
-                _meanVector.ROI = _fullROI;
-                _stdVector.ROI = _fullLineROI;
+                _firstVector.ROI = _fullROI;
+                _secondVector.ROI = _fullLineROI;
             }
         }
 

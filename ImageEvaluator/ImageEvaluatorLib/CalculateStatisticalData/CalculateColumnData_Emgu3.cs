@@ -11,9 +11,9 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 {
     class CalculateColumnDataEmgu3 : CalculateColumnDataBaseEmgu
     {
-        private Image<Gray, byte> _lineSegment1;
-        private Image<Gray, byte> _lineSegment2;
 
+        Image<Gray, byte> _lineSegment1;
+        Image<Gray, byte> _lineSegment2;
 
 
         public CalculateColumnDataEmgu3(ILogger logger, int width, int height)
@@ -24,11 +24,12 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             _logger?.Info($"{this.GetType().Name} instantiated.");
         }
 
+
         public override bool Run(List<NamedData> data, string fileName)
         {
             Image<Gray, byte>[] rawImages = null;
             Image<Gray, byte>[] maskImages = null;
-            BorderPointArrays borderPointarrays;
+            BorderPointArrays borderPointarrays = null;
 
             try
             {
@@ -38,105 +39,61 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                     return false;
                 }
 
-
-                rawImages = GetEmguByteImages("_rawImages", data);
-                int imageCounterRaw = rawImages?.Length ?? 0;
-
-                maskImages = GetEmguByteImages("maskImages", data);
-                int imageCounterMask = maskImages?.Length ?? 0;
-
-                borderPointarrays = GetBorderPointArrays("borderPointArrayList", data);
-
-                if ((imageCounterMask != imageCounterRaw) || (imageCounterRaw == 0) || (imageCounterRaw != borderPointarrays.Count))
+                int imageCounter = LoadNamedData(data, ref borderPointarrays, ref rawImages, ref maskImages);
+                if (imageCounter == 0)
                 {
-                    _logger.Info($"{this.GetType()} input and mask image number is not the same!");
-                    return false;
+                    _logger.Info($"{this.GetType().Name} - No images were loaded from dynamicresult");
                 }
 
 
-                double[] meanOfMean = new double[imageCounterRaw];
-                double[] stdOfMean = new double[imageCounterRaw];
-                double[] meanOfStd = new double[imageCounterRaw];
-                double[] stdOfStd = new double[imageCounterRaw];
-                double[] homogeneity1 = new double[imageCounterRaw];
-                double[] homogeneity2 = new double[imageCounterRaw];
-                double[] minOfMean = new double[imageCounterRaw];
-                double[] maxOfMean = new double[imageCounterRaw];
+                double[] meanOfNoiseMean = new double[imageCounter];
+                double[] stdOfNoiseMean = new double[imageCounter];
+                double[] meanOfNoiseStd = new double[imageCounter];
+                double[] stdOfNoiseStd = new double[imageCounter];
+                double[] noiseMeanHomogeneity1 = new double[imageCounter];
+                double[] noiseMeanHomogeneity2 = new double[imageCounter];
+                double[] minOfNoiseMean = new double[imageCounter];
+                double[] maxOfNoiseMean = new double[imageCounter];
 
 
-                for (int m = 0; m < imageCounterRaw; m++)
+                for (int m = 0; m < imageCounter; m++)
                 {
 
-                    if (!CheckInputData(rawImages[m], maskImages[m], borderPointarrays[m], _meanVector, _stdVector))
+                    int[] indexes = Iterate(rawImages[m], maskImages[m], borderPointarrays[m]);
+                    if (indexes == null || indexes.Length != 2)
                     {
-                        _logger.Info($"{this.GetType()} input and mask data is not proper!");
-                        continue;
+                        _logger.Info($"{this.GetType().Name} - problem during IterateNoise. Return indexes are not proper for further calculation.");
                     }
-
-                    ReAllocateEmgu();
-                    _resultVector1 = _meanVector.Data;
-                    _resultVector2 = _stdVector.Data;
-
-                    int imageWidth = rawImages[m].Width;
-                    int indexMin = int.MaxValue;
-                    int indexMax = int.MinValue;
-
-                    for (int i = 0; i < pointArray.Length / 2; i++)
-                    {
-                        if (pointArray[i, 0] > 0 && pointArray[i, 1] < imageWidth && (pointArray[i, 1] - pointArray[i, 0]) < imageWidth)
-                        {
-
-                            MCvScalar noiseMean = new MCvScalar();
-                            MCvScalar noisestd = new MCvScalar();
-
-                            Rectangle r1 = new Rectangle(pointArray[i, 0], i, pointArray[i, 1] - pointArray[i, 0], 1);
-                            Rectangle r2 = new Rectangle(pointArray[i, 0] + 1, i, pointArray[i, 1] - pointArray[i, 0], 1);
-
-                            rawImages[m].ROI = r1;
-                            using (_lineSegment1 = rawImages[m].Copy())
-                            {
-                                rawImages[m].ROI = r2;
-                                using (_lineSegment2 = rawImages[m].Copy())
-                                {
-                                    using (Image<Gray, byte> tempImage = _lineSegment1 - _lineSegment2)
-                                    {
-                                        CvInvoke.MeanStdDev(tempImage, ref noiseMean, ref noisestd);
-
-                                        _resultVector1[0, i, 0] = (float)noiseMean.V0;
-                                        _resultVector2[0, i, 0] = (float)noisestd.V0;
-                                    }
-                                }
-                            }
-
-                            if (i < indexMin)
-                            {
-                                indexMin = i;
-                            }
-
-                            if (i > indexMax)
-                            {
-                                indexMax = i;
-                            }
-
-                        }
-                        else
-                        {
-                            _resultVector1[0, i, 0] = 0.0f;
-                            _resultVector2[0, i, 0] = 0.0f;
-                        }
-                    }
+                    int indexMin = indexes[0];
+                    int indexMax = indexes[1];
 
                     if (!CalculateStatistics(indexMin, indexMax, maskImages[m]))
                     {
                         return false;
                     }
 
-                    resu1 = _meanOfMean.V0;
-                    resu2 = _stdOfMean.V0;
-                    resu3 = _meanOfStd.V0;
-                    resu4 = _stdOfStd.V0;
+
+                    meanOfNoiseMean[m] = _meanOfMean.V0;
+                    stdOfNoiseMean[m] = _stdOfMean.V0;
+                    meanOfNoiseStd[m] = _meanOfStd.V0;
+                    stdOfNoiseStd[m] = _stdOfStd.V0;
+                    noiseMeanHomogeneity1[m] = Math.Max(Math.Abs(_meanOfRegion2.V0 - _meanOfRegion1.V0), Math.Abs(_meanOfRegion2.V0 - _meanOfRegion3.V0));
+                    noiseMeanHomogeneity2[m] = Math.Abs(_meanOfRegion1.V0 - _meanOfRegion3.V0);
+                    minOfNoiseMean[m] = _minOfMean.V0;
+                    maxOfNoiseMean[m] = _maxOfMean.V0;
 
                 }
+
+
+                data.Add(new DoubleVectorNamedData(meanOfNoiseMean, "meanOfNoiseMean", nameof(meanOfNoiseMean)));
+                data.Add(new DoubleVectorNamedData(stdOfNoiseMean, "stdOfNoiseMean", nameof(stdOfNoiseMean)));
+                data.Add(new DoubleVectorNamedData(meanOfNoiseStd, "meanOfNoiseStd", nameof(meanOfNoiseStd)));
+                data.Add(new DoubleVectorNamedData(stdOfNoiseStd, "stdOfNoiseStd", nameof(stdOfNoiseStd)));
+                data.Add(new DoubleVectorNamedData(noiseMeanHomogeneity1, "noiseMeanHomogeneity1", nameof(noiseMeanHomogeneity1)));
+                data.Add(new DoubleVectorNamedData(noiseMeanHomogeneity2, "noiseMeanHomogeneity2", nameof(noiseMeanHomogeneity2)));
+                data.Add(new DoubleVectorNamedData(minOfNoiseMean, "minOfNoiseMean", nameof(minOfNoiseMean)));
+                data.Add(new DoubleVectorNamedData(maxOfNoiseMean, "maxOfNoiseMean", nameof(maxOfNoiseMean)));
+
 
                 return true;
             }
@@ -164,6 +121,80 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
 
         }
+
+
+        protected int[] Iterate(Image<Gray, byte> rawImage, Image<Gray, byte> maskImage, int[,] pointArray)
+        {
+            try
+            {
+                if (!CheckInputData(rawImage, maskImage, pointArray, _firstVector, _secondVector))
+                {
+                    _logger.Info($"{this.GetType()} input and mask data is not proper!");
+                    return null;
+                }
+
+                ReAllocateEmgu();
+                double[,,] resultVector1 = _firstVector.Data;
+                double[,,] resultVector2 = _secondVector.Data;
+
+                int imageWidth = rawImage.Width;
+                int indexMin = int.MaxValue;
+                int indexMax = int.MinValue;
+
+                for (int i = 0; i < pointArray.Length / 2; i++)
+                {
+                    if (pointArray[i, 0] > 0 && pointArray[i, 1] < imageWidth && (pointArray[i, 1] - pointArray[i, 0]) < imageWidth)
+                    {
+
+                        MCvScalar noiseMean = new MCvScalar();
+                        MCvScalar noisestd = new MCvScalar();
+
+                        Rectangle r1 = new Rectangle(pointArray[i, 0], i, pointArray[i, 1] - pointArray[i, 0], 1);
+                        Rectangle r2 = new Rectangle(pointArray[i, 0] + 1, i, pointArray[i, 1] - pointArray[i, 0], 1);
+
+                        rawImage.ROI = r1;
+                        using (_lineSegment1 = rawImage.Copy())
+                        {
+                            rawImage.ROI = r2;
+                            using (_lineSegment2 = rawImage.Copy())
+                            {
+                                using (Image<Gray, byte> tempImage = _lineSegment1 - _lineSegment2)
+                                {
+                                    CvInvoke.MeanStdDev(tempImage, ref noiseMean, ref noisestd);
+
+                                    resultVector1[0, i, 0] = (float)noiseMean.V0;
+                                    resultVector2[0, i, 0] = (float)noisestd.V0;
+                                }
+                            }
+                        }
+
+                        if (i < indexMin)
+                        {
+                            indexMin = i;
+                        }
+
+                        if (i > indexMax)
+                        {
+                            indexMax = i;
+                        }
+
+                    }
+                    else
+                    {
+                        resultVector1[0, i, 0] = 0.0f;
+                        resultVector2[0, i, 0] = 0.0f;
+                    }
+                }
+                return new int[] { indexMin, indexMax };
+            }
+            catch (Exception)
+            {
+                _logger.Error($"Exception during {this.GetType().Name} - IterateNoise.");
+                throw;
+            }
+        }
+
+
 
 
         //private bool CalculateStatistics(int indexMin, int indexMax)

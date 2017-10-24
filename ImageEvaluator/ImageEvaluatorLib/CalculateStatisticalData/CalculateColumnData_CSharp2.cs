@@ -56,10 +56,10 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             resu9 = 0;
             resu10 = 0;
 
-            _meanVector = new Image<Gray, double>(_height, 1);
-            _stdVector = new Image<Gray, double>(_height, 1);
-            _resultVector1 = _meanVector.Data;
-            _resultVector2 = _stdVector.Data;
+            _firstVector = new Image<Gray, double>(_height, 1);
+            _secondVector = new Image<Gray, double>(_height, 1);
+            _resultVector1 = _firstVector.Data;
+            _resultVector2 = _secondVector.Data;
 
             if (!IsInitialized)
             {
@@ -81,8 +81,8 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
             for (int m = 0; m < imageCounterRaw; m++)
             {
-                meanVector = _meanVector;
-                stdVector = _stdVector;
+                meanVector = _firstVector;
+                stdVector = _secondVector;
 
                 if (!CheckInputData(rawImages[m], maskImages[m], pointArray, meanVector, stdVector))
                     return false;

@@ -10,7 +10,7 @@ using ImageEvaluatorLib.BaseClasses;
 
 namespace ImageEvaluatorLib.BorderSearch
 {
-    internal abstract class BorderSearcherBase : NamedDataProvider, IBorderSearcher
+    internal abstract class BorderSearcherBase : NamedDataProvider, IBorderSearcher, IElement
     {
 
         protected int[,] _borderPoints;
@@ -21,6 +21,9 @@ namespace ImageEvaluatorLib.BorderSearch
         //private Image<Gray, byte> _maskImage;
         protected ILogger _logger;
 
+        public string ClassName { get; protected set; }
+        public string Title { get; protected set; }
+
 
         protected BorderSearcherBase(ILogger logger, int imageWidth, int imageHeight, int border)
         {
@@ -28,6 +31,9 @@ namespace ImageEvaluatorLib.BorderSearch
             _imageHeight = imageHeight;
             _logger = logger;
             _borderSkipSize = border;
+
+            ClassName = nameof(BorderSearcherBase);
+            Title = ClassName;
         }
 
 
@@ -48,13 +54,13 @@ namespace ImageEvaluatorLib.BorderSearch
         {
             if (!IsInitialized)
             {
-                _logger?.Error("BorderSearch is not initialized yet.");
+                _logger?.ErrorLog("Not initialized yet.", ClassName);
                 return false;
             }
 
             try
             {
-                Image<Gray, byte>[] rawImages = GetEmguByteImages("RawImages", data);
+                Image<Gray, ushort>[] rawImages = GetEmguUShortImages("RawImages", data);
                 int imageCounterRaw = rawImages?.Length ?? 0;
 
                 Image<Gray, byte>[] maskImages = GetEmguByteImages("MaskImages", data);
@@ -62,7 +68,7 @@ namespace ImageEvaluatorLib.BorderSearch
 
                 if (imageCounterMask != imageCounterRaw)
                 {
-                    _logger.Info($"{this.GetType()} input and mask image number is not the same!");
+                    _logger?.InfoLog("Input and mask image number is not the same!", ClassName);
                     return false;
                 }
 
@@ -72,13 +78,13 @@ namespace ImageEvaluatorLib.BorderSearch
                 {
                     if (!CheckInputImage(maskImages[m]))
                     {
-                        _logger?.Info("GetBorderPoints - Invalid input mask image.");
+                        _logger?.InfoLog("Invalid input mask image.", ClassName);
                         continue;
                     }
 
                     if (!(AllocArrays() && ResetPointList()))
                     {
-                        _logger.Info($"{this.GetType().Name} array re-allocation failed.");
+                        _logger?.InfoLog("Array re-allocation failed.", ClassName);
                         continue;
                     }
 
@@ -91,7 +97,7 @@ namespace ImageEvaluatorLib.BorderSearch
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Exception during border points calculation: {ex}");
+                _logger?.ErrorLog($"Exception during border points calculation: {ex}", ClassName);
                 return false;
             }
 
@@ -100,7 +106,7 @@ namespace ImageEvaluatorLib.BorderSearch
 
 
 
-        protected abstract bool CalculatePoints(Image<Gray, byte> origImage, Image<Gray, byte> maskImage, string name);
+        protected abstract bool CalculatePoints(Image<Gray, ushort> origImage, Image<Gray, byte> maskImage, string name);
 
 
         protected bool AllocArrays()
@@ -127,9 +133,9 @@ namespace ImageEvaluatorLib.BorderSearch
         }
 
 
-        protected bool CheckInputImage(Image<Gray, byte> maskImage)
+        protected bool CheckInputImage(Image<Gray, ushort> image)
         {
-            if (maskImage == null || maskImage.Height != _imageHeight || maskImage.Width != _imageHeight)
+            if (image == null || image.Height != _imageHeight || image.Width != _imageHeight)
             {
                 return false;
             }
@@ -137,33 +143,68 @@ namespace ImageEvaluatorLib.BorderSearch
         }
 
 
-        protected void SaveMaskImage(string name, Image<Gray, byte> maskImage, string ext)
+        protected bool CheckInputImage(Image<Gray, byte> image)
         {
-            string fileNameBase = Path.GetFileNameWithoutExtension(name);
-            string path = Path.GetDirectoryName(name);
-            string finalOutputName = Path.Combine(path ?? string.Empty, ext + "_BorderSearch", $"{fileNameBase}.png");
-
-            string directory = Path.GetDirectoryName(finalOutputName);
-            if (directory != null && !Directory.Exists(directory))
+            if (image == null || image.Height != _imageHeight || image.Width != _imageHeight)
             {
-                Directory.CreateDirectory(directory);
+                return false;
             }
+            return true;
+        }
 
-            maskImage.Save(finalOutputName);
+        protected void SaveMaskImage(string name, Image<Gray, byte> image, string ext)
+        {
+            string finalOutputName = CheckOutputDirectoryOfImageSaving(name, ext, ".png");
+
+            if (finalOutputName != null)
+            {
+                image.Save(finalOutputName);
+            }
         }
 
 
-
-        protected void SavePointList(string name)
+        protected void SaveMaskImage(string name, Image<Gray, ushort> image, string ext)
         {
-            string fileNameBase = Path.GetFileNameWithoutExtension(name);
-            string path = Path.GetDirectoryName(name);
-            string finalOutputName = Path.Combine(path ?? string.Empty, "PointList", $"{fileNameBase}.csv");
+            string finalOutputName = CheckOutputDirectoryOfImageSaving(name, ext, ".png");
 
-            string directory = Path.GetDirectoryName(finalOutputName);
-            if (directory != null && !Directory.Exists(directory))
+            if (finalOutputName != null)
             {
-                Directory.CreateDirectory(directory);
+                image.Save(finalOutputName);
+            }
+        }
+
+
+        private string CheckOutputDirectoryOfImageSaving(string name, string ext, string extension)
+        {
+            try
+            {
+                string fileNameBase = Path.GetFileNameWithoutExtension(name);
+                string path = Path.GetDirectoryName(name);
+                string finalOutputName = Path.Combine(path ?? string.Empty, ext + "_BorderSearch", $"{fileNameBase}{extension}");
+
+                string directory = Path.GetDirectoryName(finalOutputName);
+                if (directory != null && !Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                return finalOutputName;
+            }
+            catch (Exception ex)
+            {
+                _logger?.ErrorLog($"Exception during directory determination: {ex}", ClassName);
+                return null;
+            }
+        }
+
+
+        protected void SavePointList(string name, string ext)
+        {
+            string finalOutputName = CheckOutputDirectoryOfImageSaving(name, ext, ".csv");
+
+            if (finalOutputName == null)
+            {
+                return;
             }
 
             using (StreamWriter sw = new StreamWriter(finalOutputName))

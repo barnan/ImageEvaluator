@@ -65,7 +65,7 @@ namespace ImageEvaluatorInterfaces.BaseClasses
 
         public EmguUShortNamedData AsEmguUShortNamedData()
         {
-            return this as EmguByteNamedData;
+            return this as EmguUShortNamedData;
         }
 
         public EmguFloatNamedData AsEmguFloatNamedData()

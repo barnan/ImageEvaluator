@@ -8,6 +8,7 @@ using Emgu.CV.Util;
 using ImageEvaluatorInterfaces;
 using NLog;
 using Emgu.CV.UI;
+using ImageEvaluatorInterfaces.BaseClasses;
 
 namespace ImageEvaluatorLib.BorderSearch
 {
@@ -21,9 +22,14 @@ namespace ImageEvaluatorLib.BorderSearch
             : base(logger, imageWidth, imageHeight, border)
         {
             _showImages = show;
+
+            ClassName = nameof(BorderSearcherEmgu2);
+            Title = ClassName;
+
+            _logger?.InfoLog("Instantiated.", ClassName);
         }
 
-        protected override bool CalculatePoints(Image<Gray, byte> origImage, Image<Gray, byte> maskImage, string name)
+        protected override bool CalculatePoints(Image<Gray, ushort> origImage, Image<Gray, byte> maskImage, string name)
         {
             using (VectorOfVectorOfPoint contour = new VectorOfVectorOfPoint())
             {
@@ -50,16 +56,16 @@ namespace ImageEvaluatorLib.BorderSearch
                                     tempImage.Draw(coordinateList, new Gray(100.0), 2);
                                     ImageViewer.Show(tempImage, "BorderSearcher_Emgu1 - contour points");
 
-                                    SaveMaskImage(name, tempImage, "orig");
+                                    SaveMaskImage(name, tempImage, "MaskImage");
                                 }
 
-                                using (var tempImage = new Image<Gray, byte>(origImage.Size))
+                                using (var tempImage = new Image<Gray, ushort>(origImage.Size))
                                 {
                                     origImage.CopyTo(tempImage);
                                     tempImage.Draw(coordinateList, new Gray(200.0), 2);
                                     ImageViewer.Show(tempImage, "BorderSearcher_Emgu1 - contour points");
 
-                                    SaveMaskImage(name, tempImage, "orig");
+                                    SaveMaskImage(name, tempImage, "OrigImage");
                                 }
                             }
 
@@ -91,24 +97,20 @@ namespace ImageEvaluatorLib.BorderSearch
 
                     if (_showImages)
                     {
-                        SavePointList(name);
+                        SavePointList(name, "PointList");
                     }
 
                     return true;
                 }
                 catch (Exception ex)
                 {
-                    _logger?.Error($"Exception caught in BorderSearcher_Emgu1-CalculatePoints: {ex}.");
+                    _logger?.ErrorLog($"Exception occured: {ex}.", ClassName);
                     return false;
                 }
 
             }
 
         }
-
-
-
-
 
     }
 
@@ -117,6 +119,8 @@ namespace ImageEvaluatorLib.BorderSearch
     {
         public IBorderSearcher Factory(ILogger logger, int border, int imageWidth, int imageHeight, bool showImages)
         {
+            logger?.InfoLog("Factory called.", nameof(FactoryBorderSearcherEmgu2));
+
             return new BorderSearcherEmgu2(logger, border, showImages, imageWidth, imageHeight);
         }
     }

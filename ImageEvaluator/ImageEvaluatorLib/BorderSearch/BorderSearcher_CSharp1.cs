@@ -3,6 +3,7 @@ using Emgu.CV.Structure;
 using NLog;
 using System;
 using ImageEvaluatorInterfaces;
+using ImageEvaluatorInterfaces.BaseClasses;
 
 namespace ImageEvaluatorLib.BorderSearch
 {
@@ -12,11 +13,14 @@ namespace ImageEvaluatorLib.BorderSearch
         internal BorderSearcherCSharp1(ILogger logger, int border, int imageWidth, int imageHeight)
             : base(logger, imageWidth, imageHeight, border)
         {
-            _logger?.Info("BorderSearcher_CSharp1 instantiated.");
+            ClassName = nameof(BorderSearcherCSharp1);
+            Title = ClassName;
+
+            _logger?.InfoLog("Instantiated.", ClassName);
         }
 
 
-        protected override bool CalculatePoints(Image<Gray, byte> origImage, Image<Gray, byte> maskImage, string name)
+        protected override bool CalculatePoints(Image<Gray, ushort> origImage, Image<Gray, byte> maskImage, string name)
         {
             try
             {
@@ -48,14 +52,14 @@ namespace ImageEvaluatorLib.BorderSearch
 
                 if (_showImages)
                 {
-                    SavePointList(name);
+                    SavePointList(name, "PointList");
                 }
 
                 return true;
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Exception caught in BorderSearcher_CSharp1-CalculatePoints: {ex}.");
+                _logger?.ErrorLog($"Exception occured: {ex}", ClassName);
                 return false;
             }
 
@@ -72,6 +76,8 @@ namespace ImageEvaluatorLib.BorderSearch
     {
         public IBorderSearcher Factory(ILogger logger, int border, int imageWidth, int imageHeight, bool showImages)
         {
+            logger?.InfoLog("Factory called.", nameof(FactoryBorderSearcherCSharp1));
+
             return new BorderSearcherCSharp1(logger, border, imageWidth, imageHeight);
         }
     }

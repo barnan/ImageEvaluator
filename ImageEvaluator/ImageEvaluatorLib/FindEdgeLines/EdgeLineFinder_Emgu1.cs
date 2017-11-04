@@ -33,7 +33,7 @@ namespace ImageEvaluatorLib.FindEdgeLines
             _logger?.Info($"{this.GetType().Name} instantiated.");
         }
 
-        public override bool Run(List<NamedData> data, ref IWaferEdgeFindData edgeFindData)
+        public override bool Execute(List<NamedData> data, ref IWaferEdgeFindData edgeFindData)
         {
 
             Image<Gray, byte>[] rawImages = null;
@@ -47,10 +47,10 @@ namespace ImageEvaluatorLib.FindEdgeLines
                     return false;
                 }
 
-                rawImages = GetEmguByteImages("_rawImages", data);
+                rawImages = GetEmguByteImages("RawImages", data);
                 int imageCounterRaw = rawImages?.Length ?? 0;
 
-                maskImages = GetEmguByteImages("maskImages", data);
+                maskImages = GetEmguByteImages("MaskImages", data);
                 int imageCounterMask = maskImages?.Length ?? 0;
 
                 if (imageCounterMask != imageCounterRaw)

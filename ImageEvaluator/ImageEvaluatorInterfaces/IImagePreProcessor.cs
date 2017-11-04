@@ -6,7 +6,7 @@ namespace ImageEvaluatorInterfaces
 {
     public interface IImagePreProcessor : IInitalizable
     {
-        bool Run(List<NamedData> data, string name);
+        bool Execute(List<NamedData> data, string name);
     }
 
 

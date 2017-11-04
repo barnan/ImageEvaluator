@@ -44,7 +44,7 @@ namespace ImageEvaluatorLib.BorderSearch
         }
 
 
-        public bool Run(List<NamedData> data, string name)
+        public bool Execute(List<NamedData> data, string name)
         {
             if (!IsInitialized)
             {
@@ -54,10 +54,10 @@ namespace ImageEvaluatorLib.BorderSearch
 
             try
             {
-                Image<Gray, byte>[] rawImages = GetEmguByteImages("_rawImages", data);
+                Image<Gray, byte>[] rawImages = GetEmguByteImages("RawImages", data);
                 int imageCounterRaw = rawImages?.Length ?? 0;
 
-                Image<Gray, byte>[] maskImages = GetEmguByteImages("maskImages", data);
+                Image<Gray, byte>[] maskImages = GetEmguByteImages("MaskImages", data);
                 int imageCounterMask = maskImages?.Length ?? 0;
 
                 if (imageCounterMask != imageCounterRaw)

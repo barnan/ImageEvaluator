@@ -20,7 +20,8 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         internal CalculateColumnDataCSharp2(ILogger logger, int width, int height)
             : base(logger, width, height)
         {
-            _logger?.Info("CalculateColumnData_CSharp2 instantiated.");
+            _className = nameof(CalculateColumnDataCSharp2);
+            _logger?.InfoLog($"Instantiated.", _className);
         }
 
 
@@ -38,85 +39,73 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         /// <param name="resu4"></param>
         /// <param name="resu5"></param>
         /// <param name="resu6"></param>
-        public override bool Run(List<NamedData> data, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector,
-                                out double resu1, out double resu2, out double resu3, out double resu4, out double resu5, out double resu6, out double resu7, out double resu8,
-                                out double resu9, out double resu10)
+        public override bool Execute(List<NamedData> data, string fileName)
         {
             Image<Gray, byte>[] rawImages = null;
             Image<Gray, byte>[] maskImages = null;
+            BorderPointArrays borderPointarrays = null;
 
-            resu1 = 0;
-            resu2 = 0;
-            resu3 = 0;
-            resu4 = 0;
-            resu5 = 0;
-            resu6 = 0;
-            resu7 = 0;
-            resu8 = 0;
-            resu9 = 0;
-            resu10 = 0;
 
-            _firstVector = new Image<Gray, double>(_height, 1);
-            _secondVector = new Image<Gray, double>(_height, 1);
-            _resultVector1 = _firstVector.Data;
-            _resultVector2 = _secondVector.Data;
+            double[,,] resultVector1 = _firstVector.Data;
+            double[,,] resultVector2 = _secondVector.Data;
 
-            if (!IsInitialized)
+            try
             {
-                _logger.Error("CalculateColumnData_CSharp2 is not initialized.");
-                return false;
-            }
 
-            rawImages = GetEmguByteImages("_rawImages", data);
-            int imageCounterRaw = rawImages?.Length ?? 0;
 
-            maskImages = GetEmguByteImages("maskImages", data);
-            int imageCounterMask = maskImages?.Length ?? 0;
-
-            if (imageCounterMask != imageCounterRaw)
-            {
-                _logger.Info($"{this.GetType()} input and mask image number is not the same!");
-                return false;
-            }
-
-            for (int m = 0; m < imageCounterRaw; m++)
-            {
-                meanVector = _firstVector;
-                stdVector = _secondVector;
-
-                if (!CheckInputData(rawImages[m], maskImages[m], pointArray, meanVector, stdVector))
-                    return false;
-
-                byte[,,] imgData = rawImages[m].Data;
-
-                for (int i = 0; i < pointArray.Length / 2; i++)
+                if (!IsInitialized)
                 {
-                    try
-                    {
-                        double sum = 0;
-                        double sum2 = 0;
-                        int counter = 0;
+                    _logger.ErrorLog($"It is not initialized.", _className);
+                    return false;
+                }
 
-                        for (int j = 0; j < (pointArray[i, 1] - pointArray[i, 0]); j++)
-                        {
-                            sum += imgData[i, pointArray[i, 0] + j, 0];
-                            sum2 += (imgData[i, pointArray[i, 0] + j, 0] * imgData[i, pointArray[i, 0] + j, 0]);
-                            counter++;
-                        }
+                int imageCounter = LoadNamedData(data, ref borderPointarrays, ref rawImages, ref maskImages);
+                if (imageCounter == 0)
+                {
+                    _logger?.Info($"No images were loaded from dynamicresult", _className);
+                }
 
-                        _resultVector1[0, i, 0] = (float)(sum / counter);
-                        _resultVector2[0, i, 0] = (float)Math.Sqrt(sum2 / (counter - 1) - (sum * sum / Math.Pow(counter - 1, 2)));
-
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error during the CalculateColumnData_CSharp2-CalculateStatistics, i:{i}, message: {ex}.");
+                for (int m = 0; m < imageCounter; m++)
+                {
+                    if (!CheckInputData(rawImages[m], maskImages[m], borderPointarrays[m], _firstVector, _secondVector))
                         return false;
+
+                    byte[,,] imgData = rawImages[m].Data;
+
+                    for (int i = 0; i < borderPointarrays[m].Length / 2; i++)
+                    {
+                        try
+                        {
+                            double sum = 0;
+                            double sum2 = 0;
+                            int counter = 0;
+
+                            for (int j = 0; j < (borderPointarrays[m][i, 1] - borderPointarrays[m][i, 0]); j++)
+                            {
+                                sum += imgData[i, borderPointarrays[m][i, 0] + j, 0];
+                                sum2 += (imgData[i, borderPointarrays[m][i, 0] + j, 0] * imgData[i, borderPointarrays[m][i, 0] + j, 0]);
+                                counter++;
+                            }
+
+                            resultVector1[0, i, 0] = (float)(sum / counter);
+                            resultVector2[0, i, 0] = (float)Math.Sqrt(sum2 / (counter - 1) - (sum * sum / Math.Pow(counter - 1, 2)));
+
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger?.ErrorLog($"Error during the calculation, i:{i}, message: {ex}.", _className);
+                            return false;
+                        }
                     }
                 }
-            }
 
-            return true;
+                return true;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -133,7 +122,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
             if (!partResu || pointArray == null || pointArray.Length < 0 || (pointArray.Length / 2) > 10000 || (pointArray.Length / 2) != inputImage.Height)
             {
-                _logger.Error("Error during CheckInputData");
+                _logger?.ErrorLog("Input check failed.", _className);
                 return false;
             }
 
@@ -151,7 +140,8 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
     {
         public IColumnDataCalculator Factory(ILogger logger, int width, int height)
         {
-            return new CalculateColumnDataCSharp1(logger, width, height);
+            logger?.Info($"Factory called.", nameof(FactoryCalculateColumnDataEmgu1));
+            return new CalculateColumnDataCSharp2(logger, width, height);
         }
     }
 

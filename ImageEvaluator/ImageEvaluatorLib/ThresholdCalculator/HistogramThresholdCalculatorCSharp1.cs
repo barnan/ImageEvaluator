@@ -28,14 +28,14 @@ namespace ImageEvaluatorLib.ThresholdCalculator
             }
         }
 
-        public HistogramThresholdCalculatorCSharp1(ILogger logger, int histogramSize, int param) 
+        public HistogramThresholdCalculatorCSharp1(ILogger logger, int histogramSize, int param)
             : base(logger, histogramSize)
         {
             Param = param;
         }
-        
 
-        public override bool Run(DenseHistogram hist, out float minPos)
+
+        public override bool Execute(DenseHistogram hist, out float minPos)
         {
             minPos = Param;
 
@@ -48,6 +48,7 @@ namespace ImageEvaluatorLib.ThresholdCalculator
     {
         public IHistogramThresholdCalculator Factory(ILogger logger, int range, int param = 0)
         {
+            logger?.Info($"{GetType().Name} factory called.");
             return new HistogramThresholdCalculatorCSharp1(logger, range, param);
         }
     }

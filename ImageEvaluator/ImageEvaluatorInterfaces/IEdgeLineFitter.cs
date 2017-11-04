@@ -7,7 +7,7 @@ namespace ImageEvaluatorInterfaces
 {
     public interface IEdgeLineFitter : IInitalizable
     {
-        bool Run(IWaferEdgeFindData edgeFindData, ref IWaferFittingData edgeFitData);
+        bool Execute(IWaferEdgeFindData edgeFindData, ref IWaferFittingData edgeFitData);
     }
 
 

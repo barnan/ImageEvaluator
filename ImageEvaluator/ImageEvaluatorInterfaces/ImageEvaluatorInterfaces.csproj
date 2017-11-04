@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="BaseClasses\BeltCoordinates.cs" />
     <Compile Include="BaseClasses\BorderPointArrays.cs" />
+    <Compile Include="BaseClasses\LoggerExtension.cs" />
     <Compile Include="BaseClasses\NamedData.cs" />
     <Compile Include="IBorderSearcher.cs" />
     <Compile Include="IColumnDataCalculator.cs" />
@@ -61,6 +62,7 @@
     <Compile Include="IDirectoryReader.cs" />
     <Compile Include="IEdgeLineFinder.cs" />
     <Compile Include="IEdgeLineFitter.cs" />
+    <Compile Include="IElement.cs" />
     <Compile Include="IEvaluationProcessor.cs" />
     <Compile Include="IImagePreProcessor.cs" />
     <Compile Include="IImageReader.cs" />

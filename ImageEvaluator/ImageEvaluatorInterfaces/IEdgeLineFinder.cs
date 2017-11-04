@@ -9,7 +9,7 @@ namespace ImageEvaluatorInterfaces
 {
     public interface IEdgeLineFinder : IInitalizable
     {
-        bool Run(List<NamedData> data, ref IWaferEdgeFindData edgeFindData);
+        bool Execute(List<NamedData> data, ref IWaferEdgeFindData edgeFindData);
     }
 
 

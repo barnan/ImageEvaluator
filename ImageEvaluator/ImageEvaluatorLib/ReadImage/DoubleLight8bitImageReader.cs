@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using ImageEvaluatorInterfaces;
+using ImageEvaluatorInterfaces.BaseClasses;
 
 namespace ImageEvaluatorLib.ReadImage
 {
@@ -17,9 +18,12 @@ namespace ImageEvaluatorLib.ReadImage
         internal DoubleLight8BitImageReader(ILogger logger, int width, int height, bool showImages)
             : base(logger, width, height, showImages)
         {
+            ClassName = nameof(DoubleLight16BitImageReader);
+            Title = ClassName;
+
             _bitNumber = 1;
 
-            _logger?.Info($"{this.GetType().Name} instantiated.");
+            _logger?.InfoLog($"Instantiated.", ClassName);
         }
 
 
@@ -37,7 +41,8 @@ namespace ImageEvaluatorLib.ReadImage
                 byte[] inputImage = File.ReadAllBytes(_fileName);
                 int stride = _width;
 
-                Console.WriteLine($"{this.GetType().Name} - Image reading time: {sw.ElapsedMilliseconds}ms.");
+                //Console.WriteLine($"Image reading time: {sw.ElapsedMilliseconds}ms.");
+                _logger?.TraceLog($"Image reading time: {sw.ElapsedMilliseconds}ms.", ClassName);
                 sw.Restart();
 
                 byte[] dataRow1 = new byte[stride];
@@ -45,8 +50,8 @@ namespace ImageEvaluatorLib.ReadImage
 
                 // make separate emgu images:
 
-                byte[,,] emguImage1Array = _rawImages[0].Data;
-                byte[,,] emguImage2Array = _rawImages[1].Data;
+                ushort[,,] emguImage1Array = _rawImages[0].Data;
+                ushort[,,] emguImage2Array = _rawImages[1].Data;
 
                 for (int i = 0; i < _height; i++)
                 {
@@ -61,11 +66,11 @@ namespace ImageEvaluatorLib.ReadImage
 
                 }
 
-                Console.WriteLine($"{this.GetType().Name} - Image conversion time to emgu-image: {sw.ElapsedMilliseconds}ms.");
+                _logger?.TraceLog($"Conversion time to emgu-image: {sw.ElapsedMilliseconds}ms.", ClassName);
             }
             catch (Exception ex)
             {
-                _logger.Error($"Exception during file read (8 bit double light): {(string.IsNullOrEmpty(_fileName) ? string.Empty : _fileName)}. {ex}");
+                _logger?.ErrorLog($"Exception occured: {(string.IsNullOrEmpty(_fileName) ? string.Empty : _fileName)}. {ex}", ClassName);
                 return false;
             }
 
@@ -83,7 +88,7 @@ namespace ImageEvaluatorLib.ReadImage
     {
         public IImageReader Factory(ILogger logger, int width, int height, bool showImages)
         {
-            logger?.Info($"{typeof(FactoryDoubleLight8BitImageReader)} factory called.");
+            logger?.InfoLog($"Factory called.", nameof(FactoryDoubleLight8BitImageReader));
             return new DoubleLight8BitImageReader(logger, width, height, showImages);
         }
     }

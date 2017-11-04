@@ -63,6 +63,11 @@ namespace ImageEvaluatorInterfaces.BaseClasses
             return this as EmguByteNamedData;
         }
 
+        public EmguUShortNamedData AsEmguUShortNamedData()
+        {
+            return this as EmguByteNamedData;
+        }
+
         public EmguFloatNamedData AsEmguFloatNamedData()
         {
             return this as EmguFloatNamedData;
@@ -178,6 +183,14 @@ namespace ImageEvaluatorInterfaces.BaseClasses
     public sealed class EmguFloatNamedData : NamedData<Image<Gray, byte>[]>
     {
         public EmguFloatNamedData(Image<Gray, byte>[] value, string description, string name)
+            : base(value, description, name)
+        {
+        }
+    }
+
+    public sealed class EmguUShortNamedData : NamedData<Image<Gray, ushort>[]>
+    {
+        public EmguUShortNamedData(Image<Gray, ushort>[] value, string description, string name)
             : base(value, description, name)
         {
         }

@@ -41,7 +41,7 @@ namespace ImageEvaluator.EvaluationProcessor
             return IsInitialized = resu;
         }
 
-        public override bool Run()
+        public override bool Execute()
         {
             if (!IsInitialized)
             {
@@ -60,7 +60,7 @@ namespace ImageEvaluator.EvaluationProcessor
 
                 LogElapsedTime(_watch1, $"Image reading: {Path.GetFileName(name)}");
 
-                _sawmarkDet.Run(_dynamicResult, name);
+                _sawmarkDet.Execute(_dynamicResult, name);
 
                 LogElapsedTime(_watch1, $"Determine wafer orientation: {Path.GetFileName(name)}");
 

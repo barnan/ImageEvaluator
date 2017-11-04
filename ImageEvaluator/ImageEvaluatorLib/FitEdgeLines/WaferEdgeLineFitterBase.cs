@@ -25,7 +25,7 @@ namespace ImageEvaluatorLib.FitEdgeLines
         public bool IsInitialized { get; protected set; }
 
 
-        public bool Run(IWaferEdgeFindData edgeFindData, ref IWaferFittingData edgeFitData)
+        public bool Execute(IWaferEdgeFindData edgeFindData, ref IWaferFittingData edgeFitData)
         {
 
             return true;

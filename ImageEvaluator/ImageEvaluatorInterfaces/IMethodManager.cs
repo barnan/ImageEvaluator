@@ -3,6 +3,6 @@ namespace ImageEvaluatorInterfaces
 {
     public interface IMethodManager : IInitalizable
     {
-        bool Run();
+        bool Execute();
     }
 }

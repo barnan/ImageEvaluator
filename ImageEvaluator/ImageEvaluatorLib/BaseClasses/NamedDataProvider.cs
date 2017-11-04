@@ -24,6 +24,22 @@ namespace ImageEvaluatorLib.BaseClasses
             return images;
         }
 
+        public Image<Gray, ushort>[] GetEmguUShortImages(string name, List<NamedData> data)
+        {
+            Image<Gray, ushort>[] images = null;
+            foreach (NamedData item in data)
+            {
+                if (item.AsEmguUShortNamedData() != null)
+                {
+                    if (item.AsEmguByteNamedData().Name == name)
+                    {
+                        images = item?.AsEmguUShortNamedData();
+                    }
+                }
+            }
+            return images;
+        }
+
 
         public BorderPointArrays GetBorderPointArrays(string name, List<NamedData> data)
         {

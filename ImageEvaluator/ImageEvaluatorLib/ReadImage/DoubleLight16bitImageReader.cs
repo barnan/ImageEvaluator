@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using ImageEvaluatorInterfaces;
+using ImageEvaluatorInterfaces.BaseClasses;
 
 namespace ImageEvaluatorLib.ReadImage
 {
@@ -17,9 +18,12 @@ namespace ImageEvaluatorLib.ReadImage
         internal DoubleLight16BitImageReader(ILogger logger, int width, int height, bool showImages)
             : base(logger, width, height, showImages)
         {
+            ClassName = nameof(DoubleLight16BitImageReader);
+            Title = ClassName;
+
             _bitNumber = 2;
 
-            _logger?.Info($"{this.GetType().Name} instantiated.");
+            _logger?.Info($"Instantiated.", ClassName);
         }
 
 
@@ -37,7 +41,7 @@ namespace ImageEvaluatorLib.ReadImage
                 byte[] inputImage = File.ReadAllBytes(_fileName);
                 int stride = _width * 2;
 
-                Console.WriteLine($"{this.GetType().Name} - Image reading time: {sw.ElapsedMilliseconds}ms.");
+                _logger?.TraceLog($"Image reading time: {sw.ElapsedMilliseconds}ms.", ClassName);
                 sw.Restart();
 
                 byte[] dataRow1 = new byte[stride];
@@ -46,8 +50,8 @@ namespace ImageEvaluatorLib.ReadImage
                 // make separate emgu images:
 
                 // to speed up:
-                byte[,,] emguImage1Array = _rawImages[0].Data;
-                byte[,,] emguImage2Array = _rawImages[1].Data;
+                ushort[,,] emguImage1Array = _rawImages[0].Data;
+                ushort[,,] emguImage2Array = _rawImages[1].Data;
 
                 for (int i = 0; i < _height; i++)
                 {
@@ -56,16 +60,16 @@ namespace ImageEvaluatorLib.ReadImage
 
                     for (int j = 0; j < _width; j++)
                     {
-                        emguImage1Array[i, j, 0] = (byte)(dataRow1[2 * j] + (dataRow1[2 * j + 1] << 8));
-                        emguImage2Array[i, j, 0] = (byte)(dataRow2[2 * j] + (dataRow2[2 * j + 1] << 8));
+                        emguImage1Array[i, j, 0] = (ushort)(dataRow1[2 * j] + (dataRow1[2 * j + 1] << 8));
+                        emguImage2Array[i, j, 0] = (ushort)(dataRow2[2 * j] + (dataRow2[2 * j + 1] << 8));
                     }
                 }
 
-                Console.WriteLine($"{this.GetType().Name} - Image conversion time to emgu-image: {sw.ElapsedMilliseconds}ms.");
+                _logger?.TraceLog($"Conversion time to emgu-image: {sw.ElapsedMilliseconds}ms.", ClassName);
             }
             catch (Exception ex)
             {
-                _logger.Error($"Exception during file read (16 bit double light): {(string.IsNullOrEmpty(_fileName) ? string.Empty : _fileName)}. {ex}");
+                _logger?.ErrorLog($"Exception occured: {(string.IsNullOrEmpty(_fileName) ? string.Empty : _fileName)}: {ex}", ClassName);
                 return false;
             }
 
@@ -83,7 +87,7 @@ namespace ImageEvaluatorLib.ReadImage
     {
         public IImageReader Factory(ILogger logger, int width, int height, bool showImages)
         {
-            logger?.Info($"{typeof(Factory_DoubleLight16bitImageReader)} factory called.");
+            logger?.InfoLog($"Factory called.", nameof(Factory_DoubleLight16bitImageReader));
             return new DoubleLight16BitImageReader(logger, width, height, showImages);
         }
     }

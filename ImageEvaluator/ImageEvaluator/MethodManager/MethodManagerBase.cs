@@ -57,7 +57,7 @@ namespace ImageEvaluator.MethodManager
         public bool IsInitialized { get; protected set; }
 
 
-        public bool Run()
+        public bool Execute()
         {
             if (!IsInitialized)
             {
@@ -65,7 +65,7 @@ namespace ImageEvaluator.MethodManager
                 return false;
             }
 
-            return _evaluationProcessor.Run();
+            return _evaluationProcessor.Execute();
         }
 
 

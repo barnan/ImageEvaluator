@@ -15,6 +15,9 @@ namespace ImageEvaluatorLib.ReadImage
         public SimpleLight8BitImageReader(ILogger logger, int width, int height, bool showImages)
             : base(logger, width, height, showImages)
         {
+            ClassName = nameof(DoubleLight16BitImageReader);
+            Title = ClassName;
+
             _bitNumber = 1;
 
             _logger?.Info($"{this.GetType().Name} instantiated.");
@@ -33,14 +36,18 @@ namespace ImageEvaluatorLib.ReadImage
                 Console.WriteLine($"{this.GetType().Name} - Image reading time: {sw.ElapsedMilliseconds}ms.");
                 sw.Restart();
 
-                byte[,,] emguImage1Array = _rawImages[0].Data;
+                //_rawImages[0].Bytes = inputImage;
+
+                ushort[,,] emguImage1Array = _rawImages[0].Data;
 
                 for (int i = 0; i < _height; i++)
                 {
+                    int index = i * _width;
+
                     for (int j = 0; j < _width; j++)
                     {
-                        int index = j + i * _width;
-                        emguImage1Array[i, j, 0] = inputImage[index];
+
+                        emguImage1Array[i, j, 0] = inputImage[index + j];
                     }
 
                 }

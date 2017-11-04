@@ -10,7 +10,7 @@ namespace ImageEvaluatorInterfaces
 {
     public interface IHistogramThresholdCalculator : IInitalizable
     {
-        bool Run(DenseHistogram hist, out float pos);
+        bool Execute(DenseHistogram hist, out float pos);
 
     }
 

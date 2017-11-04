@@ -25,7 +25,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         }
 
 
-        public override bool Run(List<NamedData> data, string fileName)
+        public override bool Execute(List<NamedData> data, string fileName)
         {
             Image<Gray, byte>[] rawImages = null;
             Image<Gray, byte>[] maskImages = null;
@@ -129,7 +129,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             {
                 if (!CheckInputData(rawImage, maskImage, pointArray, _firstVector, _secondVector))
                 {
-                    _logger.Info($"{this.GetType()} input and mask data is not proper!");
+                    _logger?.InfoLog($"Input and mask data is not proper!", _className);
                     return null;
                 }
 
@@ -162,8 +162,12 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                                 {
                                     CvInvoke.MeanStdDev(tempImage, ref noiseMean, ref noisestd);
 
-                                    resultVector1[0, i, 0] = (float)noiseMean.V0;
                                     resultVector2[0, i, 0] = (float)noisestd.V0;
+
+                                    CvInvoke.AbsDiff(_lineSegment1, _lineSegment2, tempImage);
+                                    CvInvoke.MeanStdDev(tempImage, ref noiseMean, ref noisestd);
+
+                                    resultVector1[0, i, 0] = (float)noiseMean.V0;
                                 }
                             }
                         }
@@ -189,66 +193,10 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
             catch (Exception)
             {
-                _logger.Error($"Exception during {this.GetType().Name} - IterateNoise.");
+                _logger?.ErrorLog($"Exception during - IterateNoise.", _className);
                 throw;
             }
         }
-
-
-
-
-        //private bool CalculateStatistics(int indexMin, int indexMax)
-        //{
-        //    _meanOfMean = new MCvScalar();
-        //    _stdOfMean = new MCvScalar();
-        //    _meanOfStd = new MCvScalar();
-        //    _stdOfStd = new MCvScalar();
-
-        //    _meanOfNoiseRegion1 = new MCvScalar();
-        //    _meanOfNoiseRegion2 = new MCvScalar();
-        //    _meanOfNoiseRegion3 = new MCvScalar();
-
-        //    MCvScalar stdOfRegion1 = new MCvScalar();
-        //    MCvScalar stdOfRegion2 = new MCvScalar();
-        //    MCvScalar stdOfRegion3 = new MCvScalar();
-
-        //    try
-        //    {
-        //        Rectangle rect1 = new Rectangle(indexMin, 0, indexMax - indexMin, 1);
-        //        Rectangle fullRoi = new Rectangle(0, 0, _meanVector.Width, 1);
-
-        //        _meanVector.ROI = rect1;
-        //        _stdVector.ROI = rect1;
-
-        //        CvInvoke.MeanStdDev(_meanVector, ref _meanOfMean, ref _stdOfMean);
-        //        CvInvoke.MeanStdDev(_stdVector, ref _meanOfStd, ref _stdOfStd);
-
-        //        int regionWidth = (indexMax - indexMin) / 5;
-        //        Rectangle rect3 = new Rectangle(indexMin, 0, regionWidth, 1);
-        //        Rectangle rect4 = new Rectangle(indexMin + 2 * regionWidth, 0, regionWidth, 1);
-        //        Rectangle rect5 = new Rectangle(indexMin + 4 * regionWidth, 0, regionWidth, 1);
-
-        //        _meanVector.ROI = rect3;
-        //        CvInvoke.MeanStdDev(_stdVector, ref _meanOfNoiseRegion1, ref stdOfRegion1);
-
-        //        _meanVector.ROI = rect4;
-        //        CvInvoke.MeanStdDev(_stdVector, ref _meanOfNoiseRegion2, ref stdOfRegion2);
-
-        //        _meanVector.ROI = rect5;
-        //        CvInvoke.MeanStdDev(_stdVector, ref _meanOfNoiseRegion3, ref stdOfRegion3);
-
-        //        _meanVector.ROI = fullRoi;
-        //        _stdVector.ROI = fullRoi;
-
-        //        return true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger?.Error($"Exception occured during CalculateColumnDataEmgu1 - CalculateStatistics: {ex}");
-        //        return false;
-        //    }
-        //}
-
 
     }
 
@@ -260,7 +208,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
     {
         public IColumnDataCalculator Factory(ILogger logger, int width, int height)
         {
-            logger?.Info($"{typeof(FactoryCalculateColumnDataEmgu3)} factory called.");
+            logger?.InfoLog($"Factory called.", nameof(FactoryCalculateColumnDataEmgu3));
             return new CalculateColumnDataEmgu3(logger, width, height);
         }
     }

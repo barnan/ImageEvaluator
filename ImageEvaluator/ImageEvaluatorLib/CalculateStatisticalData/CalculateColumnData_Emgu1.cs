@@ -18,13 +18,16 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         internal CalculateColumnDataEmgu1(ILogger logger, int width, int height)
             : base(logger, width, height)
         {
+            ClassName = nameof(CalculateColumnDataEmgu1);
+            Title = ClassName;
+
             InitEmguImages();
 
-            _logger?.Info($"{this.GetType().Name} instantiated.");
+            _logger?.InfoLog($"Instantiated.", ClassName);
         }
 
 
-        public override bool Run(List<NamedData> data, string fileName)
+        public override bool Execute(List<NamedData> data, string fileName)
         {
             Image<Gray, byte>[] rawImages = null;
             Image<Gray, byte>[] maskImages = null;
@@ -34,14 +37,14 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             {
                 if (!IsInitialized)
                 {
-                    _logger.Error($"{this.GetType().Name} is not initialized.");
+                    _logger?.ErrorLog($"It is not initialized.", ClassName);
                     return false;
                 }
 
                 int imageCounter = LoadNamedData(data, ref borderPointarrays, ref rawImages, ref maskImages);
                 if (imageCounter == 0)
                 {
-                    _logger.Info($"{this.GetType().Name} - No images were loaded from dynamicresult");
+                    _logger?.InfoLog("No images were loaded from dynamicresult", ClassName);
                 }
 
                 double[] meanOfMean = new double[imageCounter];
@@ -58,14 +61,14 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                     int[] indexes = Iterate(rawImages[m], maskImages[m], borderPointarrays[m]);
                     if (indexes == null || indexes.Length != 2)
                     {
-                        _logger.Info($"{this.GetType().Name} - problem during Iterate. Return indexes are not proper for further calculation.");
+                        _logger?.InfoLog($"Problem during Iterate. Return indexes are not proper for further calculation. index:{m}", ClassName);
                     }
                     int indexMin = indexes[0];
                     int indexMax = indexes[1];
 
                     if (!CalculateStatistics(indexMin, indexMax, maskImages[m]))
                     {
-                        _logger.Info($"Problem during statistics calculation: {m}");
+                        _logger?.InfoLog($"Problem during statistics calculation: {m}", ClassName);
                         continue;
                     }
 
@@ -93,7 +96,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Exception occured during {this.GetType().Name} - Run: {ex}");
+                _logger?.ErrorLog($"Exception occured: {ex}", ClassName);
                 return false;
             }
             finally
@@ -123,7 +126,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             {
                 if (!CheckInputData(rawImage, maskImage, pointArray, _firstVector, _secondVector))
                 {
-                    _logger.Info($"{this.GetType()} input and mask data is not proper!");
+                    _logger?.InfoLog("Input and mask data is not proper!", ClassName);
                     return null;
                 }
 
@@ -169,9 +172,9 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
                 return new int[] { indexMin, indexMax };
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                _logger.Error($"Exception during {this.GetType().Name} - Iterate.");
+                _logger?.ErrorLog($"Exception occured: {ex}", ClassName);
                 throw;
             }
         }
@@ -183,7 +186,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
             if (!partResu || pointArray == null || pointArray.Length < 0 || (pointArray.Length / 2) > 10000 || (pointArray.Length / 2) != inputImage.Height)
             {
-                _logger?.Error("Error during CheckInputData");
+                _logger?.ErrorLog("Error in input data.", ClassName);
                 return false;
             }
 
@@ -197,7 +200,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
     {
         public IColumnDataCalculator Factory(ILogger logger, int width, int height)
         {
-            logger?.Info($"{typeof(FactoryCalculateColumnDataEmgu1)} factory called.");
+            logger?.InfoLog($"Factory called.", nameof(FactoryCalculateColumnDataEmgu1));
             return new CalculateColumnDataEmgu1(logger, width, height);
         }
     }

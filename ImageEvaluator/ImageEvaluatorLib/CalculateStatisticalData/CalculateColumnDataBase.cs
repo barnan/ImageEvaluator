@@ -11,8 +11,10 @@ using ImageEvaluatorLib.BaseClasses;
 
 namespace ImageEvaluatorLib.CalculateStatisticalData
 {
-    internal abstract class CalculateColumnDataBase : NamedDataProvider, IColumnDataCalculator
+    internal abstract class CalculateColumnDataBase : NamedDataProvider, IColumnDataCalculator, IElement
     {
+        protected string _className;
+
         protected int _width;
         protected int _height;
 
@@ -37,12 +39,17 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
         private Matrix<byte> _reducedMask;
 
+        public string ClassName { get; protected set; }
+        public string Title { get; protected set; }
+
 
         protected CalculateColumnDataBase(ILogger logger, int width, int height)
         {
             _logger = logger;
             _width = width;
             _height = height;
+
+            ClassName = nameof(CalculateColumnDataBase);
         }
 
 
@@ -50,7 +57,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         {
             IsInitialized = InitEmguImages();
 
-            _logger?.Info("CalculateColumnData_Base " + (IsInitialized ? string.Empty : "NOT") + " Initialized.");
+            _logger?.InfoLog((IsInitialized ? string.Empty : "NOT") + " Initialized.", ClassName);
 
             return IsInitialized;
         }
@@ -60,7 +67,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         public bool IsInitialized { get; protected set; }
 
 
-        public abstract bool Run(List<NamedData> data, string fileName);
+        public abstract bool Execute(List<NamedData> data, string fileName);
 
 
         protected virtual bool CheckInputData(Image<Gray, byte> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, double> meanVector, Image<Gray, double> stdVector)
@@ -69,18 +76,18 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             {
                 if (inputImage == null || inputImage.Height != _height || inputImage.Width != _width)
                 {
-                    _logger?.Error($"Error in the input image size. Predefined width: {_width}, Predefined height: {_height}, image width: {inputImage?.Width}, image height: {inputImage?.Height}");
+                    _logger?.ErrorLog($"Error in the input image size. Predefined width: {_width}, Predefined height: {_height}, image width: {inputImage?.Width}, image height: {inputImage?.Height}", ClassName);
                     return false;
                 }
                 if (meanVector == null || stdVector == null || meanVector.Width != inputImage.Height || stdVector.Width != inputImage.Height)
                 {
-                    _logger?.Error($"Error in the meanVector and stdVector length. meanVector height:{meanVector?.Height} stdVector height:{stdVector?.Height} meanVector height:{inputImage.Height}.");
+                    _logger?.ErrorLog($"Error in the meanVector and stdVector length. meanVector height:{meanVector?.Height} stdVector height:{stdVector?.Height} meanVector height:{inputImage.Height}.", ClassName);
                     return false;
                 }
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Error during CalculateColumnData CheckInputImage: {ex}");
+                _logger?.ErrorLog($"Exception occured: {ex}", ClassName);
             }
 
             return true;
@@ -102,7 +109,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Error during CalculcateColumnData - Init: {ex}.");
+                _logger?.ErrorLog($"Exception occured: {ex}", ClassName);
                 return false;
             }
         }
@@ -131,9 +138,9 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             return true;
         }
 
+
         protected virtual int LoadNamedData(List<NamedData> data, ref BorderPointArrays borderPoints, ref Image<Gray, byte>[] rawImages, ref Image<Gray, byte>[] maskImages)
         {
-
             rawImages = GetEmguByteImages("_rawImages", data);
             int imageCounterRaw = rawImages?.Length ?? 0;
 
@@ -145,14 +152,12 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
             if ((imageCounterMask != imageCounterRaw) || (imageCounterRaw == 0) || (imageCounterRaw != borderPoints.Count))
             {
-                _logger.Info($"{this.GetType()} input and mask image number is not the same!");
+                _logger.InfoLog($"Input and mask image number is not the same!", ClassName);
                 return 0;
             }
 
             return imageCounterRaw;
         }
-
-
 
 
 
@@ -181,10 +186,22 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
                 int thresh = 150; // 150 means -> 1204 pixels in case of H2048, 2409 pixels in ase of  H4096, 4818 in case of H8192  (H->Height)
 
+                for (int i = 0; i < _reducedMask.Height; i++)
+                {
+                    if (_reducedMask[i, 0] < thresh && _firstVector.Data[0, i, 0] < double.Epsilon)
+                    {
+                        tempReducedMask.Data[0, i, 0] = 0;
+                    }
+                    else
+                    {
+                        tempReducedMask.Data[0, i, 0] = 255;
+                    }
+                }
+
                 for (int i = 0; i < _reducedMask.Height / 2; i++)
                 {
                     tempReducedMask.Data[0, i, 0] = 0;
-                    if (_reducedMask[i, 0] > thresh)
+                    if (_reducedMask[i, 0] > thresh && _firstVector.Data[0, i, 0] > double.Epsilon)
                     {
                         indexMin = i;
                         break;
@@ -193,7 +210,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 for (int i = _reducedMask.Height - 1; i > _reducedMask.Height / 2; i--)
                 {
                     tempReducedMask.Data[0, i, 0] = 0;
-                    if (_reducedMask[i, 0] > thresh)
+                    if (_reducedMask[i, 0] > thresh && _firstVector.Data[0, i, 0] > double.Epsilon)
                     {
                         indexMax = i;
                         break;
@@ -204,7 +221,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 int value2 = _reducedMask.Height;
                 for (int i = indexMin; i < indexMax; i++)
                 {
-                    if (_reducedMask[i, 0] < thresh)
+                    if (_reducedMask[i, 0] < thresh && _firstVector.Data[0, i, 0] < double.Epsilon)
                     {
                         value1 = i - indexMin;
                         break;
@@ -212,24 +229,13 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 }
                 for (int i = indexMax; i > indexMin; i--)
                 {
-                    if (_reducedMask[i, 0] < thresh)
+                    if (_reducedMask[i, 0] < thresh && _firstVector.Data[0, i, 0] < double.Epsilon)
                     {
                         value2 = indexMax - i;
                         break;
                     }
                 }
 
-                for (int i = 0; i < _reducedMask.Height; i++)
-                {
-                    if (_reducedMask[i, 0] < thresh)
-                    {
-                        tempReducedMask.Data[0, i, 0] = 0;
-                    }
-                    else
-                    {
-                        tempReducedMask.Data[0, i, 0] = 255;
-                    }
-                }
 
                 CvInvoke.MeanStdDev(_firstVector, ref _meanOfMean, ref _stdOfMean, tempReducedMask);
                 CvInvoke.MeanStdDev(_secondVector, ref _meanOfStd, ref _stdOfStd, tempReducedMask);
@@ -261,7 +267,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Exception occured during CalculateColumnDataEmgu1 - CalculateStatistics: {ex}");
+                _logger?.ErrorLog($"Exception occured: {ex}", ClassName);
                 return false;
             }
             finally

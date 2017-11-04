@@ -28,13 +28,15 @@ namespace ImageEvaluatorLib.ThresholdCalculator
 
             Hist = new float[HistogramSize];
 
+            IsInitialized = true;
+
             Logger?.Info($"{typeof(HistogramThresholdCalculatorBase)}" + (IsInitialized ? string.Empty : " NOT") + " initialized.");
 
-            return IsInitialized = true;
+            return IsInitialized;
         }
 
 
-        public abstract bool Run(DenseHistogram hist, out float minPos);
+        public abstract bool Execute(DenseHistogram hist, out float minPos);
 
     }
 }

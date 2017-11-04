@@ -9,6 +9,8 @@ namespace ImageEvaluatorLib.ReadImage
         protected SimpleLightImageReader_Base(ILogger logger, int width, int height, bool showImages)
             : base(width, height, logger, showImages, 1)
         {
+            ClassName = nameof(DoubleLight16BitImageReader);
+            Title = ClassName;
         }
 
 

@@ -26,7 +26,7 @@ namespace ImageEvaluatorLib.FindEdgeLines
         }
 
 
-        public abstract bool Run(List<NamedData> data, ref IWaferEdgeFindData edgeFindData);
+        public abstract bool Execute(List<NamedData> data, ref IWaferEdgeFindData edgeFindData);
 
 
         public virtual bool Init()

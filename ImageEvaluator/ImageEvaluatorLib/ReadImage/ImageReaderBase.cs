@@ -11,7 +11,7 @@ using System.IO;
 
 namespace ImageEvaluatorLib.ReadImage
 {
-    internal abstract class ImageReaderBase : IImageReader
+    internal abstract class ImageReaderBase : IImageReader, IElement
     {
         protected string _fileName;
         protected int _width;
@@ -20,9 +20,11 @@ namespace ImageEvaluatorLib.ReadImage
         protected ILogger _logger;
         protected bool _showImages;
         protected int _imageNum;
-        protected Image<Gray, byte>[] _rawImages;
+        protected Image<Gray, ushort>[] _rawImages;
         protected Rectangle _fullROI;
 
+        public string ClassName { get; protected set; }
+        public string Title { get; protected set; }
 
 
         protected ImageReaderBase(int width, int height, ILogger logger, bool showImages, int imageNum)
@@ -32,6 +34,9 @@ namespace ImageEvaluatorLib.ReadImage
             _logger = logger;
             _showImages = showImages;
             _imageNum = imageNum;
+
+            ClassName = nameof(ImageReaderBase);
+            Title = ClassName;
         }
 
         public bool IsInitialized { get; protected set; }
@@ -45,7 +50,7 @@ namespace ImageEvaluatorLib.ReadImage
         {
             if (_width > 10000 || _width < 0)
             {
-                _logger?.Error($"Image width is not proper: {_width}");
+                _logger?.ErrorLog($"Image width is not proper: {_width}", ClassName);
                 return false;
             }
             return true;
@@ -60,7 +65,7 @@ namespace ImageEvaluatorLib.ReadImage
         {
             IsInitialized = (CheckWidthData() && InitEmguImages());
 
-            _logger?.Info($"{this.GetType().Name} " + (IsInitialized ? string.Empty : "NOT") + " initialized.");
+            _logger?.InfoLog((IsInitialized ? string.Empty : "NOT") + " initialized.", ClassName);
 
             return IsInitialized;
         }
@@ -84,7 +89,7 @@ namespace ImageEvaluatorLib.ReadImage
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Exception in DoubleLightImageReader_Base-CheckFileName: {ex}");
+                _logger?.ErrorLog($"Exception occured: {ex}", ClassName);
                 return false;
             }
 
@@ -106,10 +111,10 @@ namespace ImageEvaluatorLib.ReadImage
 
             try
             {
-                _rawImages = new Image<Gray, byte>[_imageNum];
+                _rawImages = new Image<Gray, ushort>[_imageNum];
                 for (int i = 0; i < _imageNum; i++)
                 {
-                    _rawImages[0] = new Image<Gray, byte>(_width, _height);
+                    _rawImages[i] = new Image<Gray, ushort>(_width, _height);
                 }
 
                 _fullROI = new Rectangle(0, 0, _width, _height);
@@ -118,7 +123,7 @@ namespace ImageEvaluatorLib.ReadImage
             }
             catch (Exception ex)
             {
-                _logger?.Error($"DoubleLightImageReader_Base - InitEmguImages. Error during emgu initialization. {ex}");
+                _logger?.ErrorLog($"Exception during emgu initialization. {ex}", ClassName);
                 return false;
             }
 
@@ -137,11 +142,11 @@ namespace ImageEvaluatorLib.ReadImage
                     }
                 }
 
-                _logger.Info("Image ROIs were reseted.");
+                _logger?.InfoLog("Image ROIs were reseted.", ClassName);
                 return true;
             }
 
-            _logger.Info("Image ROIs could be reseted because Reader is not initialized yet");
+            _logger?.InfoLog("Image ROIs could be reseted because Reader is not initialized yet", ClassName);
             return false;
         }
 
@@ -171,17 +176,17 @@ namespace ImageEvaluatorLib.ReadImage
         {
             if (!IsInitialized)
             {
-                _logger?.Trace("DoubleLightImageReader is not initialized yet.");
+                _logger?.InfoLog("It is not initialized yet.", ClassName);
                 return false;
             }
 
-            _logger?.Trace($"{this.GetType().Name} GetImage. inputFileName: {inputfileName}");
+            _logger?.TraceLog($"InputFileName: {inputfileName}", ClassName);
 
             _fileName = inputfileName;
 
             if (!CheckFile(inputfileName))
             {
-                _logger?.Error("The file name is invalid. It does not exists or the width, height are invalid.");
+                _logger?.ErrorLog("The file name is invalid. It does not exists or the width, height are invalid.", ClassName);
                 return false;
             }
 
@@ -189,12 +194,12 @@ namespace ImageEvaluatorLib.ReadImage
             {
                 ResetImageROI();
 
-                data.Add(new EmguByteNamedData(_rawImages, "Contains the raw input images", nameof(_rawImages)));
+                data.Add(new EmguUShortNamedData(_rawImages, "Contains the raw input images", "RawImages"));
 
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Error during image handling: {ex}");
+                _logger?.ErrorLog($"Error during image handling: {ex}", ClassName);
                 return false;
             }
 
@@ -210,14 +215,14 @@ namespace ImageEvaluatorLib.ReadImage
                     }
                 }
 
-                _logger?.Trace($"{_fileName} readed.");
+                _logger?.TraceLog($"{_fileName} readed.", ClassName);
 
                 return true;
             }
             catch (Exception ex)
             {
                 ClearEmguImages();
-                _logger?.Error($"Error during double light image reading. {ex}");
+                _logger?.ErrorLog($"Error during double light image reading. {ex}", ClassName);
                 return false;
             }
 
@@ -229,3 +234,4 @@ namespace ImageEvaluatorLib.ReadImage
 
     }
 }
+

@@ -31,7 +31,7 @@ namespace ImageEvaluatorLib.DetermineSawmarkOrientation
         public bool IsInitialized { get; protected set; }
 
 
-        public bool Run(List<NamedData> data, string name)
+        public bool Execute(List<NamedData> data, string name)
         {
             Image<Gray, byte>[] rawImages = null;
 
@@ -41,7 +41,7 @@ namespace ImageEvaluatorLib.DetermineSawmarkOrientation
                 return false;
             }
 
-            rawImages = GetEmguByteImages("_rawImages", data);
+            rawImages = GetEmguByteImages("RawImages", data);
             int imageCounterRaw = rawImages?.Length ?? 0;
 
 

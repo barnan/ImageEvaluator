@@ -15,7 +15,7 @@ namespace ImageEvaluatorInterfaces
         //        out double resu9, out double resu10);
 
 
-        bool Run(List<NamedData> data, string fileName);
+        bool Execute(List<NamedData> data, string fileName);
     }
 
 

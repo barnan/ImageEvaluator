@@ -23,8 +23,6 @@ namespace ImageEvaluator.EvaluationProcessor
         private readonly IEdgeLineFinder _edgeFinder;
 
 
-        //Image<Gray, byte>[] _images;
-        //Image<Gray, byte>[] _masks;
         int[,] _borderPoints1;
         Image<Gray, double> _meanVector1;
         Image<Gray, double> _stdVector1;
@@ -80,16 +78,16 @@ namespace ImageEvaluator.EvaluationProcessor
         }
 
 
-        public override bool Run()
+        public override bool Execute()
         {
 
             if (!IsInitialized)
             {
-                _logger?.Error($"{this.GetType().Name} Run is not initialized yet.");
+                _logger?.Error($"{this.GetType().Name} Execute is not initialized yet.");
                 return false;
             }
 
-            _logger?.Info($"{this.GetType().Name} Run started.");
+            _logger?.Info($"{this.GetType().Name} Execute started.");
 
             while (!_dirReader.IsEndOfDirectory())
             {
@@ -102,39 +100,15 @@ namespace ImageEvaluator.EvaluationProcessor
 
                 LogElapsedTime(_watch1, $"Image reading: {name}");
 
-                _preProc.Run(_dynamicResult, path);
+                _preProc.Execute(_dynamicResult, path);
 
                 LogElapsedTime(_watch1, $"Image pre-processing: {name}");
 
-                _borderSearcher.Run(_dynamicResult, path);
+                _borderSearcher.Execute(_dynamicResult, path);
 
                 LogElapsedTime(_watch1, $"Border search: {Path.GetFileName(name)}");
 
-                double resu1;
-                double resu2;
-                double resu3;
-                double resu4;
-                double resu5;
-                double resu6;
-                double resu7;
-                double resu8;
-                double resu9;
-                double resu10;
-                //_columnDataCalculator1.Run(_dynamicResult, _borderPoints1, ref _meanVector1, ref _stdVector1, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6, out resu7, out resu8, out resu9, out resu10);
-                _columnDataCalculator1.Run(_dynamicResult, path);
-
-                IColumnStatisticalMeasurementResult result1 = new ColumnStatisticalMeasurementResult
-                {
-                    Name = name,
-                    MeanOfMean = resu1,
-                    StdOfMean = resu2,
-                    MeanOfStd = resu3,
-                    StdOfStd = resu4,
-                    ColumnHomogenity1 = resu5,
-                    ColumnHomogenity2 = resu6,
-                    MinOfMean = resu7,
-                    MaxOfMean = resu8
-                };
+                _columnDataCalculator1.Execute(_dynamicResult, path);
 
                 IColumnMeasurementResult result2 = new ColumnMeasurementResult
                 {
@@ -147,11 +121,7 @@ namespace ImageEvaluator.EvaluationProcessor
 
                 LogElapsedTime(_watch1, $"Column data, statistical calculation 1: {Path.GetFileName(name)}");
 
-                _columnDataCalculator2.Run(_dynamicResult, _borderPoints1, ref _meanVector1, ref _stdVector1, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6, out resu7, out resu8, out resu9, out resu10);
-                result1.MeanOfNoiseMean = resu1;
-                result1.StdOfNoiseMean = resu2;
-                result1.MeanOfNoiseStd = resu3;
-                result1.StdOfNoiseStd = resu4;
+                _columnDataCalculator2.Execute(_dynamicResult, path);
 
                 IColumnMeasurementResult result3 = new ColumnMeasurementResult
                 {
@@ -166,15 +136,15 @@ namespace ImageEvaluator.EvaluationProcessor
 
                 IWaferEdgeFindData waferEdgeFindData1 = null;
 
-                _edgeFinder.Run(_dynamicResult, ref waferEdgeFindData1);
-                result1.LeftLineSpread = waferEdgeFindData1.LeftLineSpread;
-                result1.RightLineSpread = waferEdgeFindData1.RightLineSpread;
-                result1.TopLineSpread = waferEdgeFindData1.TopLineSpread;
-                result1.BottomLineSpread = waferEdgeFindData1.BottomLineSpread;
+                //_edgeFinder.Run(_dynamicResult, ref waferEdgeFindData1);
+                //result1.LeftLineSpread = waferEdgeFindData1.LeftLineSpread;
+                //result1.RightLineSpread = waferEdgeFindData1.RightLineSpread;
+                //result1.TopLineSpread = waferEdgeFindData1.TopLineSpread;
+                //result1.BottomLineSpread = waferEdgeFindData1.BottomLineSpread;
 
                 LogElapsedTime(_watch1, "Edge finder");
 
-                _saver1.SaveResult(result1 as IMeasurementResult, name, "");
+                //_saver1.SaveResult(result1 as IMeasurementResult, name, "");
 
                 LogElapsedTime(_watch1, $"Result saving: {Path.GetFileName(name)}");
             }

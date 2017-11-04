@@ -24,7 +24,7 @@ namespace ImageEvaluator
             //IMethodManager mm3 = new MethodManager3(inputDirs, 8192, 8192);
 
             mm3.Init();
-            mm3.Run();
+            mm3.Execute();
 
 
             Console.ReadKey();

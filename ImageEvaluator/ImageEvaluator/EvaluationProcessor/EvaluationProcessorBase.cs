@@ -15,7 +15,7 @@ namespace ImageEvaluator.EvaluationProcessor
         protected List<NamedData> _dynamicResult = new List<NamedData>();
 
 
-        public abstract bool Run();
+        public abstract bool Execute();
         public abstract bool Init();
 
         public bool IsInitialized { get; protected set; }

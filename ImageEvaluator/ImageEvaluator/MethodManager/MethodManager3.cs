@@ -42,9 +42,9 @@ namespace ImageEvaluator.MethodManager
 
                 IDirectoryReader dirReader = new Factory_DirectoryReader().Factory(_logger, _inputPaths[_pathIndex], "raw", imageReader);
 
-                int histogramRange = 4096;
+                int histogramRange = 256;
                 //IHistogramThresholdCalculator histcalculator = new FactoryHistogramThresholdCalculatorCSharp1().Factory(_logger, 256, 40);
-                IHistogramThresholdCalculator histcalculator = new FactoryHistogramThresholdCalculatorCSharp1().Factory(_logger, 256, 30);
+                IHistogramThresholdCalculator histcalculator = new FactoryHistogramThresholdCalculatorCSharp1().Factory(_logger, histogramRange, 30);
 
                 BeltCoordinates beltCoords = new BeltCoordinates { LeftBeltStart = 425, LeftBeltEnd = 565, RightBeltStart = 1500, RightBeltEnd = 1640 };
                 IImagePreProcessor preProcessor = new FactoryImagePreProcessor().Factory(_logger, histogramRange, _width, _height, histcalculator, show, beltCoords);

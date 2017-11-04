@@ -6,7 +6,7 @@ namespace ImageEvaluatorInterfaces
     public interface IEvaluationProcessor : IInitalizable
     {
 
-        bool Run();
+        bool Execute();
 
     }
 }

@@ -90,7 +90,7 @@ namespace ImageEvaluator.EvaluationProcessor
         /// 
         /// </summary>
         /// <returns></returns>
-        public override bool Run()
+        public override bool Execute()
         {
             if (!IsInitialized)
             {
@@ -109,29 +109,18 @@ namespace ImageEvaluator.EvaluationProcessor
 
                 LogElapsedTime(_watch1, $"Image reading: {Path.GetFileName(name)}");
 
-                _preProc.Run(_dynamicResult, name);
+                _preProc.Execute(_dynamicResult, name);
                 //_preProc.Run(_dynamicResult, name);
 
                 LogElapsedTime(_watch1, $"Image pre-processing: {Path.GetFileName(name)}");
 
-                _borderSearcher.Run(_dynamicResult, ref _borderPoints1, name);
+                _borderSearcher.Execute(_dynamicResult, name);
                 //_borderSearcher.Run(_images[1], _masks[1], ref _borderPoints2, name);
 
                 LogElapsedTime(_watch1, $"Border search: {Path.GetFileName(name)}");
 
 
-                double resu1;
-                double resu2;
-                double resu3;
-                double resu4;
-                double resu5;
-                double resu6;
-                double resu7;
-                double resu8;
-                double resu9;
-                double resu10;
-                _columnDataCalculator.Run(_dynamicResult, _borderPoints1, ref _meanVector1, ref _stdVector1, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6, out resu7, out resu8, out resu9, out resu10);
-                //_columnDataCalculator.Run(_dynamicResult, _borderPoints2, ref _meanVector2, ref _stdVector2, out resu1, out resu2, out resu3, out resu4, out resu5, out resu6, out resu7, out resu8, out resu9, out resu10);
+                _columnDataCalculator.Execute(_dynamicResult, string.Empty);
 
                 LogElapsedTime(_watch1, $"Column data, statistical calculation: {Path.GetFileName(name)}");
 
@@ -146,7 +135,7 @@ namespace ImageEvaluator.EvaluationProcessor
                 IWaferEdgeFindData waferEdgeFindData1 = null;
                 IWaferEdgeFindData waferEdgeFindData2 = null;
 
-                _edgeFinder.Run(_dynamicResult, ref waferEdgeFindData1);
+                _edgeFinder.Execute(_dynamicResult, ref waferEdgeFindData1);
                 //_edgeFinder.Run(_images[1], _masks[1], ref waferEdgeFindData2);
 
                 LogElapsedTime(_watch1, "Edge finder");
@@ -154,8 +143,8 @@ namespace ImageEvaluator.EvaluationProcessor
                 IWaferFittingData waferEdgeFittingData1 = null;
                 IWaferFittingData waferEdgeFittingData2 = null;
 
-                _edgeFitter.Run(waferEdgeFindData1, ref waferEdgeFittingData1);
-                _edgeFitter.Run(waferEdgeFindData2, ref waferEdgeFittingData2);
+                _edgeFitter.Execute(waferEdgeFindData1, ref waferEdgeFittingData1);
+                _edgeFitter.Execute(waferEdgeFindData2, ref waferEdgeFittingData2);
 
                 LogElapsedTime(_watch1, "Edge fitter");
 

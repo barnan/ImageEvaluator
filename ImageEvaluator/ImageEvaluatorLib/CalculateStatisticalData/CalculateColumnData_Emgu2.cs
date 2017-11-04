@@ -39,119 +39,122 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         }
 
 
-        public override bool Run(List<NamedData> data, int[,] pointArray, ref Image<Gray, double> meanVector, ref Image<Gray, double> stdVector,
-            out double resu1, out double resu2, out double resu3, out double resu4, out double resu5, out double resu6, out double resu7, out double resu8,
-            out double resu9, out double resu10)
+        public override bool Execute(List<NamedData> data, string fileName)
         {
             Image<Gray, byte>[] rawImages = null;
             Image<Gray, byte>[] maskImages = null;
+            BorderPointArrays borderPointarrays = null;
 
-            resu1 = 0;
-            resu2 = 0;
-            resu3 = 0;
-            resu4 = 0;
-            resu5 = 0;
-            resu6 = 0;
-            resu7 = 0;
-            resu8 = 0;
-            resu9 = 0;
-            resu10 = 0;
-
-            _firstVector = new Image<Gray, double>(_height, 1);
-            _secondVector = new Image<Gray, double>(_height, 1);
-            _resultVector1 = _firstVector.Data;
-            _resultVector2 = _secondVector.Data;
-
-            if (!IsInitialized)
+            try
             {
-                _logger.Error("CalculateColumnData_CSharp2 is not initialized.");
-                return false;
-            }
-
-            rawImages = GetEmguByteImages("_rawImages", data);
-            int imageCounterRaw = rawImages?.Length ?? 0;
-
-            maskImages = GetEmguByteImages("maskImages", data);
-            int imageCounterMask = maskImages?.Length ?? 0;
-
-            if (imageCounterMask != imageCounterRaw)
-            {
-                _logger.Info($"{this.GetType()} input and mask image number is not the same!");
-                return false;
-            }
-
-            for (int m = 0; m < imageCounterRaw; m++)
-            {
-
-                if (!CheckInputData(rawImages[m], maskImages[m], pointArray, meanVector, stdVector))
+                if (!IsInitialized)
                 {
-                    _logger.Info($"{this.GetType()} input and mask data is not proper!");
-                    continue;
+                    _logger.Error("CalculateColumnData_CSharp2 is not initialized.");
+                    return false;
                 }
 
-                meanVector = _firstVector;
-                stdVector = _secondVector;
-
-                // mask the outer area to zero
-                Gray zero = new Gray(0.0);
-                using (_complementaryMask = maskImages[m].Not())
+                int imageCounter = LoadNamedData(data, ref borderPointarrays, ref rawImages, ref maskImages);
+                if (imageCounter == 0)
                 {
-                    rawImages[m].SetValue(zero, _complementaryMask);
+                    _logger.Info($"{this.GetType().Name} - No images were loaded from dynamicresult");
                 }
 
-                using (Image<Gray, ushort> tempImage = rawImages[m].Convert<Gray, ushort>())
+                double[,,] resultVector1 = _firstVector.Data;
+                double[,,] resultVector2 = _secondVector.Data;
+
+                for (int m = 0; m < imageCounter; m++)
                 {
-                    using (_convertedMask = maskImages[m].Convert<Gray, float>())
+
+                    if (!CheckInputData(rawImages[m], maskImages[m], borderPointarrays[m], _firstVector, _secondVector))
                     {
-                        //calculate square image
-                        //_squareImage = tempImage.Pow(2);
-                        CvInvoke.Pow(tempImage, 2, _squareImage);
+                        _logger.Info($"{this.GetType()} input and mask data is not proper!");
+                        continue;
+                    }
 
-                        // reduce the sum2 (sum)
-                        //_squaremean = new Image<Gray, float>(new Size(1, inputImage.Height));
-                        CvInvoke.Reduce(_squareImage, _squaremean, ReduceDimension.Auto, ReduceType.ReduceSum);
+                    // mask the outer area to zero
+                    Gray zero = new Gray(0.0);
+                    using (_complementaryMask = maskImages[m].Not())
+                    {
+                        rawImages[m].SetValue(zero, _complementaryMask);
+                    }
 
-                        // reduce the sum image (sum)
-                        //_mean = new Image<Gray, float>(new Size(1, inputImage.Height));
-                        CvInvoke.Reduce(rawImages[m], _mean, ReduceDimension.Auto, ReduceType.ReduceSum);
+                    using (Image<Gray, ushort> tempImage = rawImages[m].Convert<Gray, ushort>())
+                    {
+                        using (_convertedMask = maskImages[m].Convert<Gray, float>())
+                        {
+                            //calculate square image
+                            //_squareImage = tempImage.Pow(2);
+                            CvInvoke.Pow(tempImage, 2, _squareImage);
 
-                        // reduce the sum image (sum)
-                        //_counter = new Image<Gray, float>(new Size(1, inputImage.Height));
+                            // reduce the sum2 (sum)
+                            //_squaremean = new Image<Gray, float>(new Size(1, inputImage.Height));
+                            CvInvoke.Reduce(_squareImage, _squaremean, ReduceDimension.Auto, ReduceType.ReduceSum);
 
-                        CvInvoke.Reduce(_convertedMask, _counter, ReduceDimension.Auto, ReduceType.ReduceSum);
+                            // reduce the sum image (sum)
+                            //_mean = new Image<Gray, float>(new Size(1, inputImage.Height));
+                            CvInvoke.Reduce(rawImages[m], _mean, ReduceDimension.Auto, ReduceType.ReduceSum);
 
-                        //Image<Gray, float> counterReciprok = counter.Pow(-1);
+                            // reduce the sum image (sum)
+                            //_counter = new Image<Gray, float>(new Size(1, inputImage.Height));
 
-                        CvInvoke.Divide(_squaremean, _counter, _squaremean);
-                        CvInvoke.Divide(_mean, _counter, _mean);
+                            CvInvoke.Reduce(_convertedMask, _counter, ReduceDimension.Auto, ReduceType.ReduceSum);
 
-                        //squaremean._Mul(counterReciprok);
-                        //mean._Mul(counterReciprok);
+                            //Image<Gray, float> counterReciprok = counter.Pow(-1);
 
-                        // calculate   Math.Sqrt(sum2 / (counter-1) - (sum * sum / Math.Pow(counter-1,2)));
-                        CvInvoke.Pow(_mean, 2, _sq);
-                        CvInvoke.Subtract(_squaremean, _sq, _resu);
-                        CvInvoke.Pow(_resu, 0.5, _sqrt);
-                        //_sq = _mean.Pow(2);
-                        //_resu = _squaremean - _sq;
-                        //_sqrt = _resu.Pow(0.5);
+                            CvInvoke.Divide(_squaremean, _counter, _squaremean);
+                            CvInvoke.Divide(_mean, _counter, _mean);
 
-                        //ClearEmguImages();
+                            //squaremean._Mul(counterReciprok);
+                            //mean._Mul(counterReciprok);
+
+                            // calculate   Math.Sqrt(sum2 / (counter-1) - (sum * sum / Math.Pow(counter-1,2)));
+                            CvInvoke.Pow(_mean, 2, _sq);
+                            CvInvoke.Subtract(_squaremean, _sq, _resu);
+                            CvInvoke.Pow(_resu, 0.5, _sqrt);
+                            //_sq = _mean.Pow(2);
+                            //_resu = _squaremean - _sq;
+                            //_sqrt = _resu.Pow(0.5);
+
+                            //ClearEmguImages();
+                        }
+                    }
+
+                    float[,,] meanData = _mean.Data;
+                    float[,,] resuData = _sqrt.Data;
+
+                    for (int i = 0; i < _mean.Height; i++)
+                    {
+                        resultVector1[0, i, 0] = meanData[i, 0, 0];
+                        resultVector2[0, i, 0] = resuData[i, 0, 0];
+                    }
+
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error($"Exception occured during {this.GetType().Name} - Run: {ex}");
+                return false;
+            }
+            finally
+            {
+                foreach (var item in rawImages)
+                {
+                    if (item != null)
+                    {
+                        item.ROI = _fullROI;
                     }
                 }
-
-                float[,,] meanData = _mean.Data;
-                float[,,] resuData = _sqrt.Data;
-
-                for (int i = 0; i < _mean.Height; i++)
+                foreach (var item in maskImages)
                 {
-                    _resultVector1[0, i, 0] = meanData[i, 0, 0];
-                    _resultVector2[0, i, 0] = resuData[i, 0, 0];
+                    if (item != null)
+                    {
+                        item.ROI = _fullROI;
+                    }
                 }
-
             }
 
-            return true;
 
         }
 
@@ -227,6 +230,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
     {
         public IColumnDataCalculator Factory(ILogger logger, int width, int height)
         {
+            logger?.Info($"{nameof(FactoryCalculateColumnDataEmgu2)} factory called.");
             return new CalculateColumnDataEmgu2(logger, width, height);
         }
     }

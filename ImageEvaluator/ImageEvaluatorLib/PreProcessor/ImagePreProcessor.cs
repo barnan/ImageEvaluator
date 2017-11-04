@@ -79,11 +79,11 @@ namespace ImageEvaluatorLib.PreProcessor
         /// <param name="maskImage"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public bool Run(List<NamedData> data, string name)
+        public bool Execute(List<NamedData> data, string name)
         {
             try
             {
-                Image<Gray, byte>[] inputImages = GetEmguByteImages("_rawImages", data);
+                Image<Gray, ushort>[] inputImages = GetEmguUShortImages("RawImages", data);
                 int imageCounter = inputImages?.Length ?? 0;
 
                 if (imageCounter == 0)
@@ -100,10 +100,10 @@ namespace ImageEvaluatorLib.PreProcessor
                     CvInvoke.Transpose(inputImages[m], inputImages[m]);
 
                     // calculate historamm for binarythreshold
-                    _hist.Calculate<byte>(new[] { inputImages[0] }, false, null);
+                    _hist.Calculate<ushort>(new[] { inputImages[0] }, false, null);
 
                     float thresh;
-                    _thresholdcalculator.Run(_hist, out thresh);
+                    _thresholdcalculator.Execute(_hist, out thresh);
 
                     if (_showImages)
                     {

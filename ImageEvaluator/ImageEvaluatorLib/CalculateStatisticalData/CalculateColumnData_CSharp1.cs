@@ -22,14 +22,16 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         internal CalculateColumnDataCSharp1(ILogger logger, int width, int height)
             : base(logger, width, height)
         {
-            _logger?.InfoLog($"{nameof(CalculateColumnDataCSharp1)} instantiated.", nameof(CalculateColumnDataCSharp1));
-            _className = nameof(CalculateColumnDataCSharp1);
+            ClassName = nameof(CalculateColumnDataCSharp1);
+            Title = ClassName;
+
+            _logger?.InfoLog($"Instantiated.", ClassName);
         }
 
 
         public override bool Execute(List<NamedData> data, string path)
         {
-            Image<Gray, byte>[] rawImages = null;
+            Image<Gray, ushort>[] rawImages = null;
             Image<Gray, byte>[] maskImages = null;
             BorderPointArrays borderPointarrays = null;
 
@@ -41,14 +43,14 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             {
                 if (!IsInitialized)
                 {
-                    _logger?.ErrorLog($"{nameof(CalculateColumnDataCSharp1)} is not initialized.", _className);
+                    _logger?.ErrorLog($"It is not initialized", ClassName);
                     return false;
                 }
 
                 int imageCounter = LoadNamedData(data, ref borderPointarrays, ref rawImages, ref maskImages);
                 if (imageCounter == 0)
                 {
-                    _logger?.InfoLog($"No images were loaded from dynamicresult", _className);
+                    _logger?.InfoLog($"No images were loaded from dynamicresult", ClassName);
                 }
 
                 for (int m = 0; m < imageCounter; m++)
@@ -56,11 +58,11 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
                     if (!CheckInputData(rawImages[m], maskImages[m], borderPointarrays[m], _firstVector, _secondVector))
                     {
-                        _logger?.InfoLog($"Input and mask data is not proper!", _className);
+                        _logger?.InfoLog($"Input and mask data is not proper!", ClassName);
                         continue;
                     }
 
-                    byte[,,] imgData = rawImages[m].Data;
+                    ushort[,,] imgData = rawImages[m].Data;
 
                     for (int i = 0; i < borderPointarrays[m].Length / 2; i++)
                     {
@@ -94,32 +96,11 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
             catch (Exception ex)
             {
-                _logger?.ErrorLog($"Exception occured: {ex}.", _className);
+                _logger?.ErrorLog($"Exception occured: {ex}.", ClassName);
                 return false;
             }
         }
 
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="inputImage"></param>
-        /// <param name="maskImage"></param>
-        /// <param name="pointArray"></param>
-        /// <param name="meanVector"></param>
-        /// <returns></returns>
-        protected override bool CheckInputData(Image<Gray, byte> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, double> meanVector, Image<Gray, double> stdVector)
-        {
-            bool partResu = base.CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector);
-
-            if (!partResu || pointArray == null || pointArray.Length < 0 || (pointArray.Length / 2) > 10000 || (pointArray.Length / 2) != inputImage.Height)
-            {
-                _logger?.ErrorLog("Error during CheckInputData.", _className);
-                return false;
-            }
-
-            return true;
-        }
     }
 
 

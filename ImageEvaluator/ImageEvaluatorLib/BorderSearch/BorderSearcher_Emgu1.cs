@@ -25,12 +25,6 @@ namespace ImageEvaluatorLib.BorderSearch
         }
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="origImage"></param>
-        /// <param name="maskImage"></param>
-        /// <param name="name"></param>
         protected override bool CalculatePoints(Image<Gray, ushort> origImage, Image<Gray, byte> maskImage, string name)
         {
             using (Mat hierarchy = new Mat())
@@ -59,7 +53,7 @@ namespace ImageEvaluatorLib.BorderSearch
                                         tempImage.Draw(coordinateList, new Gray(100.0), 2);
                                         ImageViewer.Show(tempImage, "BorderSearcher_Emgu1 - contour points");
 
-                                        SaveMaskImage(name, tempImage, "orig");
+                                        SaveImage(name, tempImage, "mask");
                                     }
                                     using (var tempImage = new Image<Gray, ushort>(origImage.Size))
                                     {
@@ -67,9 +61,8 @@ namespace ImageEvaluatorLib.BorderSearch
                                         tempImage.Draw(coordinateList, new Gray(200.0), 2);
                                         ImageViewer.Show(tempImage, "BorderSearcher_Emgu1 - contour points");
 
-                                        SaveMaskImage(name, tempImage, "orig");
+                                        SaveImage(name, tempImage, "orig");
                                     }
-
                                 }
 
                                 for (int j = 0; j < contour[i].Size - 1; j++)
@@ -168,7 +161,7 @@ namespace ImageEvaluatorLib.BorderSearch
     {
         public IBorderSearcher Factory(ILogger logger, int border, int imageWidth, int imageHeight, bool showImages)
         {
-            logger?.InfoLog($"Factory called.", nameof(FactoryBorderSearcherEmgu1));
+            logger?.InfoLog("Factory called.", nameof(FactoryBorderSearcherEmgu1));
 
             return new BorderSearcherEmgu1(logger, border, showImages, imageWidth, imageHeight);
         }

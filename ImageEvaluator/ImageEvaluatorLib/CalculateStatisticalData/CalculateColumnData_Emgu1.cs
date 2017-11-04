@@ -19,7 +19,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             : base(logger, width, height)
         {
             ClassName = nameof(CalculateColumnDataEmgu1);
-            Title = ClassName;
+            Title = "Column Mean and Std calculator";
 
             InitEmguImages();
 
@@ -29,7 +29,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
         public override bool Execute(List<NamedData> data, string fileName)
         {
-            Image<Gray, byte>[] rawImages = null;
+            Image<Gray, ushort>[] rawImages = null;
             Image<Gray, byte>[] maskImages = null;
             BorderPointArrays borderPointarrays = null;
 
@@ -59,6 +59,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 for (int m = 0; m < imageCounter; m++)
                 {
                     int[] indexes = Iterate(rawImages[m], maskImages[m], borderPointarrays[m]);
+
                     if (indexes == null || indexes.Length != 2)
                     {
                         _logger?.InfoLog($"Problem during Iterate. Return indexes are not proper for further calculation. index:{m}", ClassName);
@@ -120,7 +121,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
 
 
-        protected int[] Iterate(Image<Gray, byte> rawImage, Image<Gray, byte> maskImage, int[,] pointArray)
+        protected int[] Iterate(Image<Gray, ushort> rawImage, Image<Gray, byte> maskImage, int[,] pointArray)
         {
             try
             {
@@ -179,19 +180,6 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
         }
 
-
-        protected override bool CheckInputData(Image<Gray, byte> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, double> meanVector, Image<Gray, double> stdVector)
-        {
-            bool partResu = base.CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector);
-
-            if (!partResu || pointArray == null || pointArray.Length < 0 || (pointArray.Length / 2) > 10000 || (pointArray.Length / 2) != inputImage.Height)
-            {
-                _logger?.ErrorLog("Error in input data.", ClassName);
-                return false;
-            }
-
-            return true;
-        }
 
     }
 

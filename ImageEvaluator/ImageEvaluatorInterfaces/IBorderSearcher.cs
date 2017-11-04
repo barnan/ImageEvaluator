@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace ImageEvaluatorInterfaces
 {
-    public interface IBorderSearcher : IInitalizable
+    public interface IBorderSearcher : IInitalizable, IElement
     {
         bool Execute(List<NamedData> data, string name);
 

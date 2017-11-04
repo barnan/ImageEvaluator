@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace ImageEvaluatorInterfaces
 {
-    public interface IImagePreProcessor : IInitalizable
+    public interface IImagePreProcessor : IInitalizable, IElement
     {
         bool Execute(List<NamedData> data, string name);
     }

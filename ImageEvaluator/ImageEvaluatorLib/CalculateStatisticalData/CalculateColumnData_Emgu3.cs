@@ -12,22 +12,25 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
     class CalculateColumnDataEmgu3 : CalculateColumnDataBaseEmgu
     {
 
-        Image<Gray, byte> _lineSegment1;
-        Image<Gray, byte> _lineSegment2;
+        Image<Gray, ushort> _lineSegment1;
+        Image<Gray, ushort> _lineSegment2;
 
 
         public CalculateColumnDataEmgu3(ILogger logger, int width, int height)
             : base(logger, width, height)
         {
+            ClassName = nameof(CalculateColumnDataEmgu3);
+            Title = "Column Noise calculator";
+
             InitEmguImages();
 
-            _logger?.Info($"{this.GetType().Name} instantiated.");
+            _logger?.InfoLog("Instantiated.", ClassName);
         }
 
 
         public override bool Execute(List<NamedData> data, string fileName)
         {
-            Image<Gray, byte>[] rawImages = null;
+            Image<Gray, ushort>[] rawImages = null;
             Image<Gray, byte>[] maskImages = null;
             BorderPointArrays borderPointarrays = null;
 
@@ -35,14 +38,14 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             {
                 if (!IsInitialized)
                 {
-                    _logger.Error($"{this.GetType().Name} is not initialized.");
+                    _logger.ErrorLog("It is not initialized.", ClassName);
                     return false;
                 }
 
                 int imageCounter = LoadNamedData(data, ref borderPointarrays, ref rawImages, ref maskImages);
                 if (imageCounter == 0)
                 {
-                    _logger.Info($"{this.GetType().Name} - No images were loaded from dynamicresult");
+                    _logger.InfoLog("No images were loaded from dynamicresult", ClassName);
                 }
 
 
@@ -60,9 +63,10 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 {
 
                     int[] indexes = Iterate(rawImages[m], maskImages[m], borderPointarrays[m]);
+
                     if (indexes == null || indexes.Length != 2)
                     {
-                        _logger.Info($"{this.GetType().Name} - problem during IterateNoise. Return indexes are not proper for further calculation.");
+                        _logger.InfoLog("Problem during IterateNoise. Return indexes are not proper for further calculation.", ClassName);
                     }
                     int indexMin = indexes[0];
                     int indexMax = indexes[1];
@@ -99,7 +103,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Exception occured during {this.GetType().Name} - Run: {ex}");
+                _logger?.ErrorLog($"Exception occured: {ex}", ClassName);
                 return false;
             }
             finally
@@ -123,13 +127,13 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         }
 
 
-        protected int[] Iterate(Image<Gray, byte> rawImage, Image<Gray, byte> maskImage, int[,] pointArray)
+        protected int[] Iterate(Image<Gray, ushort> rawImage, Image<Gray, byte> maskImage, int[,] pointArray)
         {
             try
             {
                 if (!CheckInputData(rawImage, maskImage, pointArray, _firstVector, _secondVector))
                 {
-                    _logger?.InfoLog($"Input and mask data is not proper!", _className);
+                    _logger?.InfoLog($"Input and mask data is not proper!", ClassName);
                     return null;
                 }
 
@@ -158,7 +162,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                             rawImage.ROI = r2;
                             using (_lineSegment2 = rawImage.Copy())
                             {
-                                using (Image<Gray, byte> tempImage = _lineSegment1 - _lineSegment2)
+                                using (Image<Gray, ushort> tempImage = _lineSegment1 - _lineSegment2)
                                 {
                                     CvInvoke.MeanStdDev(tempImage, ref noiseMean, ref noisestd);
 
@@ -193,7 +197,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
             catch (Exception)
             {
-                _logger?.ErrorLog($"Exception during - IterateNoise.", _className);
+                _logger?.ErrorLog($"Exception occured:", ClassName);
                 throw;
             }
         }
@@ -209,6 +213,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         public IColumnDataCalculator Factory(ILogger logger, int width, int height)
         {
             logger?.InfoLog($"Factory called.", nameof(FactoryCalculateColumnDataEmgu3));
+
             return new CalculateColumnDataEmgu3(logger, width, height);
         }
     }

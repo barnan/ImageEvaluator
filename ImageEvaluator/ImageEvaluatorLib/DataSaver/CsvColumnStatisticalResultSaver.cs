@@ -8,6 +8,7 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using ImageEvaluatorInterfaces;
 using NLog;
+using ImageEvaluatorInterfaces.BaseClasses;
 
 namespace ImageEvaluatorLib.DataSaver
 {
@@ -17,17 +18,13 @@ namespace ImageEvaluatorLib.DataSaver
         public CsvColumnStatisticalResultSaver(string outputFolder, string prefix, ILogger logger)
             : base(outputFolder, prefix, logger)
         {
-            _logger?.Info($"{typeof(CsvColumnStatisticalResultSaver)} instantiated.");
+            ClassName = nameof(CsvColumnStatisticalResultSaver);
+            Title = ClassName;
+
+            _logger?.InfoLog("Instantiated.", ClassName);
         }
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="result"></param>
-        /// <param name="inputFileName"></param>
-        /// <param name="ext"></param>
-        /// <returns></returns>
         public override bool SaveResult(IMeasurementResult result, string inputFileName, string ext)
         {
             try
@@ -102,27 +99,6 @@ namespace ImageEvaluatorLib.DataSaver
 
                 }
 
-                //foreach (PropertyInfo prop in propList)
-                //{
-                //    object obj = prop.GetValue(result);
-
-                //    if (obj is Image<Gray, double>)
-                //    {
-                //        string finalOutputName = Path.Combine(OutputFolder, $"{fileNameBase}_{_prefix}_{prop.Name}.csv");
-
-                //        using (StreamWriter sw = new StreamWriter(finalOutputName))
-                //        {
-                //            double[,,] data = (obj as Image<Gray, double>).Data;
-
-                //            for (int i = 0; i < data?.Length; i++)
-                //            {
-                //                sw.WriteLine(data[i, 0, 0]);
-                //            }
-                //        }
-                //        _logger?.Trace("Image " + finalOutputName + " saved.");
-                //    }
-                //}
-
 
                 using (FileStream fs = new FileStream(finalStatOutputName, FileMode.Append))
                 {
@@ -149,7 +125,7 @@ namespace ImageEvaluatorLib.DataSaver
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Exception in CsvResultSaver-SaveResult: {ex}");
+                _logger?.ErrorLog($"Exception occured: {ex}", ClassName);
                 return false;
             }
 
@@ -162,7 +138,8 @@ namespace ImageEvaluatorLib.DataSaver
     {
         public IResultSaver Factory(string outputFolder, string prefix, ILogger logger)
         {
-            logger?.Info($"{typeof(FactoryCsvColumnStatisticalResultSaver)} factory called.");
+            logger?.InfoLog("Factory called.", nameof(FactoryCsvColumnStatisticalResultSaver));
+
             return new CsvColumnStatisticalResultSaver(outputFolder, prefix, logger);
         }
     }

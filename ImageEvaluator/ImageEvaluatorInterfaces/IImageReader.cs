@@ -4,7 +4,7 @@ using ImageEvaluatorInterfaces.BaseClasses;
 
 namespace ImageEvaluatorInterfaces
 {
-    public interface IImageReader : IInitalizable
+    public interface IImageReader : IInitalizable, IElement
     {
         bool GetImage(string fileName, List<NamedData> data);
     }

@@ -2,48 +2,48 @@
 using System.IO;
 using ImageEvaluatorInterfaces;
 using NLog;
+using ImageEvaluatorInterfaces.BaseClasses;
+using System.Collections.Generic;
 
 namespace ImageEvaluatorLib.DataSaver
 {
-    internal abstract class ResultSaverBase : IResultSaver
+    internal abstract class ResultSaverBase : IResultSaver, INamedDataResultSaver
     {
         protected readonly string _prefix;
         protected ILogger _logger;
         private string _outputFoler;
 
+        public string ClassName { get; protected set; }
+        public string Title { get; protected set; }
+
+        public bool IsInitialized { get; protected set; }
+        public string OutputFolder { get; set; }
+
 
         protected ResultSaverBase(string outputFolder, string prefix, ILogger logger)
         {
+            ClassName = nameof(ResultSaverBase);
+            Title = ClassName;
+
             OutputFolder = outputFolder;
             _prefix = prefix;
             _logger = logger;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
+
         public bool Init()
         {
             IsInitialized = CheckDir();
-            _logger?.Info("ResultSaver is " + (IsInitialized ? string.Empty : "NOT") + " initialized.");
+            _logger?.InfoLog((IsInitialized ? string.Empty : "NOT") + " initialized.", ClassName);
             return IsInitialized;
         }
 
-        public bool IsInitialized { get; protected set; }
 
-        
-        public string OutputFolder { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
         private bool CheckDir()
         {
             if (!Directory.Exists(OutputFolder))
             {
-                _logger?.Trace($"Directory {OutputFolder} doesn't exist -> it will be created.");
+                _logger?.TraceLog($"Directory {OutputFolder} doesn't exist -> it will be created.", ClassName);
 
                 try
                 {
@@ -51,7 +51,7 @@ namespace ImageEvaluatorLib.DataSaver
                 }
                 catch (Exception ex)
                 {
-                    _logger?.Error($"Exception during ResultSaver-CheckDir: {ex}");
+                    _logger?.ErrorLog($"Exception occured: {ex}", ClassName);
                     return IsInitialized = false;
                 }
 
@@ -62,6 +62,18 @@ namespace ImageEvaluatorLib.DataSaver
 
 
         public abstract bool SaveResult(IMeasurementResult result, string inputfilename, string ext);
+
+
+        public bool SaveResult(List<NamedData> result, string inputfilename, string ext)
+        {
+
+
+
+
+
+            return true;
+        }
+
 
 
     }

@@ -5,6 +5,8 @@ using System;
 using System.IO;
 using System.Reflection;
 using ImageEvaluatorInterfaces;
+using ImageEvaluatorInterfaces.BaseClasses;
+using System.Collections.Generic;
 
 namespace ImageEvaluatorLib.DataSaver
 {
@@ -16,16 +18,13 @@ namespace ImageEvaluatorLib.DataSaver
         public PngResultSaver(string outputFolder, string prefix, ILogger logger)
             : base(outputFolder, prefix, logger)
         {
-            _logger?.Info($"{typeof(PngResultSaver)} instantiated.");
+            ClassName = nameof(PngResultSaver);
+            Title = ClassName;
+
+            _logger?.InfoLog("Instantiated.", ClassName);
         }
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="result"></param>
-        /// <param name="inputFileName"></param>
-        /// <returns></returns>
         public override bool SaveResult(IMeasurementResult result, string inputFileName, string ext)
         {
             try
@@ -49,12 +48,12 @@ namespace ImageEvaluatorLib.DataSaver
                     _tempImage1 = (obj as Image<Gray, float>).Convert<Gray, byte>();
                     _tempImage1?.Save(finalOutputName);
 
-                    _logger?.Trace("Image " + prop.Name + " " + " is saved.");
+                    _logger?.TraceLog("Image " + prop.Name + " " + " is saved", ClassName);
                 }
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Exception in PngResultSaver-SaveResult: {ex}");
+                _logger?.ErrorLog($"Exception occured: {ex}", ClassName);
                 return false;
             }
             finally
@@ -72,7 +71,7 @@ namespace ImageEvaluatorLib.DataSaver
     {
         public IResultSaver Factory(string outputFolder, string prefix, ILogger logger)
         {
-            logger?.Info($"{typeof(FactoryPngResultSaver)} factory called.");
+            logger?.Info("Factory called.", nameof(FactoryPngResultSaver));
             return new PngResultSaver(outputFolder, prefix, logger);
         }
     }

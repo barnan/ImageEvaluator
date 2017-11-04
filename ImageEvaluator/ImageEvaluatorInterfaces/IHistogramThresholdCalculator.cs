@@ -8,7 +8,7 @@ using NLog;
 
 namespace ImageEvaluatorInterfaces
 {
-    public interface IHistogramThresholdCalculator : IInitalizable
+    public interface IHistogramThresholdCalculator : IInitalizable, IElement
     {
         bool Execute(DenseHistogram hist, out float pos);
 

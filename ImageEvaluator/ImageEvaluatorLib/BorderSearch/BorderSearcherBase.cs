@@ -10,7 +10,7 @@ using ImageEvaluatorLib.BaseClasses;
 
 namespace ImageEvaluatorLib.BorderSearch
 {
-    internal abstract class BorderSearcherBase : NamedDataProvider, IBorderSearcher, IElement
+    internal abstract class BorderSearcherBase : NamedDataProvider, IBorderSearcher
     {
 
         protected int[,] _borderPoints;
@@ -44,7 +44,7 @@ namespace ImageEvaluatorLib.BorderSearch
             AllocArrays();
             ResetPointList();
 
-            _logger?.Info($"{typeof(BorderSearcherBase)}" + (IsInitialized ? string.Empty : " NOT") + " initialized.");
+            _logger?.Info((IsInitialized ? string.Empty : " NOT") + " initialized.", ClassName);
 
             return IsInitialized = true;
         }
@@ -76,13 +76,13 @@ namespace ImageEvaluatorLib.BorderSearch
 
                 for (int m = 0; m < imageCounterRaw; m++)
                 {
-                    if (!CheckInputImage(maskImages[m]))
+                    if (!CheckImage(rawImages[m], maskImages[m]))
                     {
                         _logger?.InfoLog("Invalid input mask image.", ClassName);
                         continue;
                     }
 
-                    if (!(AllocArrays() && ResetPointList()))
+                    if (!AllocArrays())   // && ResetPointList()))
                     {
                         _logger?.InfoLog("Array re-allocation failed.", ClassName);
                         continue;
@@ -93,7 +93,7 @@ namespace ImageEvaluatorLib.BorderSearch
                     borderPointArrayList[m] = _borderPoints;
                 }
 
-                data.Add(new NamedData<BorderPointArrays>(new BorderPointArrays(borderPointArrayList), "borderPointArrayList", "contains the found border points"));
+                data.Add(new NamedData<BorderPointArrays>(new BorderPointArrays(borderPointArrayList), "BorderPointArrayList", "contains the found border points"));
             }
             catch (Exception ex)
             {
@@ -105,7 +105,6 @@ namespace ImageEvaluatorLib.BorderSearch
         }
 
 
-
         protected abstract bool CalculatePoints(Image<Gray, ushort> origImage, Image<Gray, byte> maskImage, string name);
 
 
@@ -115,8 +114,6 @@ namespace ImageEvaluatorLib.BorderSearch
 
             return true;
         }
-
-
 
         protected bool ResetPointList()
         {
@@ -132,27 +129,31 @@ namespace ImageEvaluatorLib.BorderSearch
             return true;
         }
 
-
-        protected bool CheckInputImage(Image<Gray, ushort> image)
+        protected bool CheckImage(Image<Gray, ushort> rawImage, Image<Gray, byte> maskImage)
         {
-            if (image == null || image.Height != _imageHeight || image.Width != _imageHeight)
+            try
             {
-                return false;
+                if (rawImage == null || rawImage.Height != _imageHeight || rawImage.Width != _imageWidth)
+                {
+                    _logger?.ErrorLog($"Error in the input image size. Predefined width: {_imageWidth}, Predefined height: {_imageHeight}, image width: {rawImage?.Width}, image height: {rawImage?.Height}", ClassName);
+                    return false;
+                }
+                if (maskImage == null || maskImage.Height != _imageHeight || maskImage.Width != _imageWidth)
+                {
+                    _logger?.ErrorLog($"Error in the input mask size. Predefined width: {_imageWidth}, Predefined height: {_imageHeight}, mask width: {maskImage?.Width}, mask height: {maskImage?.Height}", ClassName);
+                    return false;
+                }
             }
+            catch (Exception ex)
+            {
+                _logger?.ErrorLog($"Exception occured: {ex}", ClassName);
+            }
+
+
             return true;
         }
 
-
-        protected bool CheckInputImage(Image<Gray, byte> image)
-        {
-            if (image == null || image.Height != _imageHeight || image.Width != _imageHeight)
-            {
-                return false;
-            }
-            return true;
-        }
-
-        protected void SaveMaskImage(string name, Image<Gray, byte> image, string ext)
+        protected void SaveImage(string name, Image<Gray, byte> image, string ext)
         {
             string finalOutputName = CheckOutputDirectoryOfImageSaving(name, ext, ".png");
 
@@ -162,8 +163,7 @@ namespace ImageEvaluatorLib.BorderSearch
             }
         }
 
-
-        protected void SaveMaskImage(string name, Image<Gray, ushort> image, string ext)
+        protected void SaveImage(string name, Image<Gray, ushort> image, string ext)
         {
             string finalOutputName = CheckOutputDirectoryOfImageSaving(name, ext, ".png");
 
@@ -172,7 +172,6 @@ namespace ImageEvaluatorLib.BorderSearch
                 image.Save(finalOutputName);
             }
         }
-
 
         private string CheckOutputDirectoryOfImageSaving(string name, string ext, string extension)
         {

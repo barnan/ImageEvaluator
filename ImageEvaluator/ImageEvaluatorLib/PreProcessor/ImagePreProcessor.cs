@@ -28,22 +28,16 @@ namespace ImageEvaluatorLib.PreProcessor
         private ILogger _logger;
         private BeltCoordinates _beltCoordinates;
 
+        public string ClassName { get; protected set; }
+        public string Title { get; protected set; }
+        public bool IsInitialized { get; protected set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="logger"></param>
-        /// <param name="intensityRange"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="histcalculator"></param>
-        /// <param name="showImages"></param>
-        /// <param name="beltLeftStart"></param>
-        /// <param name="beltLeftEnd"></param>
-        /// <param name="beltRightStart"></param>
-        /// <param name="beltRightEnd"></param>
+
         internal ImagePreProcessor(ILogger logger, int intensityRange, int width, int height, IHistogramThresholdCalculator histcalculator, bool showImages, BeltCoordinates beltcoords)
         {
+            ClassName = nameof(ImagePreProcessor);
+            Title = ClassName;
+
             _intensityRange = intensityRange;
             _showImages = showImages;
             _width = width;
@@ -64,12 +58,10 @@ namespace ImageEvaluatorLib.PreProcessor
                             && InitEmguImages()
                             && _thresholdcalculator.Init();
 
-            _logger?.Info("ImagePreProcessor " + (IsInitialized ? string.Empty : "NOT") + " initialized.");
+            _logger?.InfoLog((IsInitialized ? string.Empty : "NOT") + " initialized.", ClassName);
 
             return IsInitialized;
         }
-
-        public bool IsInitialized { get; protected set; }
 
 
         /// <summary>
@@ -88,7 +80,7 @@ namespace ImageEvaluatorLib.PreProcessor
 
                 if (imageCounter == 0)
                 {
-                    _logger.Info("No raw image was found dynamicresult!");
+                    _logger?.InfoLog("No raw image was found dynamicresult!", ClassName);
                     return false;
                 }
 
@@ -156,13 +148,13 @@ namespace ImageEvaluatorLib.PreProcessor
                     }
                 }
 
-                data.Add(new EmguByteNamedData(maskImages, "maskimages", "maskImages"));
+                data.Add(new EmguByteNamedData(maskImages, "Maskimages", "MaskImages"));
 
                 return true;
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Error in ImagePreProcessor - InitEmguImages. {ex}");
+                _logger?.ErrorLog($"Exception occured: {ex}", ClassName);
                 return false;
             }
         }
@@ -211,7 +203,7 @@ namespace ImageEvaluatorLib.PreProcessor
         {
             if (_width > 10000 || _width < 0)
             {
-                _logger?.Error($"Image width is not proper: {_width}");
+                _logger?.ErrorLog($"Image width is not proper: {_width}", ClassName);
                 return false;
             }
             return true;
@@ -238,7 +230,7 @@ namespace ImageEvaluatorLib.PreProcessor
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Error in ImagePreProcessor - InitEmguImages. {ex}");
+                _logger?.ErrorLog($"Exception occured: {ex}", ClassName);
                 return false;
             }
         }
@@ -266,7 +258,7 @@ namespace ImageEvaluatorLib.PreProcessor
     {
         public IImagePreProcessor Factory(ILogger logger, int intensityRange, int width, int height, IHistogramThresholdCalculator histcalculator, bool showImages, BeltCoordinates beltcoords)
         {
-            logger?.Info($"{typeof(FactoryImagePreProcessor)} factory called.");
+            logger?.InfoLog("Factory called.", nameof(FactoryImagePreProcessor));
             return new ImagePreProcessor(logger, intensityRange, width, height, histcalculator, showImages, beltcoords);
         }
     }

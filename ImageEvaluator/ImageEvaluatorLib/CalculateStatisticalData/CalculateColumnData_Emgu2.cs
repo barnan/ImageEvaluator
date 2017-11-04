@@ -35,13 +35,16 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         internal CalculateColumnDataEmgu2(ILogger logger, int width, int height)
             : base(logger, width, height)
         {
-            _logger?.Info("CalculateColumnData_Emgu2 instantiated.");
+            ClassName = nameof(CalculateColumnDataEmgu2);
+            Title = "Column Mean and Std calculator";
+
+            _logger?.InfoLog("Instantiated.", ClassName);
         }
 
 
         public override bool Execute(List<NamedData> data, string fileName)
         {
-            Image<Gray, byte>[] rawImages = null;
+            Image<Gray, ushort>[] rawImages = null;
             Image<Gray, byte>[] maskImages = null;
             BorderPointArrays borderPointarrays = null;
 
@@ -49,14 +52,14 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             {
                 if (!IsInitialized)
                 {
-                    _logger.Error("CalculateColumnData_CSharp2 is not initialized.");
+                    _logger?.ErrorLog("It is not initialized.", ClassName);
                     return false;
                 }
 
                 int imageCounter = LoadNamedData(data, ref borderPointarrays, ref rawImages, ref maskImages);
                 if (imageCounter == 0)
                 {
-                    _logger.Info($"{this.GetType().Name} - No images were loaded from dynamicresult");
+                    _logger?.InfoLog("No images were loaded from dynamicresult", ClassName);
                 }
 
                 double[,,] resultVector1 = _firstVector.Data;
@@ -67,7 +70,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
                     if (!CheckInputData(rawImages[m], maskImages[m], borderPointarrays[m], _firstVector, _secondVector))
                     {
-                        _logger.Info($"{this.GetType()} input and mask data is not proper!");
+                        _logger?.InfoLog($"Input and mask data is not proper!", ClassName);
                         continue;
                     }
 
@@ -134,7 +137,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Exception occured during {this.GetType().Name} - Run: {ex}");
+                _logger?.ErrorLog($"Exception occured: {ex}", ClassName);
                 return false;
             }
             finally
@@ -159,22 +162,6 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         }
 
 
-        protected override bool CheckInputData(Image<Gray, byte> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, double> meanVector, Image<Gray, double> stdVector)
-        {
-            base.CheckInputData(inputImage, maskImage, pointArray, meanVector, stdVector);
-
-            if (maskImage == null || maskImage.Height < 0 || maskImage.Height > 10000 || maskImage.Width < 0 || maskImage.Width > 10000)
-            {
-                return false;
-            }
-            if (inputImage.Height != maskImage.Height || inputImage.Width != maskImage.Width)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
 
         protected override bool InitEmguImages()
         {
@@ -196,7 +183,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error during InitEmguImages: {ex}");
+                _logger.InfoLog($"Error occured: {ex}", ClassName);
                 return IsInitialized = false;
             }
 
@@ -230,7 +217,8 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
     {
         public IColumnDataCalculator Factory(ILogger logger, int width, int height)
         {
-            logger?.Info($"{nameof(FactoryCalculateColumnDataEmgu2)} factory called.");
+            logger?.InfoLog($"Factory called.", nameof(FactoryCalculateColumnDataEmgu2));
+
             return new CalculateColumnDataEmgu2(logger, width, height);
         }
     }

@@ -9,7 +9,7 @@ using ImageEvaluatorInterfaces.BaseClasses;
 namespace ImageEvaluatorLib.ReadDirectory
 {
 
-    class DirectoryReader : IDirectoryReader, IElement
+    class DirectoryReader : IDirectoryReader
     {
         private string _directoryName;
         private string _extension;

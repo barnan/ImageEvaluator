@@ -18,6 +18,8 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         protected CalculateColumnDataBaseEmgu(ILogger logger, int width, int height)
             : base(logger, width, height)
         {
+            ClassName = nameof(CalculateColumnDataBase);
+            Title = ClassName;
         }
 
 

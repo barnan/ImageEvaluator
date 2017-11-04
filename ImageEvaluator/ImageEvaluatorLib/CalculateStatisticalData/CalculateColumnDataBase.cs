@@ -11,10 +11,8 @@ using ImageEvaluatorLib.BaseClasses;
 
 namespace ImageEvaluatorLib.CalculateStatisticalData
 {
-    internal abstract class CalculateColumnDataBase : NamedDataProvider, IColumnDataCalculator, IElement
+    internal abstract class CalculateColumnDataBase : NamedDataProvider, IColumnDataCalculator
     {
-        protected string _className;
-
         protected int _width;
         protected int _height;
 
@@ -50,6 +48,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             _height = height;
 
             ClassName = nameof(CalculateColumnDataBase);
+            Title = ClassName;
         }
 
 
@@ -63,20 +62,24 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         }
 
 
-
         public bool IsInitialized { get; protected set; }
 
 
         public abstract bool Execute(List<NamedData> data, string fileName);
 
 
-        protected virtual bool CheckInputData(Image<Gray, byte> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, double> meanVector, Image<Gray, double> stdVector)
+        protected virtual bool CheckInputData(Image<Gray, ushort> inputImage, Image<Gray, byte> maskImage, int[,] pointArray, Image<Gray, double> meanVector, Image<Gray, double> stdVector)
         {
             try
             {
                 if (inputImage == null || inputImage.Height != _height || inputImage.Width != _width)
                 {
                     _logger?.ErrorLog($"Error in the input image size. Predefined width: {_width}, Predefined height: {_height}, image width: {inputImage?.Width}, image height: {inputImage?.Height}", ClassName);
+                    return false;
+                }
+                if (maskImage == null || maskImage.Height != _height || maskImage.Width != _width)
+                {
+                    _logger?.ErrorLog($"Error in the input mask size. Predefined width: {_width}, Predefined height: {_height}, mask width: {maskImage?.Width}, mask height: {maskImage?.Height}", ClassName);
                     return false;
                 }
                 if (meanVector == null || stdVector == null || meanVector.Width != inputImage.Height || stdVector.Width != inputImage.Height)
@@ -139,20 +142,20 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         }
 
 
-        protected virtual int LoadNamedData(List<NamedData> data, ref BorderPointArrays borderPoints, ref Image<Gray, byte>[] rawImages, ref Image<Gray, byte>[] maskImages)
+        protected virtual int LoadNamedData(List<NamedData> data, ref BorderPointArrays borderPoints, ref Image<Gray, ushort>[] rawImages, ref Image<Gray, byte>[] maskImages)
         {
-            rawImages = GetEmguByteImages("_rawImages", data);
+            rawImages = GetEmguUShortImages("RawImages", data);
             int imageCounterRaw = rawImages?.Length ?? 0;
 
-            maskImages = GetEmguByteImages("maskImages", data);
+            maskImages = GetEmguByteImages("MaskImages", data);
             int imageCounterMask = maskImages?.Length ?? 0;
 
-            borderPoints = GetBorderPointArrays("borderPointArrayList", data);
+            borderPoints = GetBorderPointArrays("BorderPointArrayList", data);
 
 
             if ((imageCounterMask != imageCounterRaw) || (imageCounterRaw == 0) || (imageCounterRaw != borderPoints.Count))
             {
-                _logger.InfoLog($"Input and mask image number is not the same!", ClassName);
+                _logger?.InfoLog($"Input and mask image number is not the same!", ClassName);
                 return 0;
             }
 
@@ -272,7 +275,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
             finally
             {
-                _firstVector.ROI = _fullROI;
+                _firstVector.ROI = _fullLineROI;
                 _secondVector.ROI = _fullLineROI;
             }
         }

@@ -56,7 +56,7 @@ namespace ImageEvaluatorLib.BorderSearch
                                     tempImage.Draw(coordinateList, new Gray(100.0), 2);
                                     ImageViewer.Show(tempImage, "BorderSearcher_Emgu1 - contour points");
 
-                                    SaveMaskImage(name, tempImage, "MaskImage");
+                                    SaveImage(name, tempImage, "MaskImage");
                                 }
 
                                 using (var tempImage = new Image<Gray, ushort>(origImage.Size))
@@ -65,7 +65,7 @@ namespace ImageEvaluatorLib.BorderSearch
                                     tempImage.Draw(coordinateList, new Gray(200.0), 2);
                                     ImageViewer.Show(tempImage, "BorderSearcher_Emgu1 - contour points");
 
-                                    SaveMaskImage(name, tempImage, "OrigImage");
+                                    SaveImage(name, tempImage, "OrigImage");
                                 }
                             }
 

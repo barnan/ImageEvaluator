@@ -5,6 +5,8 @@ using Emgu.CV;
 using Emgu.CV.Structure;
 using ImageEvaluatorInterfaces;
 using NLog;
+using ImageEvaluatorInterfaces.BaseClasses;
+using System.Collections.Generic;
 
 namespace ImageEvaluatorLib.DataSaver
 {
@@ -14,17 +16,13 @@ namespace ImageEvaluatorLib.DataSaver
         public CsvColumnResultSaver(string outputFolder, string prefix, ILogger logger)
             : base(outputFolder, prefix, logger)
         {
-            _logger?.Info($"{typeof(CsvColumnResultSaver)} instantiated.");
+            ClassName = nameof(CsvColumnResultSaver);
+            Title = ClassName;
+
+            _logger?.InfoLog("Instantiated.", ClassName);
         }
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="result"></param>
-        /// <param name="inputFileName"></param>
-        /// <param name="ext"></param>
-        /// <returns></returns>
         public override bool SaveResult(IMeasurementResult result, string inputFileName, string ext)
         {
             try
@@ -56,12 +54,12 @@ namespace ImageEvaluatorLib.DataSaver
                             sw.WriteLine(data[0, i, 0]);
                         }
                     }
-                    _logger?.Trace("Image " + finalOutputName + " saved.");
+                    _logger?.Trace("Image " + finalOutputName + " saved.", ClassName);
                 }
             }
             catch (Exception ex)
             {
-                _logger?.Error($"Exception in CsvResultSaver-SaveResult: {ex}");
+                _logger?.ErrorLog($"Exception in CsvResultSaver-SaveResult: {ex}", ClassName);
                 return false;
             }
 
@@ -75,9 +73,8 @@ namespace ImageEvaluatorLib.DataSaver
     {
         public IResultSaver Factory(string outputFolder, string prefix, ILogger logger)
         {
-            logger?.Info($"{typeof(FactoryCsvColumnResultSaver)} factory called.");
+            logger?.InfoLog("Factory called.", nameof(FactoryCsvColumnResultSaver));
             return new CsvColumnResultSaver(outputFolder, prefix, logger);
-
         }
 
     }

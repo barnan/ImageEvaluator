@@ -110,29 +110,35 @@ namespace ImageEvaluator.EvaluationProcessor
 
                 _columnDataCalculator1.Execute(_dynamicResult, path);
 
-                IColumnMeasurementResult result2 = new ColumnMeasurementResult
-                {
-                    Name = name,
-                    ColumnMeanVector = _meanVector1,
-                    ColumnStdVector = _stdVector1
-                };
-                _saver2.SaveResult(result2 as IMeasurementResult, name, "MeanAndStd");
-
-
                 LogElapsedTime(_watch1, $"Column data, statistical calculation 1: {Path.GetFileName(name)}");
 
                 _columnDataCalculator2.Execute(_dynamicResult, path);
 
-                IColumnMeasurementResult result3 = new ColumnMeasurementResult
-                {
-                    Name = name,
-                    ColumnMeanVector = _meanVector1,
-                    ColumnStdVector = _stdVector1
-                };
-                _saver2.SaveResult(result3 as IMeasurementResult, name, "Noise");
-
-
                 LogElapsedTime(_watch1, $"Column data, statistical calculation 2: {Path.GetFileName(name)}");
+
+                bool result = (_saver1 as INamedDataResultSaver).SaveResult(_dynamicResult, name, ".png");
+
+
+
+
+                //IColumnMeasurementResult result2 = new ColumnMeasurementResult
+                //{
+                //    Name = name,
+                //    ColumnMeanVector = _meanVector1,
+                //    ColumnStdVector = _stdVector1
+                //};
+                //_saver2.SaveResult(result2 as IMeasurementResult, name, "MeanAndStd");
+
+                //IColumnMeasurementResult result3 = new ColumnMeasurementResult
+                //{
+                //    Name = name,
+                //    ColumnMeanVector = _meanVector1,
+                //    ColumnStdVector = _stdVector1
+                //};
+
+
+                //_saver2.SaveResult(result3 as IMeasurementResult, name, "Noise");
+
 
                 IWaferEdgeFindData waferEdgeFindData1 = null;
 

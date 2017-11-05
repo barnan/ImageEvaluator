@@ -1,5 +1,6 @@
 ﻿using Emgu.CV;
 using ImageEvaluatorInterfaces;
+using ImageEvaluatorInterfaces.BaseClasses;
 using NLog;
 
 namespace ImageEvaluatorLib.ThresholdCalculator
@@ -31,7 +32,11 @@ namespace ImageEvaluatorLib.ThresholdCalculator
         public HistogramThresholdCalculatorCSharp1(ILogger logger, int histogramSize, int param)
             : base(logger, histogramSize)
         {
+            ClassName = nameof(HistogramThresholdCalculatorCSharp1);
+            Title = ClassName;
             Param = param;
+
+            Logger?.InfoLog("Instantiated.", ClassName);
         }
 
 
@@ -48,7 +53,7 @@ namespace ImageEvaluatorLib.ThresholdCalculator
     {
         public IHistogramThresholdCalculator Factory(ILogger logger, int range, int param = 0)
         {
-            logger?.Info($"{GetType().Name} factory called.");
+            logger?.InfoLog("Factory called.", nameof(FactoryHistogramThresholdCalculatorCSharp1));
             return new HistogramThresholdCalculatorCSharp1(logger, range, param);
         }
     }

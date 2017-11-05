@@ -20,6 +20,7 @@ namespace ImageEvaluatorLib.PreProcessor
         private DenseHistogram _hist;
         private int _intensityRange;
         Image<Gray, byte> _thresholdedImage;
+        Image<Gray, byte> _tempimage;
         Image<Gray, byte> _dilatedImage;
         private Matrix<byte> _reducedMask;
         protected bool _showImages;
@@ -97,14 +98,20 @@ namespace ImageEvaluatorLib.PreProcessor
                     float thresh;
                     _thresholdcalculator.Execute(_hist, out thresh);
 
+
                     if (_showImages)
                     {
-                        SaveHistogram(name);
+                        GeneralImageHandling.SaveHistogram(name, "PreProcessor", "Histogram", _hist, _logger);
                     }
 
-                    // create mask image:
                     double maskValue = 255.0;
-                    CvInvoke.Threshold(inputImages[m], _thresholdedImage, thresh, maskValue, ThresholdType.Binary);
+                    if (thresh > 255)
+                        thresh /= 16;
+
+                    // tempimage for thresholding:
+                    _tempimage = inputImages[m].Convert<Gray, byte>();
+                    CvInvoke.Threshold(_tempimage, _thresholdedImage, thresh, maskValue, ThresholdType.Binary);
+                    _tempimage?.Dispose();
 
                     CvInvoke.Erode(_thresholdedImage, _dilatedImage, null, new Point(-1, -1), 3, BorderType.Default, new MCvScalar(0));
                     CvInvoke.Dilate(_dilatedImage, _thresholdedImage, null, new Point(-1, -1), 4, BorderType.Default, new MCvScalar(0));
@@ -113,6 +120,7 @@ namespace ImageEvaluatorLib.PreProcessor
 
                     maskImages[m].Reduce(_reducedMask, ReduceDimension.SingleCol, ReduceType.ReduceAvg);
 
+                    // this section tries to mask out the belts:
                     int count = 0;
                     double MagicThreshold1 = 0.4;   // 40%
                     double MagicThreshold2 = 0.18;   // 15%
@@ -144,7 +152,8 @@ namespace ImageEvaluatorLib.PreProcessor
                         ImageViewer.Show(inputImages[m], "ImagePreProcessor - transposed image");
                         ImageViewer.Show(maskImages[m], "ImagePreProcessor - maskImage");
 
-                        SaveMaskImage(name, maskImages[m]);
+                        //SaveMaskImage(name, maskImages[m], "MaskImage");
+                        GeneralImageHandling.SaveImage(name, "ImagePreProcessor", "MaskImage", maskImages[m], _logger);
                     }
                 }
 
@@ -159,43 +168,7 @@ namespace ImageEvaluatorLib.PreProcessor
             }
         }
 
-        private void SaveHistogram(string name)
-        {
-            string fileNameBase = Path.GetFileNameWithoutExtension(name);
-            string path = Path.GetDirectoryName(name);
-            string finalOutputName = Path.Combine(path ?? string.Empty, "Histogram", $"{fileNameBase}.csv");
 
-            string directory = Path.GetDirectoryName(finalOutputName);
-            if (directory != null && !Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-
-            float[] Hist = _hist.GetBinValues();
-            using (StreamWriter sw = new StreamWriter(finalOutputName))
-            {
-                for (int i = 0; i < Hist.Length; i++)
-                {
-                    sw.WriteLine($"{i},{Hist[i]}");
-                }
-            }
-        }
-
-
-        private void SaveMaskImage(string name, Image<Gray, byte> maskImage)
-        {
-            string fileNameBase = Path.GetFileNameWithoutExtension(name);
-            string path = Path.GetDirectoryName(name);
-            string finalOutputName = Path.Combine(path ?? string.Empty, "MaskImage_PreProcessor", $"{fileNameBase}.png");
-
-            string directory = Path.GetDirectoryName(finalOutputName);
-            if (directory != null && !Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-
-            maskImage.Save(finalOutputName);
-        }
 
 
 
@@ -222,6 +195,7 @@ namespace ImageEvaluatorLib.PreProcessor
             try
             {
                 _thresholdedImage = new Image<Gray, byte>(_width, _height);
+                _tempimage = new Image<Gray, byte>(_width, _height);
                 _dilatedImage = new Image<Gray, byte>(_width, _height);
                 _reducedMask = new Matrix<byte>(_height, 1);
                 _hist = new DenseHistogram(_intensityRange, new RangeF(0, _intensityRange - 1));
@@ -243,6 +217,7 @@ namespace ImageEvaluatorLib.PreProcessor
         private bool ClearEmguImages()
         {
             _thresholdedImage?.Dispose();
+            _tempimage?.Dispose();
             _dilatedImage?.Dispose();
             _reducedMask?.Dispose();
 
@@ -259,6 +234,7 @@ namespace ImageEvaluatorLib.PreProcessor
         public IImagePreProcessor Factory(ILogger logger, int intensityRange, int width, int height, IHistogramThresholdCalculator histcalculator, bool showImages, BeltCoordinates beltcoords)
         {
             logger?.InfoLog("Factory called.", nameof(FactoryImagePreProcessor));
+
             return new ImagePreProcessor(logger, intensityRange, width, height, histcalculator, showImages, beltcoords);
         }
     }

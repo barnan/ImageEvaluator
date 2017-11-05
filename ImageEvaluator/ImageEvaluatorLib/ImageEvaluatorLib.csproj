@@ -53,6 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseClasses\GeneralImageHandling.cs" />
     <Compile Include="BaseClasses\NamedDataProvider.cs" />
     <Compile Include="BorderSearch\BorderSearcherBase.cs" />
     <Compile Include="BorderSearch\BorderSearcher_CSharp1.cs" />

@@ -4,6 +4,7 @@ using ImageEvaluatorInterfaces;
 using NLog;
 using ImageEvaluatorInterfaces.BaseClasses;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ImageEvaluatorLib.DataSaver
 {
@@ -61,13 +62,57 @@ namespace ImageEvaluatorLib.DataSaver
         }
 
 
-        public abstract bool SaveResult(IMeasurementResult result, string inputfilename, string ext);
+        public abstract bool SaveResult(IMeasurementResult result, string inputfilename, string fileNameExtension);
 
 
-        public bool SaveResult(List<NamedData> result, string inputfilename, string ext)
+        public bool SaveResult(List<NamedData> data, string filename, string fileNameExtension)
         {
+            // Determine header:
+            List<string> firstLineElements = null;
+            List<string> fileHeader = new List<string>();
+            foreach (var item in data)
+            {
+                if (item.DataType == typeof(double) || item.DataType == typeof(int) || item.DataType == typeof(byte) || item.DataType == typeof(long) || item.DataType == typeof(bool))
+                {
+                    fileHeader.Add(item.Name);
+                }
+            }
 
+            if (fileHeader.Count == 0)
+            {
+                return false;
+            }
 
+            int counter = 0;
+            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(filename);
+            string finalFileName = Path.Combine(OutputFolder, fileNameExtension + $"_Result_{counter.ToString("00")}.csv");
+            bool compareResu;
+            //
+            for (int i = 0; i < 10; i++)
+            {
+                try
+                {
+                    using (FileStream fs = new FileStream(finalFileName, FileMode.Append, FileAccess.ReadWrite))
+                    using (StreamReader sr = new StreamReader(fs))
+                    {
+                        firstLineElements = new List<string>(sr.ReadLine().Split(','));
+                        compareResu = fileHeader.SequenceEqual(firstLineElements);
+
+                        if (!compareResu)
+                        {
+                            finalFileName = Path.Combine(OutputFolder, fileNameExtension + $"_Result_{(++counter).ToString("00")}.csv");
+                        }
+                        else
+                        {
+                            SaveData(data, finalFileName);
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    finalFileName = Path.Combine(OutputFolder, fileNameExtension + $"_Result_{(++counter).ToString("00")}.csv");
+                }
+            }
 
 
 
@@ -76,5 +121,10 @@ namespace ImageEvaluatorLib.DataSaver
 
 
 
+        private bool SaveData(List<NamedData> data, string finalFileName)
+        {
+
+
+        }
     }
 }

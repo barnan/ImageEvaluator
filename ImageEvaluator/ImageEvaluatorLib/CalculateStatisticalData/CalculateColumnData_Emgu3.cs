@@ -77,26 +77,26 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                     }
 
 
-                    meanOfNoiseMean[m] = _meanOfMean.V0;
-                    stdOfNoiseMean[m] = _stdOfMean.V0;
-                    meanOfNoiseStd[m] = _meanOfStd.V0;
-                    stdOfNoiseStd[m] = _stdOfStd.V0;
-                    noiseMeanHomogeneity1[m] = Math.Max(Math.Abs(_meanOfRegion2.V0 - _meanOfRegion1.V0), Math.Abs(_meanOfRegion2.V0 - _meanOfRegion3.V0));
-                    noiseMeanHomogeneity2[m] = Math.Abs(_meanOfRegion1.V0 - _meanOfRegion3.V0);
-                    minOfNoiseMean[m] = _minOfMean.V0;
-                    maxOfNoiseMean[m] = _maxOfMean.V0;
+                    meanOfNoiseMean[m] = _meanOfFirst.V0;
+                    stdOfNoiseMean[m] = _stdOfFirst.V0;
+                    meanOfNoiseStd[m] = _meanOfSecond.V0;
+                    stdOfNoiseStd[m] = _stdOfSecond.V0;
+                    noiseMeanHomogeneity1[m] = Math.Max(Math.Abs(_meanOfRegion2OfFirst.V0 - _meanOfRegion1OfFirst.V0), Math.Abs(_meanOfRegion2OfFirst.V0 - _meanOfRegion3OfFirst.V0));
+                    noiseMeanHomogeneity2[m] = Math.Abs(_meanOfRegion1OfFirst.V0 - _meanOfRegion3OfFirst.V0);
+                    minOfNoiseMean[m] = _minOfFirst.V0;
+                    maxOfNoiseMean[m] = _maxOfFirst.V0;
 
                 }
 
 
-                data.Add(new DoubleVectorNamedData(meanOfNoiseMean, "meanOfNoiseMean", nameof(meanOfNoiseMean)));
-                data.Add(new DoubleVectorNamedData(stdOfNoiseMean, "stdOfNoiseMean", nameof(stdOfNoiseMean)));
-                data.Add(new DoubleVectorNamedData(meanOfNoiseStd, "meanOfNoiseStd", nameof(meanOfNoiseStd)));
-                data.Add(new DoubleVectorNamedData(stdOfNoiseStd, "stdOfNoiseStd", nameof(stdOfNoiseStd)));
-                data.Add(new DoubleVectorNamedData(noiseMeanHomogeneity1, "noiseMeanHomogeneity1", nameof(noiseMeanHomogeneity1)));
-                data.Add(new DoubleVectorNamedData(noiseMeanHomogeneity2, "noiseMeanHomogeneity2", nameof(noiseMeanHomogeneity2)));
-                data.Add(new DoubleVectorNamedData(minOfNoiseMean, "minOfNoiseMean", nameof(minOfNoiseMean)));
-                data.Add(new DoubleVectorNamedData(maxOfNoiseMean, "maxOfNoiseMean", nameof(maxOfNoiseMean)));
+                data.Add(new DoubleVectorNamedData(meanOfNoiseMean, "MeanOfNoiseMean", "MeanOfNoiseMean"));
+                data.Add(new DoubleVectorNamedData(stdOfNoiseMean, "StdOfNoiseMean", "StdOfNoiseMean"));
+                data.Add(new DoubleVectorNamedData(meanOfNoiseStd, "MeanOfNoiseStd", "MeanOfNoiseStd"));
+                data.Add(new DoubleVectorNamedData(stdOfNoiseStd, "StdOfNoiseStd", "StdOfNoiseStd"));
+                data.Add(new DoubleVectorNamedData(noiseMeanHomogeneity1, "NoiseMeanHomogeneity1", "NoiseMeanHomogeneity1"));
+                data.Add(new DoubleVectorNamedData(noiseMeanHomogeneity2, "NoiseMeanHomogeneity2", "NoiseMeanHomogeneity2"));
+                data.Add(new DoubleVectorNamedData(minOfNoiseMean, "MinOfNoiseMean", "MinOfNoiseMean"));
+                data.Add(new DoubleVectorNamedData(maxOfNoiseMean, "MaxOfNoiseMean", "MaxOfNoiseMean"));
 
 
                 return true;
@@ -131,15 +131,15 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         {
             try
             {
+                ReAllocateEmgu();
+                double[,,] resultVector1 = _firstVector.Data;
+                double[,,] resultVector2 = _secondVector.Data;
+
                 if (!CheckInputData(rawImage, maskImage, pointArray, _firstVector, _secondVector))
                 {
                     _logger?.InfoLog($"Input and mask data is not proper!", ClassName);
                     return null;
                 }
-
-                ReAllocateEmgu();
-                double[,,] resultVector1 = _firstVector.Data;
-                double[,,] resultVector2 = _secondVector.Data;
 
                 int imageWidth = rawImage.Width;
                 int indexMin = int.MaxValue;
@@ -205,9 +205,6 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
     }
 
 
-    /// <summary>
-    /// 
-    /// </summary>
     public class FactoryCalculateColumnDataEmgu3 : IColumnDataCalculator_Creator
     {
         public IColumnDataCalculator Factory(ILogger logger, int width, int height)

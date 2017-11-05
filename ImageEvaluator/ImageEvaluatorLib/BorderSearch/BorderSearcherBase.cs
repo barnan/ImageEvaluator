@@ -76,15 +76,14 @@ namespace ImageEvaluatorLib.BorderSearch
 
                 for (int m = 0; m < imageCounterRaw; m++)
                 {
-                    if (!CheckImage(rawImages[m], maskImages[m]))
+                    if (!(GeneralImageHandling.CheckImages(rawImages[m], maskImages[m], _imageWidth, _imageHeight, _logger)))
                     {
-                        _logger?.InfoLog("Invalid input mask image.", ClassName);
                         continue;
                     }
 
-                    if (!AllocArrays())   // && ResetPointList()))
+                    if (!(AllocArrays() && ResetPointList()))
                     {
-                        _logger?.InfoLog("Array re-allocation failed.", ClassName);
+                        _logger?.InfoLog("Borderpoints array re-allocation failed.", ClassName);
                         continue;
                     }
 
@@ -93,7 +92,7 @@ namespace ImageEvaluatorLib.BorderSearch
                     borderPointArrayList[m] = _borderPoints;
                 }
 
-                data.Add(new NamedData<BorderPointArrays>(new BorderPointArrays(borderPointArrayList), "BorderPointArrayList", "contains the found border points"));
+                data.Add(new BorderPointArraysNamedData(new BorderPointArrays(borderPointArrayList), "contains the found border points", "BorderPointArrayList"));
             }
             catch (Exception ex)
             {
@@ -129,77 +128,10 @@ namespace ImageEvaluatorLib.BorderSearch
             return true;
         }
 
-        protected bool CheckImage(Image<Gray, ushort> rawImage, Image<Gray, byte> maskImage)
-        {
-            try
-            {
-                if (rawImage == null || rawImage.Height != _imageHeight || rawImage.Width != _imageWidth)
-                {
-                    _logger?.ErrorLog($"Error in the input image size. Predefined width: {_imageWidth}, Predefined height: {_imageHeight}, image width: {rawImage?.Width}, image height: {rawImage?.Height}", ClassName);
-                    return false;
-                }
-                if (maskImage == null || maskImage.Height != _imageHeight || maskImage.Width != _imageWidth)
-                {
-                    _logger?.ErrorLog($"Error in the input mask size. Predefined width: {_imageWidth}, Predefined height: {_imageHeight}, mask width: {maskImage?.Width}, mask height: {maskImage?.Height}", ClassName);
-                    return false;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger?.ErrorLog($"Exception occured: {ex}", ClassName);
-            }
-
-
-            return true;
-        }
-
-        protected void SaveImage(string name, Image<Gray, byte> image, string ext)
-        {
-            string finalOutputName = CheckOutputDirectoryOfImageSaving(name, ext, ".png");
-
-            if (finalOutputName != null)
-            {
-                image.Save(finalOutputName);
-            }
-        }
-
-        protected void SaveImage(string name, Image<Gray, ushort> image, string ext)
-        {
-            string finalOutputName = CheckOutputDirectoryOfImageSaving(name, ext, ".png");
-
-            if (finalOutputName != null)
-            {
-                image.Save(finalOutputName);
-            }
-        }
-
-        private string CheckOutputDirectoryOfImageSaving(string name, string ext, string extension)
-        {
-            try
-            {
-                string fileNameBase = Path.GetFileNameWithoutExtension(name);
-                string path = Path.GetDirectoryName(name);
-                string finalOutputName = Path.Combine(path ?? string.Empty, ext + "_BorderSearch", $"{fileNameBase}{extension}");
-
-                string directory = Path.GetDirectoryName(finalOutputName);
-                if (directory != null && !Directory.Exists(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
-
-                return finalOutputName;
-            }
-            catch (Exception ex)
-            {
-                _logger?.ErrorLog($"Exception during directory determination: {ex}", ClassName);
-                return null;
-            }
-        }
-
 
         protected void SavePointList(string name, string ext)
         {
-            string finalOutputName = CheckOutputDirectoryOfImageSaving(name, ext, ".csv");
+            string finalOutputName = GeneralImageHandling.CheckOutputDirectoryOfImageSaving(name, "BorderSearch", "_PointList", ".csv");
 
             if (finalOutputName == null)
             {

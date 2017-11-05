@@ -11,12 +11,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 {
     class CalculateColumnDataCSharp2 : CalculateColumnDataBase
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="logger"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
+
         internal CalculateColumnDataCSharp2(ILogger logger, int width, int height)
             : base(logger, width, height)
         {
@@ -28,20 +23,6 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         }
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="inputImage"></param>
-        /// <param name="maskImage"></param>
-        /// <param name="pointArray"></param>
-        /// <param name="meanVector"></param>
-        /// <param name="stdVector"></param>
-        /// <param name="resu1"></param>
-        /// <param name="resu2"></param>
-        /// <param name="resu3"></param>
-        /// <param name="resu4"></param>
-        /// <param name="resu5"></param>
-        /// <param name="resu6"></param>
         public override bool Execute(List<NamedData> data, string fileName)
         {
             Image<Gray, ushort>[] rawImages = null;
@@ -123,6 +104,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         public IColumnDataCalculator Factory(ILogger logger, int width, int height)
         {
             logger?.Info($"Factory called.", nameof(FactoryCalculateColumnDataEmgu1));
+
             return new CalculateColumnDataCSharp2(logger, width, height);
         }
     }

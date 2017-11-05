@@ -32,8 +32,6 @@ namespace ImageEvaluatorLib.DataSaver
                 Type t = result.GetType();
 
                 PropertyInfo[] props = t.GetProperties();
-                //var nameProp = props.Where(p => p.Name == "Name").ToArray();
-                //string name = (nameProp.Length > 0) ? (string)nameProp[0].GetValue(result) : string.Empty;
 
                 foreach (PropertyInfo prop in props)
                 {
@@ -72,6 +70,7 @@ namespace ImageEvaluatorLib.DataSaver
         public IResultSaver Factory(string outputFolder, string prefix, ILogger logger)
         {
             logger?.Info("Factory called.", nameof(FactoryPngResultSaver));
+
             return new PngResultSaver(outputFolder, prefix, logger);
         }
     }

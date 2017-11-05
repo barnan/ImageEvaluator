@@ -13,12 +13,6 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
     {
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="logger"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
         internal CalculateColumnDataCSharp1(ILogger logger, int width, int height)
             : base(logger, width, height)
         {

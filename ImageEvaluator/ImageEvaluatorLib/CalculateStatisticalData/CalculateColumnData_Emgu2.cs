@@ -26,12 +26,6 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         Image<Gray, float> _sqrt;
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="logger"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
         internal CalculateColumnDataEmgu2(ILogger logger, int width, int height)
             : base(logger, width, height)
         {
@@ -210,9 +204,6 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
     public class FactoryCalculateColumnDataEmgu2 : IColumnDataCalculator_Creator
     {
         public IColumnDataCalculator Factory(ILogger logger, int width, int height)

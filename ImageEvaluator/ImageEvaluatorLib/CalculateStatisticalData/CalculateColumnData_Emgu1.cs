@@ -47,14 +47,14 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                     _logger?.InfoLog("No images were loaded from dynamicresult", ClassName);
                 }
 
-                double[] meanOfMean = new double[imageCounter];
-                double[] stdOfMean = new double[imageCounter];
-                double[] meanOfStd = new double[imageCounter];
-                double[] stdOfStd = new double[imageCounter];
-                double[] homogeneity1 = new double[imageCounter];
-                double[] homogeneity2 = new double[imageCounter];
-                double[] minOfMean = new double[imageCounter];
-                double[] maxOfMean = new double[imageCounter];
+                double[] meanOfBrightnessMean = new double[imageCounter];
+                double[] stdOfBrightnessMean = new double[imageCounter];
+                double[] meanOfBrightnessStd = new double[imageCounter];
+                double[] stdOfBrightnessStd = new double[imageCounter];
+                double[] brightnessHomogeneity1 = new double[imageCounter];
+                double[] brightnessHomogeneity2 = new double[imageCounter];
+                double[] minOfBrightnessMean = new double[imageCounter];
+                double[] maxOfBrightnessMean = new double[imageCounter];
 
                 for (int m = 0; m < imageCounter; m++)
                 {
@@ -73,25 +73,25 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                         continue;
                     }
 
-                    meanOfMean[m] = _meanOfMean.V0;
-                    stdOfMean[m] = _stdOfMean.V0;
-                    meanOfStd[m] = _meanOfStd.V0;
-                    stdOfStd[m] = _stdOfStd.V0;
-                    homogeneity1[m] = Math.Max(Math.Abs(_meanOfRegion2.V0 - _meanOfRegion1.V0), Math.Abs(_meanOfRegion2.V0 - _meanOfRegion3.V0));
-                    homogeneity2[m] = Math.Abs(_meanOfRegion1.V0 - _meanOfRegion3.V0);
-                    minOfMean[m] = _minOfMean.V0;
-                    maxOfMean[m] = _maxOfMean.V0;
+                    meanOfBrightnessMean[m] = _meanOfFirst.V0;
+                    stdOfBrightnessMean[m] = _stdOfFirst.V0;
+                    meanOfBrightnessStd[m] = _meanOfSecond.V0;
+                    stdOfBrightnessStd[m] = _stdOfSecond.V0;
+                    brightnessHomogeneity1[m] = Math.Max(Math.Abs(_meanOfRegion2OfFirst.V0 - _meanOfRegion1OfFirst.V0), Math.Abs(_meanOfRegion2OfFirst.V0 - _meanOfRegion3OfFirst.V0));
+                    brightnessHomogeneity2[m] = Math.Abs(_meanOfRegion1OfFirst.V0 - _meanOfRegion3OfFirst.V0);
+                    minOfBrightnessMean[m] = _minOfFirst.V0;
+                    maxOfBrightnessMean[m] = _maxOfFirst.V0;
 
                 }
 
-                data.Add(new DoubleVectorNamedData(meanOfMean, "meanOfMean", nameof(meanOfMean)));
-                data.Add(new DoubleVectorNamedData(stdOfMean, "stdOfMean", nameof(stdOfMean)));
-                data.Add(new DoubleVectorNamedData(meanOfStd, "meanOfStd", nameof(meanOfStd)));
-                data.Add(new DoubleVectorNamedData(stdOfStd, "stdOfStd", nameof(stdOfStd)));
-                data.Add(new DoubleVectorNamedData(homogeneity1, "homogeneity1", nameof(homogeneity1)));
-                data.Add(new DoubleVectorNamedData(homogeneity2, "homogeneity2", nameof(homogeneity2)));
-                data.Add(new DoubleVectorNamedData(minOfMean, "minOfMean", nameof(minOfMean)));
-                data.Add(new DoubleVectorNamedData(maxOfMean, "maxOfMean", nameof(maxOfMean)));
+                data.Add(new DoubleVectorNamedData(meanOfBrightnessMean, "MeanOfBrightnessMean", "MeanOfBrightnessMean"));
+                data.Add(new DoubleVectorNamedData(stdOfBrightnessMean, "StdOfMean", "StdOfBrightnessMean"));
+                data.Add(new DoubleVectorNamedData(meanOfBrightnessStd, "MeanOfStd", "MeanOfBrightnessStd"));
+                data.Add(new DoubleVectorNamedData(stdOfBrightnessStd, "StdOfStd", "StdOfBrightnessStd"));
+                data.Add(new DoubleVectorNamedData(brightnessHomogeneity1, "BrightnessHomogeneity1", "BrightnessHomogeneity1"));
+                data.Add(new DoubleVectorNamedData(brightnessHomogeneity2, "BrightnessHomogeneity2", "BrightnessHomogeneity2"));
+                data.Add(new DoubleVectorNamedData(minOfBrightnessMean, "MinOfMean", "MinOfBrightnessMean"));
+                data.Add(new DoubleVectorNamedData(maxOfBrightnessMean, "MaxOfMean", "MAxOfBrightnessMean"));
 
                 return true;
             }
@@ -125,15 +125,15 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         {
             try
             {
+                ReAllocateEmgu();
+                double[,,] resultVector1 = _firstVector.Data;
+                double[,,] resultVector2 = _secondVector.Data;
+
                 if (!CheckInputData(rawImage, maskImage, pointArray, _firstVector, _secondVector))
                 {
                     _logger?.InfoLog("Input and mask data is not proper!", ClassName);
                     return null;
                 }
-
-                ReAllocateEmgu();
-                double[,,] resultVector1 = _firstVector.Data;
-                double[,,] resultVector2 = _secondVector.Data;
 
                 int imageWidth = rawImage.Width;
                 int indexMin = int.MaxValue;
@@ -189,6 +189,7 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         public IColumnDataCalculator Factory(ILogger logger, int width, int height)
         {
             logger?.InfoLog($"Factory called.", nameof(FactoryCalculateColumnDataEmgu1));
+
             return new CalculateColumnDataEmgu1(logger, width, height);
         }
     }

@@ -2,6 +2,7 @@
 using Emgu.CV;
 using ImageEvaluatorInterfaces;
 using NLog;
+using ImageEvaluatorInterfaces.BaseClasses;
 
 namespace ImageEvaluatorLib.ThresholdCalculator
 {
@@ -12,7 +13,10 @@ namespace ImageEvaluatorLib.ThresholdCalculator
         public HistogramThresholdCalculatorEmgu1(ILogger logger, int histogramSize, int param = 0)
             : base(logger, histogramSize)
         {
-            Logger?.Info($"{GetType().Name} instantiated.");
+            ClassName = nameof(HistogramThresholdCalculatorEmgu1);
+            Title = ClassName;
+
+            Logger?.InfoLog("Instantiated.", ClassName);
         }
 
 
@@ -22,13 +26,13 @@ namespace ImageEvaluatorLib.ThresholdCalculator
 
             if (!IsInitialized)
             {
-                Logger?.Info($"Error during {GetType().Name} Execute - Not initialized yet.");
+                Logger?.InfoLog("It is not initialized yet.", ClassName);
                 return false;
             }
 
             if (inputHistogram == null)
             {
-                Logger.Trace($"{GetType().Name} inputHistogramm is null!");
+                Logger.TraceLog("InputHistogramm is null!", ClassName);
                 return false;
             }
 
@@ -73,7 +77,7 @@ namespace ImageEvaluatorLib.ThresholdCalculator
             }
             catch (Exception ex)
             {
-                Logger?.Error($"Exception occured during {GetType().Name} histogramcalculation: {ex}");
+                Logger?.ErrorLog($"Exception occured: {ex}", ClassName);
                 return false;
             }
         }
@@ -85,7 +89,8 @@ namespace ImageEvaluatorLib.ThresholdCalculator
     {
         public IHistogramThresholdCalculator Factory(ILogger logger, int range, int param = 0)
         {
-            logger?.Info($"{GetType().Name} factory called.");
+            logger?.InfoLog("Factory called.", nameof(FactoryHistogramThresholdCalculatorEmgu1));
+
             return new HistogramThresholdCalculatorEmgu1(logger, range, param);
         }
     }

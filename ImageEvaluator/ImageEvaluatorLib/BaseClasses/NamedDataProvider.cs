@@ -31,7 +31,7 @@ namespace ImageEvaluatorLib.BaseClasses
             {
                 if (item.AsEmguUShortNamedData() != null)
                 {
-                    if (item.AsEmguByteNamedData().Name == name)
+                    if (item.AsEmguUShortNamedData().Name == name)
                     {
                         images = item?.AsEmguUShortNamedData();
                     }

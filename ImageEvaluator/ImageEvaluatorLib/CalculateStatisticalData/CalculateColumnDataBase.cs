@@ -24,16 +24,20 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         protected Image<Gray, double> _secondVector;
 
 
-        protected MCvScalar _meanOfMean;
-        protected MCvScalar _minOfMean;
-        protected MCvScalar _maxOfMean;
-        protected MCvScalar _stdOfMean;
-        protected MCvScalar _meanOfStd;
-        protected MCvScalar _stdOfStd;
+        protected MCvScalar _meanOfFirst;
+        protected MCvScalar _minOfFirst;
+        protected MCvScalar _maxOfFirst;
+        protected MCvScalar _stdOfFirst;
+        protected MCvScalar _meanOfSecond;
+        protected MCvScalar _stdOfSecond;
 
-        protected MCvScalar _meanOfRegion1;
-        protected MCvScalar _meanOfRegion2;
-        protected MCvScalar _meanOfRegion3;
+        protected MCvScalar _meanOfRegion1OfFirst;
+        protected MCvScalar _meanOfRegion2OfFirst;
+        protected MCvScalar _meanOfRegion3OfFirst;
+
+        protected MCvScalar _stdOfRegion1OfFirst;
+        protected MCvScalar _stdOfRegion2OfFirst;
+        protected MCvScalar _stdOfRegion3OfFirst;
 
         private Matrix<byte> _reducedMask;
 
@@ -72,16 +76,11 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         {
             try
             {
-                if (inputImage == null || inputImage.Height != _height || inputImage.Width != _width)
+                if (!GeneralImageHandling.CheckImages(inputImage, maskImage, _width, _height, _logger))
                 {
-                    _logger?.ErrorLog($"Error in the input image size. Predefined width: {_width}, Predefined height: {_height}, image width: {inputImage?.Width}, image height: {inputImage?.Height}", ClassName);
                     return false;
                 }
-                if (maskImage == null || maskImage.Height != _height || maskImage.Width != _width)
-                {
-                    _logger?.ErrorLog($"Error in the input mask size. Predefined width: {_width}, Predefined height: {_height}, mask width: {maskImage?.Width}, mask height: {maskImage?.Height}", ClassName);
-                    return false;
-                }
+
                 if (meanVector == null || stdVector == null || meanVector.Width != inputImage.Height || stdVector.Width != inputImage.Height)
                 {
                     _logger?.ErrorLog($"Error in the meanVector and stdVector length. meanVector height:{meanVector?.Height} stdVector height:{stdVector?.Height} meanVector height:{inputImage.Height}.", ClassName);
@@ -168,20 +167,20 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         {
             try
             {
-                _meanOfMean = new MCvScalar();
-                _stdOfMean = new MCvScalar();
-                _meanOfStd = new MCvScalar();
-                _stdOfStd = new MCvScalar();
-                _minOfMean = new MCvScalar();
-                _maxOfMean = new MCvScalar();
+                _meanOfFirst = new MCvScalar();
+                _stdOfFirst = new MCvScalar();
+                _meanOfSecond = new MCvScalar();
+                _stdOfSecond = new MCvScalar();
+                _minOfFirst = new MCvScalar();
+                _maxOfFirst = new MCvScalar();
 
-                _meanOfRegion1 = new MCvScalar();
-                _meanOfRegion2 = new MCvScalar();
-                _meanOfRegion3 = new MCvScalar();
+                _meanOfRegion1OfFirst = new MCvScalar();
+                _meanOfRegion2OfFirst = new MCvScalar();
+                _meanOfRegion3OfFirst = new MCvScalar();
 
-                MCvScalar stdOfRegion1 = new MCvScalar();
-                MCvScalar stdOfRegion2 = new MCvScalar();
-                MCvScalar stdOfRegion3 = new MCvScalar();
+                _stdOfRegion1OfFirst = new MCvScalar();
+                _stdOfRegion2OfFirst = new MCvScalar();
+                _stdOfRegion3OfFirst = new MCvScalar();
 
 
                 maskImage.Reduce(_reducedMask, ReduceDimension.SingleCol, ReduceType.ReduceAvg);
@@ -240,8 +239,8 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 }
 
 
-                CvInvoke.MeanStdDev(_firstVector, ref _meanOfMean, ref _stdOfMean, tempReducedMask);
-                CvInvoke.MeanStdDev(_secondVector, ref _meanOfStd, ref _stdOfStd, tempReducedMask);
+                CvInvoke.MeanStdDev(_firstVector, ref _meanOfFirst, ref _stdOfFirst, tempReducedMask);
+                CvInvoke.MeanStdDev(_secondVector, ref _meanOfSecond, ref _stdOfSecond, tempReducedMask);
 
                 double maxVal = 0.0;
                 double minVal = 0.0;
@@ -249,8 +248,8 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 Point minPos = new Point();
 
                 CvInvoke.MinMaxLoc(_firstVector, ref minVal, ref maxVal, ref minPos, ref maxPos, tempReducedMask);
-                _minOfMean = new MCvScalar(minVal);
-                _maxOfMean = new MCvScalar(maxVal);
+                _minOfFirst = new MCvScalar(minVal);
+                _maxOfFirst = new MCvScalar(maxVal);
 
                 int regionWidth = (indexMax - indexMin) / 5;
                 Rectangle rect3 = new Rectangle(indexMin, 0, Math.Min(regionWidth, value1), 1);
@@ -258,13 +257,13 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 Rectangle rect5 = new Rectangle(indexMax - Math.Min(regionWidth, value2), 0, Math.Min(regionWidth, value2), 1);
 
                 _firstVector.ROI = rect3;
-                CvInvoke.MeanStdDev(_firstVector, ref _meanOfRegion1, ref stdOfRegion1);
+                CvInvoke.MeanStdDev(_firstVector, ref _meanOfRegion1OfFirst, ref _stdOfRegion1OfFirst);
 
                 _firstVector.ROI = rect4;
-                CvInvoke.MeanStdDev(_firstVector, ref _meanOfRegion2, ref stdOfRegion2);
+                CvInvoke.MeanStdDev(_firstVector, ref _meanOfRegion2OfFirst, ref _stdOfRegion2OfFirst);
 
                 _firstVector.ROI = rect5;
-                CvInvoke.MeanStdDev(_firstVector, ref _meanOfRegion3, ref stdOfRegion3);
+                CvInvoke.MeanStdDev(_firstVector, ref _meanOfRegion3OfFirst, ref _stdOfRegion3OfFirst);
 
                 return true;
             }
@@ -275,8 +274,13 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
             }
             finally
             {
-                _firstVector.ROI = _fullLineROI;
-                _secondVector.ROI = _fullLineROI;
+                if (_firstVector != null && _fullLineROI != null)
+                    _firstVector.ROI = _fullLineROI;
+
+                if (_secondVector != null && _fullLineROI != null)
+                    _secondVector.ROI = _fullLineROI;
+
+
             }
         }
 

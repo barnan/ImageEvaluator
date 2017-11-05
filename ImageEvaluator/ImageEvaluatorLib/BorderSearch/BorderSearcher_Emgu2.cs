@@ -9,6 +9,7 @@ using ImageEvaluatorInterfaces;
 using NLog;
 using Emgu.CV.UI;
 using ImageEvaluatorInterfaces.BaseClasses;
+using ImageEvaluatorLib.BaseClasses;
 
 namespace ImageEvaluatorLib.BorderSearch
 {
@@ -54,18 +55,20 @@ namespace ImageEvaluatorLib.BorderSearch
                                 {
                                     maskImage.CopyTo(tempImage);
                                     tempImage.Draw(coordinateList, new Gray(100.0), 2);
-                                    ImageViewer.Show(tempImage, "BorderSearcher_Emgu1 - contour points");
+                                    ImageViewer.Show(tempImage, "BorderSearcher_Emgu2 - contour points");
 
-                                    SaveImage(name, tempImage, "MaskImage");
+                                    //SaveImage(name, tempImage, "MaskImage");
+                                    GeneralImageHandling.SaveImage(name, "BorderSearcher", "MaskImage", tempImage, _logger);
                                 }
 
                                 using (var tempImage = new Image<Gray, ushort>(origImage.Size))
                                 {
                                     origImage.CopyTo(tempImage);
                                     tempImage.Draw(coordinateList, new Gray(200.0), 2);
-                                    ImageViewer.Show(tempImage, "BorderSearcher_Emgu1 - contour points");
+                                    ImageViewer.Show(tempImage, "BorderSearcher_Emgu2 - contour points");
 
-                                    SaveImage(name, tempImage, "OrigImage");
+                                    //SaveImage(name, tempImage, "OrigImage");
+                                    GeneralImageHandling.SaveImage(name, "BorderSearcher", "OrigImage", tempImage, _logger);
                                 }
                             }
 

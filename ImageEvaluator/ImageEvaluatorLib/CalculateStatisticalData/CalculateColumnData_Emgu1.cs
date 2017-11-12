@@ -23,105 +23,13 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
             InitEmguImages();
 
+            lorum = "Brightness";
+
             _logger?.InfoLog($"Instantiated.", ClassName);
         }
 
 
-        public override bool Execute(List<NamedData> data, string fileName)
-        {
-            Image<Gray, ushort>[] rawImages = null;
-            Image<Gray, byte>[] maskImages = null;
-            BorderPointArrays borderPointarrays = null;
-
-            try
-            {
-                if (!IsInitialized)
-                {
-                    _logger?.ErrorLog($"It is not initialized.", ClassName);
-                    return false;
-                }
-
-                int imageCounter = LoadNamedData(data, ref borderPointarrays, ref rawImages, ref maskImages);
-                if (imageCounter == 0)
-                {
-                    _logger?.InfoLog("No images were loaded from dynamicresult", ClassName);
-                }
-
-                double[] meanOfBrightnessMean = new double[imageCounter];
-                double[] stdOfBrightnessMean = new double[imageCounter];
-                double[] meanOfBrightnessStd = new double[imageCounter];
-                double[] stdOfBrightnessStd = new double[imageCounter];
-                double[] brightnessHomogeneity1 = new double[imageCounter];
-                double[] brightnessHomogeneity2 = new double[imageCounter];
-                double[] minOfBrightnessMean = new double[imageCounter];
-                double[] maxOfBrightnessMean = new double[imageCounter];
-
-                for (int m = 0; m < imageCounter; m++)
-                {
-                    int[] indexes = Iterate(rawImages[m], maskImages[m], borderPointarrays[m]);
-
-                    if (indexes == null || indexes.Length != 2)
-                    {
-                        _logger?.InfoLog($"Problem during Iterate. Return indexes are not proper for further calculation. index:{m}", ClassName);
-                    }
-                    int indexMin = indexes[0];
-                    int indexMax = indexes[1];
-
-                    if (!CalculateStatistics(indexMin, indexMax, maskImages[m]))
-                    {
-                        _logger?.InfoLog($"Problem during statistics calculation: {m}", ClassName);
-                        continue;
-                    }
-
-                    meanOfBrightnessMean[m] = _meanOfFirst.V0;
-                    stdOfBrightnessMean[m] = _stdOfFirst.V0;
-                    meanOfBrightnessStd[m] = _meanOfSecond.V0;
-                    stdOfBrightnessStd[m] = _stdOfSecond.V0;
-                    brightnessHomogeneity1[m] = Math.Max(Math.Abs(_meanOfRegion2OfFirst.V0 - _meanOfRegion1OfFirst.V0), Math.Abs(_meanOfRegion2OfFirst.V0 - _meanOfRegion3OfFirst.V0));
-                    brightnessHomogeneity2[m] = Math.Abs(_meanOfRegion1OfFirst.V0 - _meanOfRegion3OfFirst.V0);
-                    minOfBrightnessMean[m] = _minOfFirst.V0;
-                    maxOfBrightnessMean[m] = _maxOfFirst.V0;
-
-                }
-
-                data.Add(new DoubleVectorNamedData(meanOfBrightnessMean, "MeanOfBrightnessMean", "MeanOfBrightnessMean"));
-                data.Add(new DoubleVectorNamedData(stdOfBrightnessMean, "StdOfMean", "StdOfBrightnessMean"));
-                data.Add(new DoubleVectorNamedData(meanOfBrightnessStd, "MeanOfStd", "MeanOfBrightnessStd"));
-                data.Add(new DoubleVectorNamedData(stdOfBrightnessStd, "StdOfStd", "StdOfBrightnessStd"));
-                data.Add(new DoubleVectorNamedData(brightnessHomogeneity1, "BrightnessHomogeneity1", "BrightnessHomogeneity1"));
-                data.Add(new DoubleVectorNamedData(brightnessHomogeneity2, "BrightnessHomogeneity2", "BrightnessHomogeneity2"));
-                data.Add(new DoubleVectorNamedData(minOfBrightnessMean, "MinOfMean", "MinOfBrightnessMean"));
-                data.Add(new DoubleVectorNamedData(maxOfBrightnessMean, "MaxOfMean", "MAxOfBrightnessMean"));
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger?.ErrorLog($"Exception occured: {ex}", ClassName);
-                return false;
-            }
-            finally
-            {
-                foreach (var item in rawImages)
-                {
-                    if (item != null)
-                    {
-                        item.ROI = _fullROI;
-                    }
-                }
-                foreach (var item in maskImages)
-                {
-                    if (item != null)
-                    {
-                        item.ROI = _fullROI;
-                    }
-                }
-            }
-        }
-
-
-
-        protected int[] Iterate(Image<Gray, ushort> rawImage, Image<Gray, byte> maskImage, int[,] pointArray)
+        protected override int[] Iterate(Image<Gray, ushort> rawImage, Image<Gray, byte> maskImage, int[,] pointArray)
         {
             try
             {
@@ -179,7 +87,6 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 throw;
             }
         }
-
 
     }
 

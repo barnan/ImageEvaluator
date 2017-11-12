@@ -7,6 +7,7 @@ using ImageEvaluatorInterfaces;
 using NLog;
 using ImageEvaluatorInterfaces.BaseClasses;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace ImageEvaluatorLib.DataSaver
 {
@@ -28,6 +29,7 @@ namespace ImageEvaluatorLib.DataSaver
             try
             {
                 Type t = result.GetType();
+                CultureInfo cultInfo = CultureInfo.InvariantCulture;
 
                 PropertyInfo[] props = t.GetProperties();
                 foreach (PropertyInfo prop in props)
@@ -51,7 +53,7 @@ namespace ImageEvaluatorLib.DataSaver
 
                         for (int i = 0; i < data?.Length; i++)
                         {
-                            sw.WriteLine(data[0, i, 0]);
+                            sw.WriteLine(data[0, i, 0].ToString(cultInfo));
                         }
                     }
                     _logger?.Trace("Image " + finalOutputName + " saved.", ClassName);

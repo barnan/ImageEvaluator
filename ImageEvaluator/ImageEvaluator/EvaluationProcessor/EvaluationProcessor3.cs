@@ -92,6 +92,7 @@ namespace ImageEvaluator.EvaluationProcessor
             while (!_dirReader.IsEndOfDirectory())
             {
                 _watch1.Restart();
+                _dynamicResult = new List<NamedData>();
 
                 string name = string.Empty;
                 _dirReader.GetNextImage(_dynamicResult, ref name);
@@ -116,7 +117,7 @@ namespace ImageEvaluator.EvaluationProcessor
 
                 LogElapsedTime(_watch1, $"Column data, statistical calculation 2: {Path.GetFileName(name)}");
 
-                bool result = (_saver1 as INamedDataResultSaver).SaveResult(_dynamicResult, name, ".png");
+                bool result = (_saver1 as INamedDataResultSaver).SaveResult(_dynamicResult, name, "Result");
 
 
 

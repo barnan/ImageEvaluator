@@ -4,6 +4,15 @@ using System;
 
 namespace ImageEvaluatorInterfaces.BaseClasses
 {
+
+    public enum DoubleNamingConvention
+    {
+        Left,
+        Right
+    }
+
+
+
     public abstract class NamedData
     {
         public string Name { get; }
@@ -17,6 +26,11 @@ namespace ImageEvaluatorInterfaces.BaseClasses
             Description = description;
         }
 
+
+        public IntNamedData AsIntNamedData()
+        {
+            return this as IntNamedData;
+        }
 
         public LongNamedData AsLongNamedData()
         {
@@ -41,6 +55,11 @@ namespace ImageEvaluatorInterfaces.BaseClasses
         public FloatNamedData AsFloatNamedData()
         {
             return this as FloatNamedData;
+        }
+
+        public ByteNamedData AsByteNamedData()
+        {
+            return this as ByteNamedData;
         }
 
         public DateTimeNamedData AsDateTimeNamedData()
@@ -84,7 +103,7 @@ namespace ImageEvaluatorInterfaces.BaseClasses
 
     public class NamedData<T> : NamedData
     {
-        T Value { get; set; }
+        public T Value { get; set; }
 
 
         public override Type DataType
@@ -105,6 +124,15 @@ namespace ImageEvaluatorInterfaces.BaseClasses
         }
     }
 
+
+    public sealed class IntNamedData : NamedData<int>
+    {
+        public IntNamedData(int value, string description, string name)
+            : base(value, description, name)
+        {
+        }
+
+    }
 
     public sealed class LongNamedData : NamedData<long>
     {
@@ -135,6 +163,14 @@ namespace ImageEvaluatorInterfaces.BaseClasses
     public sealed class FloatNamedData : NamedData<float>
     {
         public FloatNamedData(float value, string description, string name)
+            : base(value, description, name)
+        {
+        }
+    }
+
+    public sealed class ByteNamedData : NamedData<byte>
+    {
+        public ByteNamedData(byte value, string description, string name)
             : base(value, description, name)
         {
         }

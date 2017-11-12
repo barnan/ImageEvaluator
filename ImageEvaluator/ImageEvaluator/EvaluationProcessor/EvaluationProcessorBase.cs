@@ -12,7 +12,7 @@ namespace ImageEvaluator.EvaluationProcessor
         protected readonly ILogger _logger;
         protected Stopwatch _watch1;
         protected bool _isInitialized;
-        protected List<NamedData> _dynamicResult = new List<NamedData>();
+        protected List<NamedData> _dynamicResult;
 
 
         public abstract bool Execute();

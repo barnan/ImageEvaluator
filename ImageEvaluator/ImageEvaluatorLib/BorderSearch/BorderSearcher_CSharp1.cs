@@ -20,7 +20,7 @@ namespace ImageEvaluatorLib.BorderSearch
         }
 
 
-        protected override bool CalculatePoints(Image<Gray, ushort> origImage, Image<Gray, byte> maskImage, string name)
+        protected override bool CalculatePoints(Image<Gray, ushort> origImage, Image<Gray, byte> maskImage, string name, string enumName)
         {
             try
             {
@@ -48,11 +48,6 @@ namespace ImageEvaluatorLib.BorderSearch
                             break;
                         }
                     }
-                }
-
-                if (_showImages)
-                {
-                    SavePointList(name, "PointList");
                 }
 
                 return true;

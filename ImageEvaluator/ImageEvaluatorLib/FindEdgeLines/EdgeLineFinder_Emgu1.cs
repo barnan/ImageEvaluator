@@ -353,25 +353,6 @@ namespace ImageEvaluatorLib.FindEdgeLines
 
             System.IO.FileStream stream = new System.IO.FileStream(filename, System.IO.FileMode.Create);
 
-            /*This is to verify the header format in FITS, which is very strict
-            Console.WriteLine("");
-            Console.Write("         1");
-            Console.Write("         2");
-            Console.Write("         3");
-            Console.Write("         4");
-            Console.Write("         5");
-            Console.Write("         6");
-            Console.Write("         7");
-            Console.WriteLine("         ");
-            Console.Write("1234567890");
-            Console.Write("1234567890");
-            Console.Write("1234567890");
-            Console.Write("1234567890");
-            Console.Write("1234567890");
-            Console.Write("1234567890");
-            Console.Write("1234567890");
-            Console.WriteLine("123456789");
-            // */
 
             // SIMPLE = T
             string headerCard = String.Format("{0,-8}= {1,20} / {2,-47}", "SIMPLE", "T", "file conforms to FITS standard");

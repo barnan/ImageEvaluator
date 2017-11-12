@@ -24,110 +24,13 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
             InitEmguImages();
 
+            lorum = "Noise";
+
             _logger?.InfoLog("Instantiated.", ClassName);
         }
 
 
-        public override bool Execute(List<NamedData> data, string fileName)
-        {
-            Image<Gray, ushort>[] rawImages = null;
-            Image<Gray, byte>[] maskImages = null;
-            BorderPointArrays borderPointarrays = null;
-
-            try
-            {
-                if (!IsInitialized)
-                {
-                    _logger.ErrorLog("It is not initialized.", ClassName);
-                    return false;
-                }
-
-                int imageCounter = LoadNamedData(data, ref borderPointarrays, ref rawImages, ref maskImages);
-                if (imageCounter == 0)
-                {
-                    _logger.InfoLog("No images were loaded from dynamicresult", ClassName);
-                }
-
-
-                double[] meanOfNoiseMean = new double[imageCounter];
-                double[] stdOfNoiseMean = new double[imageCounter];
-                double[] meanOfNoiseStd = new double[imageCounter];
-                double[] stdOfNoiseStd = new double[imageCounter];
-                double[] noiseMeanHomogeneity1 = new double[imageCounter];
-                double[] noiseMeanHomogeneity2 = new double[imageCounter];
-                double[] minOfNoiseMean = new double[imageCounter];
-                double[] maxOfNoiseMean = new double[imageCounter];
-
-
-                for (int m = 0; m < imageCounter; m++)
-                {
-
-                    int[] indexes = Iterate(rawImages[m], maskImages[m], borderPointarrays[m]);
-
-                    if (indexes == null || indexes.Length != 2)
-                    {
-                        _logger.InfoLog("Problem during IterateNoise. Return indexes are not proper for further calculation.", ClassName);
-                    }
-                    int indexMin = indexes[0];
-                    int indexMax = indexes[1];
-
-                    if (!CalculateStatistics(indexMin, indexMax, maskImages[m]))
-                    {
-                        return false;
-                    }
-
-
-                    meanOfNoiseMean[m] = _meanOfFirst.V0;
-                    stdOfNoiseMean[m] = _stdOfFirst.V0;
-                    meanOfNoiseStd[m] = _meanOfSecond.V0;
-                    stdOfNoiseStd[m] = _stdOfSecond.V0;
-                    noiseMeanHomogeneity1[m] = Math.Max(Math.Abs(_meanOfRegion2OfFirst.V0 - _meanOfRegion1OfFirst.V0), Math.Abs(_meanOfRegion2OfFirst.V0 - _meanOfRegion3OfFirst.V0));
-                    noiseMeanHomogeneity2[m] = Math.Abs(_meanOfRegion1OfFirst.V0 - _meanOfRegion3OfFirst.V0);
-                    minOfNoiseMean[m] = _minOfFirst.V0;
-                    maxOfNoiseMean[m] = _maxOfFirst.V0;
-
-                }
-
-
-                data.Add(new DoubleVectorNamedData(meanOfNoiseMean, "MeanOfNoiseMean", "MeanOfNoiseMean"));
-                data.Add(new DoubleVectorNamedData(stdOfNoiseMean, "StdOfNoiseMean", "StdOfNoiseMean"));
-                data.Add(new DoubleVectorNamedData(meanOfNoiseStd, "MeanOfNoiseStd", "MeanOfNoiseStd"));
-                data.Add(new DoubleVectorNamedData(stdOfNoiseStd, "StdOfNoiseStd", "StdOfNoiseStd"));
-                data.Add(new DoubleVectorNamedData(noiseMeanHomogeneity1, "NoiseMeanHomogeneity1", "NoiseMeanHomogeneity1"));
-                data.Add(new DoubleVectorNamedData(noiseMeanHomogeneity2, "NoiseMeanHomogeneity2", "NoiseMeanHomogeneity2"));
-                data.Add(new DoubleVectorNamedData(minOfNoiseMean, "MinOfNoiseMean", "MinOfNoiseMean"));
-                data.Add(new DoubleVectorNamedData(maxOfNoiseMean, "MaxOfNoiseMean", "MaxOfNoiseMean"));
-
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger?.ErrorLog($"Exception occured: {ex}", ClassName);
-                return false;
-            }
-            finally
-            {
-                foreach (var item in rawImages)
-                {
-                    if (item != null)
-                    {
-                        item.ROI = _fullROI;
-                    }
-                }
-                foreach (var item in maskImages)
-                {
-                    if (item != null)
-                    {
-                        item.ROI = _fullROI;
-                    }
-                }
-            }
-
-        }
-
-
-        protected int[] Iterate(Image<Gray, ushort> rawImage, Image<Gray, byte> maskImage, int[,] pointArray)
+        protected override int[] Iterate(Image<Gray, ushort> rawImage, Image<Gray, byte> maskImage, int[,] pointArray)
         {
             try
             {

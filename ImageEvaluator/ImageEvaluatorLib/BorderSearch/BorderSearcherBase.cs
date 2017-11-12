@@ -7,6 +7,8 @@ using NLog;
 using System.Collections.Generic;
 using ImageEvaluatorInterfaces.BaseClasses;
 using ImageEvaluatorLib.BaseClasses;
+using System.Globalization;
+using System.Drawing;
 
 namespace ImageEvaluatorLib.BorderSearch
 {
@@ -20,6 +22,7 @@ namespace ImageEvaluatorLib.BorderSearch
         protected int _imageWidth;
         //private Image<Gray, byte> _maskImage;
         protected ILogger _logger;
+        protected static string _ownFolderNameForSaving = "BorderSearch";
 
         public string ClassName { get; protected set; }
         public string Title { get; protected set; }
@@ -60,19 +63,22 @@ namespace ImageEvaluatorLib.BorderSearch
 
             try
             {
+                string[] enumNames = Enum.GetNames(typeof(DoubleNamingConvention));
+                string additionalExtensionName = string.Empty;
+
                 Image<Gray, ushort>[] rawImages = GetEmguUShortImages("RawImages", data);
                 int imageCounterRaw = rawImages?.Length ?? 0;
 
                 Image<Gray, byte>[] maskImages = GetEmguByteImages("MaskImages", data);
                 int imageCounterMask = maskImages?.Length ?? 0;
 
-                if (imageCounterMask != imageCounterRaw)
+                if (imageCounterMask != imageCounterRaw || imageCounterRaw > (enumNames?.Length ?? 0))
                 {
-                    _logger?.InfoLog("Input and mask image number is not the same!", ClassName);
+                    _logger?.InfoLog("Input and mask image number OR enumNames number is not the same!", ClassName);
                     return false;
                 }
 
-                int[][,] borderPointArrayList = new int[imageCounterRaw][,];
+                int[][,] borderPointArrayLists = new int[imageCounterRaw][,];
 
                 for (int m = 0; m < imageCounterRaw; m++)
                 {
@@ -87,12 +93,22 @@ namespace ImageEvaluatorLib.BorderSearch
                         continue;
                     }
 
-                    CalculatePoints(rawImages[m], maskImages[m], name);
+                    if (enumNames.Length == imageCounterRaw)
+                    {
+                        additionalExtensionName = "_" + enumNames[m];
+                    }
 
-                    borderPointArrayList[m] = _borderPoints;
+                    CalculatePoints(rawImages[m], maskImages[m], name, additionalExtensionName);
+
+                    borderPointArrayLists[m] = _borderPoints;
                 }
 
-                data.Add(new BorderPointArraysNamedData(new BorderPointArrays(borderPointArrayList), "contains the found border points", "BorderPointArrayList"));
+                data.Add(new BorderPointArraysNamedData(new BorderPointArrays(borderPointArrayLists), "contains the found border points", "BorderPointArrayList"));
+
+                if (_showImages)
+                {
+                    SavePointLists(borderPointArrayLists, name, "PointList");
+                }
             }
             catch (Exception ex)
             {
@@ -104,7 +120,7 @@ namespace ImageEvaluatorLib.BorderSearch
         }
 
 
-        protected abstract bool CalculatePoints(Image<Gray, ushort> origImage, Image<Gray, byte> maskImage, string name);
+        protected abstract bool CalculatePoints(Image<Gray, ushort> origImage, Image<Gray, byte> maskImage, string name, string enumName);
 
 
         protected bool AllocArrays()
@@ -129,21 +145,50 @@ namespace ImageEvaluatorLib.BorderSearch
         }
 
 
-        protected void SavePointList(string name, string ext)
+        protected bool SavePointLists(int[][,] pointLists, string name, string ext)
         {
-            string finalOutputName = GeneralImageHandling.CheckOutputDirectoryOfImageSaving(name, "BorderSearch", "_PointList", ".csv");
-
-            if (finalOutputName == null)
+            try
             {
-                return;
-            }
+                string[] enumNames = Enum.GetNames(typeof(DoubleNamingConvention));
+                string additionalExtension = string.Empty;
+                CultureInfo cultInfo = CultureInfo.InvariantCulture;
 
-            using (StreamWriter sw = new StreamWriter(finalOutputName))
-            {
-                for (int i = 0; i < _borderPoints.Length / 2; i++)
+                // check:
+                if (name == null)
                 {
-                    sw.WriteLine($"{i},{_borderPoints[i, 0]},{_borderPoints[i, 1]}");
+                    return false;
                 }
+                if (enumNames.Length < pointLists.Length)
+                {
+                    _logger?.ErrorLog($"Error during poinlist saving. The number of pointlists is longer the possible enum names", ClassName);
+                    return false;
+                }
+
+
+                for (int m = 0; m < pointLists.Length; m++)
+                {
+                    if (enumNames.Length == pointLists.Length)
+                    {
+                        additionalExtension = "_" + enumNames[m];
+                    }
+
+                    string finalOutputName = GeneralImageHandling.CheckOutputDirectoryOfImageSaving(name, "BorderSearch", ext + additionalExtension, ".csv");
+
+                    using (StreamWriter sw = new StreamWriter(finalOutputName))
+                    {
+                        for (int i = 0; i < _borderPoints.Length / 2; i++)
+                        {
+                            sw.WriteLine($"{i},{_borderPoints[i, 0].ToString(cultInfo)},{_borderPoints[i, 1].ToString(cultInfo)}");
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger?.ErrorLog($"Exception occured: {ex}", ClassName);
+                return false;
             }
         }
 

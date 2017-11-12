@@ -2,6 +2,7 @@
 using ImageEvaluatorInterfaces.BaseClasses;
 using NLog;
 using System;
+using System.Globalization;
 using System.IO;
 
 namespace ImageEvaluatorLib.BaseClasses
@@ -97,6 +98,8 @@ namespace ImageEvaluatorLib.BaseClasses
         {
             try
             {
+                CultureInfo cultInfo = CultureInfo.InvariantCulture;
+
                 string finalOutputName = CheckOutputDirectoryOfImageSaving(name, folderExt, fileNameExt, ".csv");
 
                 using (StreamWriter sw = new StreamWriter(finalOutputName))

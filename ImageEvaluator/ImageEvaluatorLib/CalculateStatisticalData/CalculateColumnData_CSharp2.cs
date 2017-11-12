@@ -9,6 +9,7 @@ using ImageEvaluatorInterfaces.BaseClasses;
 
 namespace ImageEvaluatorLib.CalculateStatisticalData
 {
+
     class CalculateColumnDataCSharp2 : CalculateColumnDataBase
     {
 
@@ -17,6 +18,8 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         {
             ClassName = nameof(CalculateColumnDataCSharp1);
             Title = ClassName;
+
+            lorum = "Brightness";
 
             _logger?.InfoLog($"Instantiated.", ClassName);
 
@@ -35,8 +38,6 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
             try
             {
-
-
                 if (!IsInitialized)
                 {
                     _logger.ErrorLog($"It is not initialized.", ClassName);

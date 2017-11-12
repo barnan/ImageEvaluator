@@ -11,6 +11,7 @@ using ImageEvaluatorLib.BaseClasses;
 
 namespace ImageEvaluatorLib.CalculateStatisticalData
 {
+
     internal abstract class CalculateColumnDataBase : NamedDataProvider, IColumnDataCalculator
     {
         protected int _width;
@@ -19,6 +20,8 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         protected ILogger _logger;
         protected Rectangle _fullROI;
         protected Rectangle _fullLineROI;
+        protected string[] _enumNames;
+        protected string lorum;
 
         protected Image<Gray, double> _firstVector;
         protected Image<Gray, double> _secondVector;
@@ -58,6 +61,8 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
         public bool Init()
         {
+            _enumNames = Enum.GetNames(typeof(DoubleNamingConvention));
+
             IsInitialized = InitEmguImages();
 
             _logger?.InfoLog((IsInitialized ? string.Empty : "NOT") + " Initialized.", ClassName);
@@ -279,8 +284,6 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
 
                 if (_secondVector != null && _fullLineROI != null)
                     _secondVector.ROI = _fullLineROI;
-
-
             }
         }
 

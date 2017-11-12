@@ -193,9 +193,6 @@ namespace ImageEvaluatorLib.ReadImage
             try
             {
                 ResetImageROI();
-
-                data.Add(new EmguUShortNamedData(_rawImages, "Contains the raw input images", "RawImages"));
-
             }
             catch (Exception ex)
             {
@@ -206,6 +203,8 @@ namespace ImageEvaluatorLib.ReadImage
             try
             {
                 ReadImage();
+
+                data.Add(new EmguUShortNamedData(_rawImages, "Contains the raw input images", "RawImages"));
 
                 if (_showImages)
                 {

@@ -12,6 +12,7 @@ using ImageEvaluatorInterfaces.BaseClasses;
 
 namespace ImageEvaluatorLib.CalculateStatisticalData
 {
+    [Obsolete]
     class CalculateColumnDataEmgu2 : CalculateColumnDataBaseEmgu
     {
 
@@ -31,6 +32,8 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
         {
             ClassName = nameof(CalculateColumnDataEmgu2);
             Title = "Column Mean and Std calculator";
+
+            lorum = "Brightness";
 
             _logger?.InfoLog("Instantiated.", ClassName);
         }
@@ -56,11 +59,13 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                     _logger?.InfoLog("No images were loaded from dynamicresult", ClassName);
                 }
 
-                double[,,] resultVector1 = _firstVector.Data;
-                double[,,] resultVector2 = _secondVector.Data;
 
                 for (int m = 0; m < imageCounter; m++)
                 {
+
+
+                    double[,,] resultVector1 = _firstVector.Data;
+                    double[,,] resultVector2 = _secondVector.Data;
 
                     if (!CheckInputData(rawImages[m], maskImages[m], borderPointarrays[m], _firstVector, _secondVector))
                     {
@@ -124,7 +129,6 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                         resultVector1[0, i, 0] = meanData[i, 0, 0];
                         resultVector2[0, i, 0] = resuData[i, 0, 0];
                     }
-
                 }
 
                 return true;
@@ -152,7 +156,90 @@ namespace ImageEvaluatorLib.CalculateStatisticalData
                 }
             }
 
+        }
 
+
+        protected override int[] Iterate(Image<Gray, ushort> rawImage, Image<Gray, byte> maskImage, int[,] pointArray)
+        {
+            try
+            {
+                double[,,] resultVector1 = _firstVector.Data;
+                double[,,] resultVector2 = _secondVector.Data;
+
+                if (!CheckInputData(rawImage, maskImage, pointArray, _firstVector, _secondVector))
+                {
+                    _logger?.InfoLog($"Input and mask data is not proper!", ClassName);
+                    return null;
+                }
+
+                int imageWidth = rawImage.Width;
+                int indexMin = int.MaxValue;
+                int indexMax = int.MinValue;
+
+                // mask the outer area to zero
+                Gray zero = new Gray(0.0);
+                using (_complementaryMask = maskImage.Not())
+                {
+                    rawImage.SetValue(zero, _complementaryMask);
+                }
+
+                using (Image<Gray, ushort> tempImage = rawImage.Convert<Gray, ushort>())
+                {
+                    using (_convertedMask = maskImage.Convert<Gray, float>())
+                    {
+                        //calculate square image
+                        //_squareImage = tempImage.Pow(2);
+                        CvInvoke.Pow(tempImage, 2, _squareImage);
+
+                        // reduce the sum2 (sum)
+                        //_squaremean = new Image<Gray, float>(new Size(1, inputImage.Height));
+                        CvInvoke.Reduce(_squareImage, _squaremean, ReduceDimension.Auto, ReduceType.ReduceSum);
+
+                        // reduce the sum image (sum)
+                        //_mean = new Image<Gray, float>(new Size(1, inputImage.Height));
+                        CvInvoke.Reduce(rawImage, _mean, ReduceDimension.Auto, ReduceType.ReduceSum);
+
+                        // reduce the sum image (sum)
+                        //_counter = new Image<Gray, float>(new Size(1, inputImage.Height));
+
+                        CvInvoke.Reduce(_convertedMask, _counter, ReduceDimension.Auto, ReduceType.ReduceSum);
+
+                        //Image<Gray, float> counterReciprok = counter.Pow(-1);
+
+                        CvInvoke.Divide(_squaremean, _counter, _squaremean);
+                        CvInvoke.Divide(_mean, _counter, _mean);
+
+                        //squaremean._Mul(counterReciprok);
+                        //mean._Mul(counterReciprok);
+
+                        // calculate   Math.Sqrt(sum2 / (counter-1) - (sum * sum / Math.Pow(counter-1,2)));
+                        CvInvoke.Pow(_mean, 2, _sq);
+                        CvInvoke.Subtract(_squaremean, _sq, _resu);
+                        CvInvoke.Pow(_resu, 0.5, _sqrt);
+                        //_sq = _mean.Pow(2);
+                        //_resu = _squaremean - _sq;
+                        //_sqrt = _resu.Pow(0.5);
+
+                        //ClearEmguImages();
+                    }
+                }
+
+                float[,,] meanData = _mean.Data;
+                float[,,] resuData = _sqrt.Data;
+
+                for (int i = 0; i < _mean.Height; i++)
+                {
+                    resultVector1[0, i, 0] = meanData[i, 0, 0];
+                    resultVector2[0, i, 0] = resuData[i, 0, 0];
+                }
+
+                return new int[] { indexMin, indexMax };
+            }
+            catch (Exception ex)
+            {
+                _logger?.ErrorLog($"Exception occured: {ex}", ClassName);
+                throw;
+            }
         }
 
 

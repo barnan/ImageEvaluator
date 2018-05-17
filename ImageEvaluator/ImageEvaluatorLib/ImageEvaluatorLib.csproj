@@ -59,6 +59,7 @@
     <Compile Include="BorderSearch\BorderSearcher_CSharp1.cs" />
     <Compile Include="BorderSearch\BorderSearcher_Emgu1.cs" />
     <Compile Include="BorderSearch\BorderSearcher_Emgu2.cs" />
+    <Compile Include="CalculateStatisticalData\CalculateBackgroundStatisticalData_Emgu1.cs" />
     <Compile Include="CalculateStatisticalData\CalculateColumnDataBase.cs" />
     <Compile Include="CalculateStatisticalData\CalculateColumnData_Base_Emgu.cs" />
     <Compile Include="CalculateStatisticalData\CalculateColumnData_CSharp1.cs" />
